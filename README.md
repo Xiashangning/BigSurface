@@ -6,13 +6,17 @@ PS:If you have a better name, please let me know.
 
 ## TODO
 - Surface Type Cover                            **Done**
+  
   > The code is based on VoodooI2CHID.kext, but added keyboard support.
 - Battery status--Surface Serial Hub            **Most Important**
   > See https://github.com/linux-surface/surface-aggregator-module.
   > To obtain the battery readout, one needs to register the operation handler for _SAN device(_SAN.RQST) and send the request to SSH device.
-  > SSH is a UART controller, the low level uart operation is needed to be completed. Thus an expert in UART development is needed.
-  > Other than that, the rest code is not hard to port, mainly how to encode and decode the request packages.
+  > SSH is a UART controller, **the low level uart operation** is needed to be completed. Thus an expert in UART development is needed.
+  > Other than that, the rest of the code is not hard to port, mainly how to encode and decode the request packages. 
+  >
+  > The Surface Laptop and Surface Book things can be deleted.
 - Performance mode
+  
   > Depends on Surface Serial Hub driver
 - Buttons
   > Surface onboard GPIO buttons. ACPI device name: MSBT HID:MSHW0040
@@ -28,4 +32,4 @@ PS:If you have a better name, please let me know.
   > Not so important, they use I2C to transfert data. Linux code available.
 - Touch Screen
   > Device id: 0x34E4
-  > Linux uses `mei` to communicate with the touch screen, don't know the equivalant thing on macOS.
+  > Linux uses `mei` to communicate with the touch screen(ipts), don't know the equivalant thing on macOS.

@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-2.0+
+# Copyright (C) 2019-2021 Maximilian Luz <luzmaximilian@gmail.com>
+
+obj-m += surface_aggregator.o
+obj-m += clients/
+
+surface_aggregator-objs := core.o
+surface_aggregator-objs += ssh_parser.o
+surface_aggregator-objs += ssh_packet_layer.o
+surface_aggregator-objs += ssh_request_layer.o
+surface_aggregator-objs += controller.o
+surface_aggregator-objs += bus.o
+
+#ccflags-y += -DDEBUG
+#ccflags-y += -DCONFIG_SURFACE_AGGREGATOR_ERROR_INJECTION
+ccflags-y += -Wall -Wextra
+ccflags-y += -Wno-unused-parameter -Wno-missing-field-initializers
+ccflags-y += -Wmaybe-uninitialized -Wuninitialized
+ccflags-y += -I$(src)
+
+# switch to handle support for both patched and non-patched kernels
+ccflags-$(__KERNEL_HAS_SSAM_MODALIAS_SUPPORT__) += -D__KERNEL_HAS_SSAM_MODALIAS_SUPPORT__=1
