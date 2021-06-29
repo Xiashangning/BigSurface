@@ -8,14 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		258836AB260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */; };
-		25B97D77260B950E00657C76 /* SurfaceButtons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 257AD12C2609DBEA0082CA88 /* SurfaceButtons.cpp */; };
 		25B97D78260B950E00657C76 /* VoodooI2CDeviceNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC0AD4561F3842800070A642 /* VoodooI2CDeviceNub.cpp */; };
 		25B97D7A260B950E00657C76 /* VoodooI2CPCILakeController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FE8F89A25290B9600318126 /* VoodooI2CPCILakeController.cpp */; };
 		25B97D7B260B950E00657C76 /* VoodooI2CControllerNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF810E61F3304720031A6F5 /* VoodooI2CControllerNub.cpp */; };
 		25B97D7C260B950E00657C76 /* VoodooI2CController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC6268921F2F6CF1000CBF2D /* VoodooI2CController.cpp */; };
 		25B97D82260B950E00657C76 /* VoodooI2CControllerDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACFCBA8E1F33644D00F9B59C /* VoodooI2CControllerDriver.cpp */; };
 		25B97D89260B950E00657C76 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BE66D8F258AC5DC003CA4AD /* libkmod.a */; };
-		25B97D8E260B950E00657C76 /* SurfaceButtons.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 257AD1292609DBE20082CA88 /* SurfaceButtons.hpp */; };
 		25B97D90260B950E00657C76 /* VoodooI2CControllerNub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = ACF810E71F3304720031A6F5 /* VoodooI2CControllerNub.hpp */; };
 		25B97D91260B950E00657C76 /* VoodooI2CControllerDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = ACFCBA8F1F33644D00F9B59C /* VoodooI2CControllerDriver.hpp */; };
 		25B97D96260B950E00657C76 /* VoodooI2CDeviceNub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = AC0AD4571F3842800070A642 /* VoodooI2CDeviceNub.hpp */; };
@@ -97,8 +95,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		257AD1292609DBE20082CA88 /* SurfaceButtons.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtons.hpp; sourceTree = "<group>"; };
-		257AD12C2609DBEA0082CA88 /* SurfaceButtons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtons.cpp; sourceTree = "<group>"; };
 		258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VoodooI2CPCIController.cpp; path = VoodooI2CController/VoodooI2CPCIController.cpp; sourceTree = "<group>"; };
 		25B97DA5260B950E00657C76 /* BigSurface.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BigSurface.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooGPIO.xcodeproj; path = ../../../Dependencies/VoodooGPIO/VoodooGPIO.xcodeproj; sourceTree = "<group>"; };
@@ -170,7 +166,6 @@
 			isa = PBXGroup;
 			children = (
 				AC0955711F4ED49E0052E343 /* Dependencies */,
-				25B97DB0260B95F700657C76 /* SurfaceButtons */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
 			);
@@ -190,15 +185,6 @@
 				25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */,
 			);
 			path = SurfaceTypeCover;
-			sourceTree = "<group>";
-		};
-		25B97DB0260B95F700657C76 /* SurfaceButtons */ = {
-			isa = PBXGroup;
-			children = (
-				257AD12C2609DBEA0082CA88 /* SurfaceButtons.cpp */,
-				257AD1292609DBE20082CA88 /* SurfaceButtons.hpp */,
-			);
-			path = SurfaceButtons;
 			sourceTree = "<group>";
 		};
 		25B97DB9260B971000657C76 /* Products */ = {
@@ -376,7 +362,6 @@
 				25B97DFE260B97AD00657C76 /* MultitouchHelpers.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				25B97DFF260B97AD00657C76 /* VoodooI2CCSGestureEngine.hpp in Headers */,
-				25B97D8E260B950E00657C76 /* SurfaceButtons.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
 				25B97DD0260B973400657C76 /* VoodooI2CACPICRSParser.hpp in Headers */,
 				25B97DFB260B97AD00657C76 /* VoodooI2CDigitiserStylus.hpp in Headers */,
@@ -531,7 +516,6 @@
 			files = (
 				25B97DCE260B973400657C76 /* VoodooI2CACPICRSParser.cpp in Sources */,
 				25B97E0B260B97AD00657C76 /* VoodooI2CMultitouchEngine.cpp in Sources */,
-				25B97D77260B950E00657C76 /* SurfaceButtons.cpp in Sources */,
 				25B97D78260B950E00657C76 /* VoodooI2CDeviceNub.cpp in Sources */,
 				25B97D7A260B950E00657C76 /* VoodooI2CPCILakeController.cpp in Sources */,
 				25B97DFC260B97AD00657C76 /* VoodooI2CNativeEngine.cpp in Sources */,

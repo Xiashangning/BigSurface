@@ -1,11 +1,3 @@
-//
-//  VoodooI2CPrecisionTouchpadHIDEventDriver.cpp
-//  VoodooI2CHID
-//
-//  Created by Xia Shangning on 21/04/2021.
-//  Copyright © 2021 Xia Shangning. All rights reserved.
-//
-
 #include "SurfaceTypeCoverDriver.hpp"
 
 #include <IOKit/hid/AppleHIDUsageTables.h>
