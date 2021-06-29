@@ -573,28 +573,32 @@
 		25B97DA3260B950E00657C76 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				CLANG_ANALYZER_DEADCODE_DEADSTORES = NO;
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.0.1;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
+				);
 				INFOPLIST_FILE = BigSurface/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MODULE_NAME = com.xavier.BigSurface;
-				MODULE_VERSION = 2.6.5;
+				MODULE_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				"OTHER_CPLUSPLUSFLAGS[arch=*]" = "-Wno-inconsistent-missing-override";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xavier.BigSurface;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -607,25 +611,28 @@
 		25B97DA4260B950E00657C76 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.0.1;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
+				);
 				INFOPLIST_FILE = BigSurface/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MODULE_NAME = com.xavier.BigSurface;
-				MODULE_VERSION = 2.6.5;
+				MODULE_VERSION = 1.0.0;
 				ONLY_ACTIVE_ARCH = YES;
 				"OTHER_CPLUSPLUSFLAGS[arch=*]" = "-Wno-inconsistent-missing-override";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xavier.BigSurface;
@@ -688,7 +695,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../MacKernelSDK/Headers";
 				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/../MacKernelSDK/Headers";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -742,7 +749,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../MacKernelSDK/Headers";
 				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/../MacKernelSDK/Headers";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 			};

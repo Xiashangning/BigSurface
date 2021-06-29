@@ -20,49 +20,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>Surface Type Cover Driver</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>DeviceUsagePairs</key>
-			<array>
-				<dict>
-					<key>DeviceUsage</key>
-					<integer>5</integer>
-					<key>DeviceUsagePage</key>
-					<integer>13</integer>
-				</dict>
-			</array>
-			<key>IOProbeScore</key>
-			<integer>300</integer>
-			<key>IOClass</key>
-			<string>SurfaceTypeCoverDriver</string>
-			<key>IOProviderClass</key>
-			<string>IOHIDInterface</string>
-			<key>RM,deliverNotifications</key>
-			<true/>
-			<key>QuietTimeAfterTyping</key>
-			<integer>100</integer>
-			<key>ProcessUSBMouseStopsTrackpad</key>
-			<false/>
-			<key>ProcessBluetoothMouseStopsTrackpad</key>
-			<false/>
-		</dict>
-		<key>Surface Buttons</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceButtons</string>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
-			<key>IOMatchCategory</key>
-			<string>IODefaultMatchCategory</string>
-			<key>IONameMatch</key>
-			<string>MSHW0040</string>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
-		</dict>
 		<key>Custom MT2 Personality</key>
 		<dict>
 			<key>ApplePreferenceCapability</key>
@@ -305,7 +262,28 @@
 			<key>HIDDisallowRemappingOfPrimaryClick</key>
 			<true/>
 			<key>HIDPointerAccelerationTable</key>
-			<data>AACAAFVTQioABwAAAAAAAgAEAAAABAAAABAAAAAQAAAAACAAAA0AAIAAAACAAAABQAAAAYAAAAIAAAAC4AAAAwAAAATgAAAEAAAAB0AAAAUAAAAKAAAABgAAAA1AAAAIAAAAFgAAAArAAAAjAAAADQAAAC8AAAAOwAAAOMAAABBAAABBAAAAEcAAAEjAAAAAUAAADwAAgAAAAIAAAAEAAAABQAAAAYAAAAJAAAACAAAAA4AAAAKAAAAE4AAAAwAAAAZgAAAEAAAACgAAAAUAAAAOQAAABgAAABNAAAAIAAAAHsAAAArAAAAuwAAADQAAADyAAAAOwAAARwAAABBAAABPwAAAEcAAAFiAAAAAgAAADwAAgAAAAIAAAAEAAAABYAAAAYAAAAKgAAACAAAABEAAAAKAAAAGAAAAAwAAAAgAAAAEAAAADQAAAAUAAAASwAAABgAAABkAAAAIAAAAKAAAAArAAAA7wAAADQAAAEuAAAAOwAAAV0AAABBAAABgQAAAEcAAAGkAAAAAsAAADwAAgAAAAIAAAAEAAAABoAAAAYAAAAMAAAACAAAABQAAAAKAAAAHQAAAAwAAAAnAAAAEAAAAEEAAAAUAAAAXgAAABgAAAB/AAAAIAAAAMgAAAArAAABKAAAADQAAAFyAAAAOwAAAaQAAABBAAABywAAAEcAAAHrAAAAA4AAADwAAgAAAAKAAAAEAAAABwAAAAYAAAANgAAACAAAABeAAAAKAAAAIoAAAAwAAAAvAAAAEAAAAE8AAAAUAAAAdQAAABgAAACfAAAAIAAAAPcAAAArAAABZAAAADQAAAG3AAAAOwAAAe0AAABBAAACFQAAAEcAAAIxAAAABAAAADwAAgAAAAMAAAAEAAAACAAAAAYAAAAPgAAACAAAABsAAAAKAAAAKQAAAAwAAAA5gAAAEAAAAGMAAAAUAAAAkwAAABgAAADLAAAAIAAAATUAAAArAAABugAAADQAAAIMAAAAOwAAAj0AAABBAAACXAAAAEcAAAJxA</data>
+			<data>
+			AACAAFVTQioABwAAAAAAAgAEAAAABAAAABAAAAAQAAAAACAAAA0A
+			AIAAAACAAAABQAAAAYAAAAIAAAAC4AAAAwAAAATgAAAEAAAAB0AA
+			AAUAAAAKAAAABgAAAA1AAAAIAAAAFgAAAArAAAAjAAAADQAAAC8A
+			AAAOwAAAOMAAABBAAABBAAAAEcAAAEjAAAAAUAAADwAAgAAAAIAA
+			AAEAAAABQAAAAYAAAAJAAAACAAAAA4AAAAKAAAAE4AAAAwAAAAZg
+			AAAEAAAACgAAAAUAAAAOQAAABgAAABNAAAAIAAAAHsAAAArAAAAu
+			wAAADQAAADyAAAAOwAAARwAAABBAAABPwAAAEcAAAFiAAAAAgAAA
+			DwAAgAAAAIAAAAEAAAABYAAAAYAAAAKgAAACAAAABEAAAAKAAAAG
+			AAAAAwAAAAgAAAAEAAAADQAAAAUAAAASwAAABgAAABkAAAAIAAAA
+			KAAAAArAAAA7wAAADQAAAEuAAAAOwAAAV0AAABBAAABgQAAAEcAA
+			AGkAAAAAsAAADwAAgAAAAIAAAAEAAAABoAAAAYAAAAMAAAACAAAA
+			BQAAAAKAAAAHQAAAAwAAAAnAAAAEAAAAEEAAAAUAAAAXgAAABgAA
+			AB/AAAAIAAAAMgAAAArAAABKAAAADQAAAFyAAAAOwAAAaQAAABBA
+			AABywAAAEcAAAHrAAAAA4AAADwAAgAAAAKAAAAEAAAABwAAAAYAA
+			AANgAAACAAAABeAAAAKAAAAIoAAAAwAAAAvAAAAEAAAAE8AAAAUA
+			AAAdQAAABgAAACfAAAAIAAAAPcAAAArAAABZAAAADQAAAG3AAAAO
+			wAAAe0AAABBAAACFQAAAEcAAAIxAAAABAAAADwAAgAAAAMAAAAEA
+			AAACAAAAAYAAAAPgAAACAAAABsAAAAKAAAAKQAAAAwAAAA5gAAAE
+			AAAAGMAAAAUAAAAkwAAABgAAADLAAAAIAAAATUAAAArAAABugAAA
+			DQAAAIMAAAAOwAAAj0AAABBAAACXAAAAEcAAAJxA
+			</data>
 			<key>HIDPointerAccelerationType</key>
 			<string>HIDTrackpadAcceleration</string>
 			<key>HIDScrollAccelCurves</key>
@@ -430,7 +408,34 @@
 				</dict>
 			</array>
 			<key>HIDScrollAccelerationTable</key>
-			<data>AACAAFVTQioABwAAAAAAAQABAAAAAQAAAAAgAAAQAABxOwAATOMAAwAAAAdgAAAEwAAADoAAAAbxSgAX6V4ACVeCACMQWgALZ6EALBF7AA2N1AA03ToAD36aADvQuAASWKAARl01ABUAAABO2dgAF8AAAFXK7QAas+UAW2FQAB2QAABe0qoAIL75AGEgywAkLXsAYnXvACewAABjRl8AAIAAABMAAHE7AABWfwABAAAAAuAAAAIAAAAJYAAAAwAAABIAAAAEwAAAIMAAAAaAAAAwgAAACGp5AEH9tgAK7bUAV4ZuAA0B2ABrPTkADv1/AIEEcAAQy5gAkdRWABJouQCe3VAAE+c/AKikCgAXAucAtn2SABot3ADARE4AHVjQAMX4OgAg35IAytuYACQ4bgDO7mUAJ6CXANIwowAAsAAAFAAAcTsAAGFOAADAAAABwAAAAQAAAANgAAACAAAADCAAAAMAAAAW4AAABMAAACnAAAAGQAAAOsAAAAfOggBP7OcACgWAAGo8rgAL658AhMCkAA2RCwCfR+EADzjIALWDbwAQ/k8AxqbEABLNUQDUeCMAFepmAOTKxwAZoVYA8qFmAB1CvwD7fXwAIQuCAQFpdAAkS20BBVKIACegAAEIK4wAAOAAABQAAHE7AABtdwAAwAAAAeAAAAEAAAAD4AAAAgAAAA6AAAADAAAAHEAAAATAAAA0AAAABgAAAEdAAAAHN4wAXL7hAAkAAACAwAAACoAAAKGAAAALz7IAvU7UAA01yQDadikADvtPAPKF4gARLu4BCSWiABUlDwEfV8QAGT9oASzRKgAdChkBNQrGACDz5QE6cR4AJEARAT3XdgAnn1YBQMHWAABQAAATAABxOwAAS7AAAQAAAAJgAAACAAAABuAAAAMAAAAMYAAABMAAABcAAAAGwAAAJAAAAAkAAAAyAAAACz1uAEFngAANcE8AUMGhAA+sTQBgSTMAEagdAG5NTAATT9YAd9WQABTQfgB+26MAF3odAIbYXQAagocAjp+lAB2J6QCTvnkAIN/yAJdcWwAkO0IAmYu9ACegOACacdcAAQAAABUAAHE7AABWfwAAwAAAAiAAAAEAAAAEgAAAAYAAAAqAAAACAAAAEaAAAAMAAAAhgAAABMAAAD6AAAAFwAAAVEAAAAbAAABrAAAACAAAAIxAAAAJAAAAqYAAAApAAADKwAAAC8AAAPTAAAANwAABJAAAABAAAAFEn9IAFEAAAV49zAAZAAABbrsYABzQAAFz78AAIOAAAXhvwAAkIAABem/AACegAAF8JGg=</data>
+			<data>
+			AACAAFVTQioABwAAAAAAAQABAAAAAQAAAAAgAAAQAABxOwAATOMA
+			AwAAAAdgAAAEwAAADoAAAAbxSgAX6V4ACVeCACMQWgALZ6EALBF7
+			AA2N1AA03ToAD36aADvQuAASWKAARl01ABUAAABO2dgAF8AAAFXK
+			7QAas+UAW2FQAB2QAABe0qoAIL75AGEgywAkLXsAYnXvACewAABj
+			Rl8AAIAAABMAAHE7AABWfwABAAAAAuAAAAIAAAAJYAAAAwAAABIA
+			AAAEwAAAIMAAAAaAAAAwgAAACGp5AEH9tgAK7bUAV4ZuAA0B2ABr
+			PTkADv1/AIEEcAAQy5gAkdRWABJouQCe3VAAE+c/AKikCgAXAucA
+			tn2SABot3ADARE4AHVjQAMX4OgAg35IAytuYACQ4bgDO7mUAJ6CX
+			ANIwowAAsAAAFAAAcTsAAGFOAADAAAABwAAAAQAAAANgAAACAAAA
+			DCAAAAMAAAAW4AAABMAAACnAAAAGQAAAOsAAAAfOggBP7OcACgWA
+			AGo8rgAL658AhMCkAA2RCwCfR+EADzjIALWDbwAQ/k8AxqbEABLN
+			UQDUeCMAFepmAOTKxwAZoVYA8qFmAB1CvwD7fXwAIQuCAQFpdAAk
+			S20BBVKIACegAAEIK4wAAOAAABQAAHE7AABtdwAAwAAAAeAAAAEA
+			AAAD4AAAAgAAAA6AAAADAAAAHEAAAATAAAA0AAAABgAAAEdAAAAH
+			N4wAXL7hAAkAAACAwAAACoAAAKGAAAALz7IAvU7UAA01yQDadikA
+			DvtPAPKF4gARLu4BCSWiABUlDwEfV8QAGT9oASzRKgAdChkBNQrG
+			ACDz5QE6cR4AJEARAT3XdgAnn1YBQMHWAABQAAATAABxOwAAS7AA
+			AQAAAAJgAAACAAAABuAAAAMAAAAMYAAABMAAABcAAAAGwAAAJAAA
+			AAkAAAAyAAAACz1uAEFngAANcE8AUMGhAA+sTQBgSTMAEagdAG5N
+			TAATT9YAd9WQABTQfgB+26MAF3odAIbYXQAagocAjp+lAB2J6QCT
+			vnkAIN/yAJdcWwAkO0IAmYu9ACegOACacdcAAQAAABUAAHE7AABW
+			fwAAwAAAAiAAAAEAAAAEgAAAAYAAAAqAAAACAAAAEaAAAAMAAAAh
+			gAAABMAAAD6AAAAFwAAAVEAAAAbAAABrAAAACAAAAIxAAAAJAAAA
+			qYAAAApAAADKwAAAC8AAAPTAAAANwAABJAAAABAAAAFEn9IAFEAA
+			AV49zAAZAAABbrsYABzQAAFz78AAIOAAAXhvwAAkIAABem/AACeg
+			AAF8JGg=
+			</data>
 			<key>HIDScrollAccelerationType</key>
 			<string>HIDTrackpadScrollAcceleration</string>
 			<key>HIDScrollResolution</key>
@@ -468,6 +473,49 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CMultitouchInterface</string>
 		</dict>
+		<key>Surface Buttons</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceButtons</string>
+			<key>IOMatchCategory</key>
+			<string>IODefaultMatchCategory</string>
+			<key>IONameMatch</key>
+			<string>MSHW0040</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
+		<key>Surface Type Cover Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>DeviceUsagePairs</key>
+			<array>
+				<dict>
+					<key>DeviceUsage</key>
+					<integer>5</integer>
+					<key>DeviceUsagePage</key>
+					<integer>13</integer>
+				</dict>
+			</array>
+			<key>IOClass</key>
+			<string>SurfaceTypeCoverDriver</string>
+			<key>IOProbeScore</key>
+			<integer>300</integer>
+			<key>IOProviderClass</key>
+			<string>IOHIDInterface</string>
+			<key>ProcessBluetoothMouseStopsTrackpad</key>
+			<false/>
+			<key>ProcessUSBMouseStopsTrackpad</key>
+			<false/>
+			<key>QuietTimeAfterTyping</key>
+			<integer>100</integer>
+			<key>RM,deliverNotifications</key>
+			<true/>
+		</dict>
 		<key>VoodooI2CControllerDriver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -478,6 +526,22 @@
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CControllerNub</string>
+		</dict>
+		<key>VoodooI2CHIDDevice</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>VoodooI2CHIDDevice</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>compatible</key>
+				<string>PNP0C50</string>
+			</dict>
+			<key>IOProviderClass</key>
+			<string>VoodooI2CDeviceNub</string>
 		</dict>
 		<key>VoodooI2CPCILakeController</key>
 		<dict>
@@ -491,22 +555,6 @@
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
-		</dict>
-		<key>VoodooI2CHIDDevice</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>VoodooI2CHIDDevice</string>
-			<key>IOPropertyMatch</key>
-			<dict>
-				<key>compatible</key>
-				<string>PNP0C50</string>
-			</dict>
-			<key>IOProbeScore</key>
-			<integer>100</integer>
-			<key>IOProviderClass</key>
-			<string>VoodooI2CDeviceNub</string>
 		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>

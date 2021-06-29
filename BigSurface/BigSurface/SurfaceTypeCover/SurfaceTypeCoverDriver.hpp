@@ -2,8 +2,8 @@
 //  SurfaceTypeCoverDriver.hpp
 //  BigSurface
 //
-//  Created by Alexandre on 21/09/2017.
-//  Copyright © 2017 Alexandre Daoud. All rights reserved.
+//  Created by Xia Shangning on 21/04/2021.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
 #ifndef SurfaceTypeCoverDriver_hpp

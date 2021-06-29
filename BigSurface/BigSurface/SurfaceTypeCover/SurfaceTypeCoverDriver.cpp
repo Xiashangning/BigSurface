@@ -2,8 +2,8 @@
 //  VoodooI2CPrecisionTouchpadHIDEventDriver.cpp
 //  VoodooI2CHID
 //
-//  Created by Alexandre on 21/09/2017.
-//  Copyright © 2017 Alexandre Daoud. All rights reserved.
+//  Created by Xia Shangning on 21/04/2021.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
 #include "SurfaceTypeCoverDriver.hpp"
@@ -290,7 +290,7 @@ void SurfaceTypeCoverDriver::setKeyboardProperties()
     if (!properties)
         return;
     
-    if (!keyboard.elements){
+    if (!keyboard.elements) {
         OSSafeReleaseNULL(properties);
         return;
     }
