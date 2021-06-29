@@ -6,7 +6,7 @@ PS : If you have a better name, please let me know.
 
 **A proposition for a fully intergrated kext for all Surface Pro related hardwares**
 
-**How to install**
+## How to install
 
 You will need to add the kext into opencore's `config.plist` in the order specified as below
 <img width="407" alt="截屏2021-06-29 下午8 26 08" src="https://user-images.githubusercontent.com/18528518/123798086-6feaca00-d919-11eb-9e87-2fb3d6268cfe.png">
