@@ -2,14 +2,19 @@
 The name comes from macOS Big Sur.
 Big Sur + Surface -> Big Surface (LOL)
 
-PS:If you have a better name, please let me know.
+PS : If you have a better name, please let me know.
 
 **A proposition for a fully intergrated kext for all Surface Pro related hardwares**
+
+## How to install
+
+You will need to add the kext into opencore's `config.plist` in the order specified as below
+<img width="407" alt="截屏2021-06-29 下午8 26 08" src="https://user-images.githubusercontent.com/18528518/123798086-6feaca00-d919-11eb-9e87-2fb3d6268cfe.png">
 
 ## TODO
 - Surface Type Cover                            **Done**
   
-  > The code is based on VoodooI2CHID.kext, but added keyboard support.
+  > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
 - Battery status--Surface Serial Hub            **Most Important**
   > See https://github.com/linux-surface/surface-aggregator-module.
   > To obtain the battery readout, one needs to register the operation handler for _SAN device(called via _SAN.RQST) and send the request to SSH device.
@@ -18,12 +23,11 @@ PS:If you have a better name, please let me know.
   >
   > The Surface Laptop and Surface Book things can be deleted.
 - Performance mode
+  
   > Depends on Surface Serial Hub driver
 - Buttons
-  > Surface onboard GPIO buttons. ACPI device name: MSBT HID:MSHW0040
-  > Not finished yet.
-  > 
-  > To drive it is quite simple, just register the corresponding GPIO interrupts and handle them.
+  
+  > WIP
 - Ambient Light Sensor
   > ACPI device name: ACSD, attached under I2C4
   > The Linux source code is attached in the folder, just one source file, should be 'easy' to port.(Maybe we don't need gesture and proximity)
