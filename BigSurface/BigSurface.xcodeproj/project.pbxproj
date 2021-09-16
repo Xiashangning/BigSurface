@@ -189,8 +189,8 @@
 		25B97D6E260B943E00657C76 /* BigSurface */ = {
 			isa = PBXGroup;
 			children = (
-				2524C0A326F3233A00CAAF12 /* SurfaceButtons */,
 				AC0955711F4ED49E0052E343 /* Dependencies */,
+				2524C0A326F3233A00CAAF12 /* SurfaceButtons */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
 			);
@@ -431,7 +431,7 @@
 		AC2603A71F2F294000CF238F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = "Alexandre Daoud";
 				TargetAttributes = {
 					25B97D6F260B950E00657C76 = {
@@ -574,7 +574,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				CLANG_ANALYZER_DEADCODE_DEADSTORES = NO;
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
@@ -612,7 +611,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "-";
@@ -646,7 +644,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -706,7 +703,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";

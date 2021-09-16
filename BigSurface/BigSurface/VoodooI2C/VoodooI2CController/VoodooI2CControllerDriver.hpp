@@ -19,14 +19,14 @@
 #include "../VoodooI2CDevice/VoodooI2CDeviceNub.hpp"
 #include "../../Dependencies/helpers.hpp"
 
-typedef struct {
+typedef struct _VoodooI2CControllerBusMessage {
     UInt16 address;
     UInt8* buffer;
     UInt16 flags;
     UInt16 length;
 } VoodooI2CControllerBusMessage;
 
-typedef struct {
+typedef struct _VoodooI2CControllerBusConfig {
     UInt32 ss_hcnt = 0x01b0;
     UInt32 fs_hcnt = 0x48;
     UInt32 ss_lcnt = 0x01fb;
@@ -34,7 +34,7 @@ typedef struct {
     UInt32 sda_hold = 0x9;
 } VoodooI2CControllerBusConfig;
 
-typedef struct {
+typedef struct _VoodooI2CControllerBusDevice {
     UInt32 abort_source;
     VoodooI2CControllerBusConfig acpi_config;
     bool awake;

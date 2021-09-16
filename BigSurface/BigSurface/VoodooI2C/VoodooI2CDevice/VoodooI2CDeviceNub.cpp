@@ -322,6 +322,8 @@ void VoodooI2CDeviceNub::releaseResources() {
 }
 
 bool VoodooI2CDeviceNub::start(IOService* provider) {
+    OSData* name;
+    
     if (!super::start(provider))
         return false;
 
@@ -337,8 +339,15 @@ bool VoodooI2CDeviceNub::start(IOService* provider) {
         IOLog("%s Could not open command gate\n", getName());
         goto exit;
     }
-
-    setProperty("IOName", reinterpret_cast<const char*>(OSDynamicCast(OSData, getProperty("name"))->getBytesNoCopy()));
+    
+    name = OSDynamicCast(OSData, getProperty("name"));
+    if (name) {
+        setProperty("IOName", reinterpret_cast<const char*>(name->getBytesNoCopy()));
+    }
+    else {
+        IOLog("%s Could not load name from property!\n", getName());
+        goto exit;
+    }
 
     registerService();
 

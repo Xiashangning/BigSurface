@@ -13,8 +13,8 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
+#include "../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
+#include "../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
 #include "../VoodooI2CController/VoodooI2CController.hpp"
 
 #ifndef EXPORT
