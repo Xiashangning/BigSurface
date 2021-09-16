@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2524C0A626F3233A00CAAF12 /* SurfaceButtons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */; };
+		2524C0A726F3233A00CAAF12 /* SurfaceButtons.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */; };
 		258836AB260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */; };
 		25B97D78260B950E00657C76 /* VoodooI2CDeviceNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC0AD4561F3842800070A642 /* VoodooI2CDeviceNub.cpp */; };
 		25B97D7A260B950E00657C76 /* VoodooI2CPCILakeController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FE8F89A25290B9600318126 /* VoodooI2CPCILakeController.cpp */; };
@@ -95,6 +97,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtons.cpp; sourceTree = "<group>"; };
+		2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtons.hpp; sourceTree = "<group>"; };
 		258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VoodooI2CPCIController.cpp; path = VoodooI2CController/VoodooI2CPCIController.cpp; sourceTree = "<group>"; };
 		25B97DA5260B950E00657C76 /* BigSurface.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BigSurface.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooGPIO.xcodeproj; path = ../../../Dependencies/VoodooGPIO/VoodooGPIO.xcodeproj; sourceTree = "<group>"; };
@@ -162,9 +166,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2524C0A326F3233A00CAAF12 /* SurfaceButtons */ = {
+			isa = PBXGroup;
+			children = (
+				2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */,
+				2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */,
+			);
+			path = SurfaceButtons;
+			sourceTree = "<group>";
+		};
 		25B97D6E260B943E00657C76 /* BigSurface */ = {
 			isa = PBXGroup;
 			children = (
+				2524C0A326F3233A00CAAF12 /* SurfaceButtons */,
 				AC0955711F4ED49E0052E343 /* Dependencies */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
@@ -364,6 +378,7 @@
 				25B97DFF260B97AD00657C76 /* VoodooI2CCSGestureEngine.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
 				25B97DD0260B973400657C76 /* VoodooI2CACPICRSParser.hpp in Headers */,
+				2524C0A726F3233A00CAAF12 /* SurfaceButtons.hpp in Headers */,
 				25B97DFB260B97AD00657C76 /* VoodooI2CDigitiserStylus.hpp in Headers */,
 				25B97E00260B97AD00657C76 /* AverageClasses.h in Headers */,
 				25B97E08260B97AD00657C76 /* csgesture-softc.h in Headers */,
@@ -533,6 +548,7 @@
 				25B97D7C260B950E00657C76 /* VoodooI2CController.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				25B97D82260B950E00657C76 /* VoodooI2CControllerDriver.cpp in Sources */,
+				2524C0A626F3233A00CAAF12 /* SurfaceButtons.cpp in Sources */,
 				25B97E0C260B97AD00657C76 /* VoodooI2CDigitiserStylus.cpp in Sources */,
 				25B97E03260B97AD00657C76 /* VoodooCSGestureHIPointingWrapper.cpp in Sources */,
 			);
@@ -564,7 +580,7 @@
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -599,7 +615,7 @@
 				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;

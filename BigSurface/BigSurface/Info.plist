@@ -453,6 +453,21 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
+		<key>Surface Buttons</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.xavier.BigSurface</string>
+			<key>IOClass</key>
+			<string>SurfaceButtons</string>
+			<key>IOMatchCategory</key>
+			<string>IODefaultMatchCategory</string>
+			<key>IONameMatch</key>
+			<string>MSHW0040</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
 		<key>VoodooI2CControllerDriver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>

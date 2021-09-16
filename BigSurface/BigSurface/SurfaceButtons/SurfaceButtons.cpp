@@ -28,7 +28,7 @@ IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
         return nullptr;
     }
     
-    IOLog("%s::----------------------------------------------SurfaceButtons found!----------------------------------------------\n", getName());
+    IOLog("%s::MSBT found!\n", getName());
     
     OSDictionary* name_match = IOService::serviceMatching(SurfaceButtons::typecoverName);
 
@@ -36,7 +36,7 @@ IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
     typecoverDevice = OSDynamicCast(SurfaceTypeCoverDriver, matched);
 
     if (typecoverDevice == NULL) {
-        IOLog("%s::Could NOT find Surface Type Cover!", getName());
+        IOLog("%s::Could NOT find Surface Type Cover!\n", getName());
         return nullptr;
     }
     name_match->release();
@@ -66,6 +66,9 @@ void SurfaceButtons::stop(IOService *provider){
 
 void SurfaceButtons::free(){
     IOLog("%s::free SurfaceButtons\n", getName());
+    
+    OSSafeReleaseNULL(buttonDevice);
+    OSSafeReleaseNULL(typecoverDevice);
     
     super::free();
 }
