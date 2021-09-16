@@ -173,6 +173,8 @@
 				2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */,
 			);
 			path = SurfaceButtons;
+			sourceTree = "<group>";
+		};
 		2524C0B126F3286D00CAAF12 /* VoodooI2CACPIResourcesParser */ = {
 			isa = PBXGroup;
 			children = (
