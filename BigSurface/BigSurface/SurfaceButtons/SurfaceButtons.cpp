@@ -37,6 +37,8 @@ IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
 
     if (typecoverDevice == NULL) {
         IOLog("%s::Could NOT find Surface Type Cover!\n", getName());
+        name_match->release();
+        OSSafeReleaseNULL(matched);
         return nullptr;
     }
     name_match->release();
