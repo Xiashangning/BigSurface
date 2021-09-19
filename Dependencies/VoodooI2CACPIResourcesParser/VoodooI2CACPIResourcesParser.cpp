@@ -40,8 +40,8 @@ void VoodooI2CACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32
     uint16_t tflags;
     memcpy(&tflags, res + offset + 7, sizeof(uint16_t));
     
-    /*uint16_t datalen;
-    memcpy(&datalen, res + offset + 10, sizeof(uint16_t));*/
+    uint16_t datalen;
+    memcpy(&datalen, res + offset + 10, sizeof(uint16_t));
     
     if (bustype == 1) {
         found_i2c = true;
@@ -58,11 +58,12 @@ void VoodooI2CACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32
         memcpy(&address, res + offset + 16, sizeof(uint16_t));
         i2c_info.address = address;
         
-        /*uint8_t i2cLen = len - (12 + datalen - 3);
+        uint8_t i2cLen = len - (12 + datalen - 3);
         
-        char *i2cBus = (char *)malloc(i2cLen);
+        char *i2cBus = (char *)IOMalloc(i2cLen);
         memcpy(i2cBus, res + offset + 12 + datalen, i2cLen);
-        IOLog("I2C Bus: %s\n", i2cBus);*/
+        IOLog("I2C Bus: %s\n", i2cBus);
+        IOFree(i2cBus, i2cLen);
     }
 }
 
@@ -89,11 +90,11 @@ void VoodooI2CACPIResourcesParser::parseACPIGPIO(uint8_t const* res, uint32_t of
     uint16_t pin_offset;
     memcpy(&pin_offset, res + offset + 14, sizeof(uint16_t));
     
-    /*uint16_t resourceOffset;
+    uint16_t resourceOffset;
     memcpy(&resourceOffset, res + offset + 17, sizeof(uint16_t));
     
     uint16_t vendorOffset;
-    memcpy(&vendorOffset, res + offset + 19, sizeof(uint16_t));*/
+    memcpy(&vendorOffset, res + offset + 19, sizeof(uint16_t));
     
     uint16_t pin_number;
     memcpy(&pin_number, res + offset + pin_offset, sizeof(uint16_t));
@@ -101,9 +102,10 @@ void VoodooI2CACPIResourcesParser::parseACPIGPIO(uint8_t const* res, uint32_t of
     if (pin_number == 0xFFFF) // pinNumber 0xFFFF is invalid
         return;
     
-    /*char *gpioController = (char *)malloc(vendorOffset - resourceOffset);
+    char *gpioController = (char *)IOMalloc(vendorOffset - resourceOffset);
     memcpy(gpioController, res + offset + resourceOffset, vendorOffset - resourceOffset);
-    IOLog("GPIO Controller: %s\n", gpioController);*/
+    IOLog("GPIO Controller: %s\n", gpioController);
+    IOFree(gpioController, vendorOffset - resourceOffset);
     
     if (gpio_type == 0) {
         // GPIOInt

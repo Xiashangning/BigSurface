@@ -341,7 +341,7 @@ bool VoodooI2CDeviceNub::start(IOService* provider) {
     }
     
     name = OSDynamicCast(OSData, getProperty("name"));
-    if (name) {
+    if (name != NULL) {
         setProperty("IOName", reinterpret_cast<const char*>(name->getBytesNoCopy()));
     }
     else {
