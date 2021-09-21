@@ -138,7 +138,7 @@ IOReturn SurfaceButtons::response(int *btn) {
     
     AbsoluteTime timestamp;
     clock_get_uptime(&timestamp);
-    if (number == PWBT_IDX && !btn_status[number]) { // releasing power button means sleeping while holding it will force the system to shutdown
+    if (number == PWBT_IDX) {
         typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_Power, btn_status[number]);
     } else if (number == VUBT_IDX) {
         typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeIncrement, btn_status[number]);
