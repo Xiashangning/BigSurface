@@ -55,7 +55,7 @@ public:
     gpio_io_info gpio_io;
     
     VoodooI2CACPIResourcesParser();
-    void parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz);
+    uint32_t parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz);
 private:
     void parseACPISerialBus(uint8_t const* res, uint32_t offset, uint32_t sz);
     void parseACPIGPIO(uint8_t const* res, uint32_t offset, uint32_t sz);

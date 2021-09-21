@@ -169,20 +169,25 @@ void VoodooI2CACPIResourcesParser::parseACPIGPIO(uint8_t const* res, uint32_t of
     }
 }
 
-void VoodooI2CACPIResourcesParser::parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz) {
+uint32_t VoodooI2CACPIResourcesParser::parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz) {
     if (offset >= sz)
-        return;
+        return offset;
     
     uint8_t opcode = res[offset];
     
     uint16_t len;
     memcpy(&len, res + offset + 1, sizeof(uint16_t));
     
-    if (opcode == 0x8c)
+    if (opcode == 0x8c) {
+        if (found_gpio_interrupts)
+            return offset;
         parseACPIGPIO(res, offset, sz);
-    if (opcode == 0x8e)
+    }else if (opcode == 0x8e) {
+        if (found_i2c)
+            return offset;
         parseACPISerialBus(res, offset, sz);
+    }
     
     offset += (len + 3);
-    parseACPIResources(res, offset, sz);
+    return parseACPIResources(res, offset, sz);
 }

@@ -311,3 +311,8 @@ IOReturn SurfaceTypeCoverDriver::setPowerState(unsigned long whichState, IOServi
     }
     return kIOPMAckImplied;
 }
+
+void SurfaceTypeCoverDriver::stop(IOService *provider) {
+    IOLog("%s::stopped\n", getName());
+    super::stop(provider);
+}

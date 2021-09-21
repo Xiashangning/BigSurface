@@ -449,7 +449,7 @@
 			<key>ProcessUSBMouseStopsTrackpad</key>
 			<false/>
 			<key>QuietTimeAfterTyping</key>
-			<integer>100</integer>
+			<integer>200</integer>
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>

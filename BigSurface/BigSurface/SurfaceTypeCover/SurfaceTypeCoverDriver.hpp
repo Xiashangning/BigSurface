@@ -77,6 +77,8 @@ class EXPORT SurfaceTypeCoverDriver : public VoodooI2CMultitouchHIDEventDriver {
     bool parseKeyboardElement(IOHIDElement* element);
     
     void setKeyboardProperties();
+    
+    void stop(IOService* provider) override;
 
  protected:
  private:
