@@ -1061,3 +1061,31 @@ IOReturn VoodooGPIO::interruptOccurredGated() {
     
     return kIOReturnSuccess;
 }
+
+/*
+ return whether the pin is activated(pressed for buttons etc.)
+ */
+bool VoodooGPIO::getPinStatus(int pin) {
+    SInt32 hw_pin = intel_gpio_to_pin(pin, nullptr, nullptr);
+    if (hw_pin < 0)
+        return false;
+    
+    intel_community *community = intel_get_community(hw_pin);
+    intel_padgroup *pad_group = NULL;
+    if (!community || !(pad_group = intel_community_get_padgroup(community, hw_pin))) {
+        return false;
+    }
+    
+    int padno = hw_pin - pad_group->base;
+    int nregs = (community->features & PINCTRL_FEATURE_DEBOUNCE) ? 4 : 2;
+    if (PADCFG0 >= nregs * 4)
+        return false;
+
+    IOVirtualAddress reg = community->pad_regs + PADCFG0 + padno * nregs * 4;
+
+    UInt32 padcfg0 = readl(reg);
+    if (!(padcfg0 & PADCFG0_GPIOTXDIS))
+        return !(padcfg0 & PADCFG0_GPIOTXSTATE);
+
+    return !(padcfg0 & PADCFG0_GPIORXSTATE);
+}

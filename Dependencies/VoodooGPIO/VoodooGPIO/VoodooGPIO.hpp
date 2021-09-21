@@ -268,6 +268,8 @@ class VoodooGPIO : public IOService {
     void stop(IOService *provider) override;
 
     IOReturn setPowerState(unsigned long powerState, IOService *whatDevice) override;
+    
+    bool getPinStatus(int pin);
 };
 
 #endif /* VoodooGPIO_h */

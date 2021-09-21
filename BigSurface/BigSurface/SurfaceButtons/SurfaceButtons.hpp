@@ -17,6 +17,7 @@
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
 #include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
+#include "../SurfaceTypeCover/SurfaceTypeCoverDriver.hpp"
 
 #ifndef EXPORT
 #define EXPORT __attribute__((visibility("default")))
@@ -44,6 +45,7 @@ private:
     bool is_interrupt_started[BTN_CNT] = {false, false, false};
     
     IOACPIPlatformDevice *button_device {nullptr};
+    SurfaceTypeCoverDriver *typecover {nullptr};
     
     void startInterrupt(int source);
     
@@ -76,8 +78,6 @@ public:
     IOReturn registerInterrupt(int source, OSObject *target, IOInterruptAction handler, void *refcon) override;
     
     IOReturn unregisterInterrupt(int source) override;
-    
-    bool init(OSDictionary* dict) override;
     
     IOService* probe(IOService* provider, SInt32* score) override;
     

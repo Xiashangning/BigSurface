@@ -41,8 +41,6 @@ IOReturn SurfaceButtons::parseButtonResources(VoodooI2CACPIResourcesParser* pars
 
     OSSafeReleaseNULL(data);
 
-    IOLog("%s::Found valid resources from _CRS method\n", getName());
-
     return kIOReturnSuccess;
 }
 
@@ -119,29 +117,35 @@ IOReturn SurfaceButtons::response(int *btn) {
     int number = *btn;
     if (number >= BTN_CNT)
         return kIOReturnSuccess;
-    btn_status[number] = !btn_status[number];
+    if (number == PWBT_IDX) {
+        btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
+    } else {
+        btn_status[number] = gpio_controller->getPinStatus(gpio_pin[number]);
+    }
     IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
+    
+    OSDictionary* name_match = IOService::serviceMatching("SurfaceTypeCoverDriver");
+
+    IOService* matched = waitForMatchingService(name_match, 100000000);
+    typecover = OSDynamicCast(SurfaceTypeCoverDriver, matched);
+    
+    if (!typecover) {
+        IOLog("%s::Could not find Surface TypeCover Driver!\n", getName());
+        return kIOReturnSuccess;
+    }
+    name_match->release();
+    OSSafeReleaseNULL(matched);
     
     AbsoluteTime timestamp;
     clock_get_uptime(&timestamp);
-    if (number == PWBT_IDX) {
-        //TODO sleep
+    if (number == PWBT_IDX && !btn_status[number]) { // releasing power button means sleeping while holding it will force the system to shutdown
+        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_Power, btn_status[number]);
     } else if (number == VUBT_IDX) {
-        dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeIncrement, btn_status[number]);
+        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeIncrement, btn_status[number]);
     } else {
-        dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeDecrement, btn_status[number]);
+        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeDecrement, btn_status[number]);
     }
     return kIOReturnSuccess;
-}
-
-bool SurfaceButtons::init(OSDictionary *dict){
-    if (super::init(dict) == false) {
-        IOLog("%s::super init failed!\n", getName());
-        return false;
-    }
-    IOLog("%s::init SurfaceButtons\n", getName());
-    
-    return true;
 }
 
 IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){

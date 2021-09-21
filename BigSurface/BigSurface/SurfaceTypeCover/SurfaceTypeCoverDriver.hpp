@@ -34,6 +34,7 @@ typedef struct __attribute__((__packed__)) {
 
 class EXPORT SurfaceTypeCoverDriver : public VoodooI2CMultitouchHIDEventDriver {
   OSDeclareDefaultStructors(SurfaceTypeCoverDriver);
+    friend class SurfaceButtons;
 
  public:
     
