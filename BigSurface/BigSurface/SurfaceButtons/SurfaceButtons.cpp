@@ -25,7 +25,7 @@ VoodooGPIO* SurfaceButtons::getGPIOController() {
 IOReturn SurfaceButtons::parseButtonResources(VoodooI2CACPIResourcesParser* parser1, VoodooI2CACPIResourcesParser* parser2, VoodooI2CACPIResourcesParser* parser3) {
     OSObject *result = nullptr;
     OSData *data = nullptr;
-    if (button_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
+    if (acpi_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
         !(data = OSDynamicCast(OSData, result))) {
         IOLog("%s::Could not find or evaluate _CRS method\n", getName());
         OSSafeReleaseNULL(result);
@@ -48,10 +48,6 @@ IOReturn SurfaceButtons::getDeviceResources() {
     VoodooI2CACPIResourcesParser parser1, parser2, parser3;
     
     parseButtonResources(&parser1, &parser2, &parser3);
-
-    // There is actually no way to avoid APIC interrupt if it is valid
-//    if (validateAPICInterrupt() == kIOReturnSuccess)
-//        return kIOReturnSuccess;
 
     if (parser1.found_gpio_interrupts && parser2.found_gpio_interrupts && parser3.found_gpio_interrupts) {
         IOLog("%s::Found valid GPIO interrupts\n", getName());
@@ -124,28 +120,7 @@ IOReturn SurfaceButtons::response(int *btn) {
     }
     IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
     
-    OSDictionary* name_match = IOService::serviceMatching("SurfaceTypeCoverDriver");
-
-    IOService* matched = waitForMatchingService(name_match, 100000000);
-    typecover = OSDynamicCast(SurfaceTypeCoverDriver, matched);
-    
-    if (!typecover) {
-        IOLog("%s::Could not find Surface TypeCover Driver!\n", getName());
-        return kIOReturnSuccess;
-    }
-    name_match->release();
-    OSSafeReleaseNULL(matched);
-    
-    AbsoluteTime timestamp;
-    clock_get_uptime(&timestamp);
-    if (number == PWBT_IDX) {
-        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_Power, btn_status[number]);
-    } else if (number == VUBT_IDX) {
-        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeIncrement, btn_status[number]);
-    } else {
-        typecover->dispatchKeyboardEvent(timestamp, kHIDPage_Consumer, kHIDUsage_Csmr_VolumeDecrement, btn_status[number]);
-    }
-    return kIOReturnSuccess;
+    return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
 IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
@@ -155,8 +130,8 @@ IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
         return nullptr;
     }
     
-    button_device = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!button_device) {
+    acpi_device = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (!acpi_device) {
         IOLog("%s::WTF? Device is not MSBT!\n", getName());
         return nullptr;
     }
@@ -214,8 +189,16 @@ bool SurfaceButtons::start(IOService *provider) {
     startInterrupt(VUBT_IDX);
     startInterrupt(VDBT_IDX);
     
+    button_device = new SurfaceButtonHIDDevice;
+
+    if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
+        IOLog("%s::Failed to init Surface Button HID Device!", getName());
+        goto exit;
+    }
+    
     IOLog("%s::started\n", getName());
 
+    acpi_device->retain();
     button_device->retain();
 
     return true;
@@ -320,5 +303,6 @@ void SurfaceButtons::releaseResources() {
 
     OSSafeReleaseNULL(work_loop);
     
+    OSSafeReleaseNULL(acpi_device);
     OSSafeReleaseNULL(button_device);
 }

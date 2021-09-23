@@ -13,11 +13,12 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOService.h>
 #include <IOKit/hid/IOHIDEventService.h>
+
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
 #include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
-#include "../SurfaceTypeCover/SurfaceTypeCoverDriver.hpp"
+#include "SurfaceButtonHIDDevice.hpp"
 
 #ifndef EXPORT
 #define EXPORT __attribute__((visibility("default")))
@@ -30,6 +31,8 @@
 #define VDBT_IDX 2
 
 const char *BTN_DESCRIPTION[BTN_CNT] = {"Power Button", "Volume Up Button", "Volume Down Button"};
+const UInt32 BTN_CMD[BTN_CNT] = {kHIDUsage_Csmr_Power, kHIDUsage_Csmr_VolumeIncrement, kHIDUsage_Csmr_VolumeDecrement};
+const UInt32 BTN_CMD_PAGE[BTN_CNT] = {kHIDPage_Consumer, kHIDPage_Consumer, kHIDPage_Consumer};
 
 class EXPORT SurfaceButtons : public IOHIDEventService {
     OSDeclareDefaultStructors(SurfaceButtons);
@@ -44,8 +47,8 @@ private:
     IOInterruptEventSource* interrupt_source[BTN_CNT] = {nullptr, nullptr, nullptr};
     bool is_interrupt_started[BTN_CNT] = {false, false, false};
     
-    IOACPIPlatformDevice *button_device {nullptr};
-    SurfaceTypeCoverDriver *typecover {nullptr};
+    IOACPIPlatformDevice *acpi_device {nullptr};
+    SurfaceButtonHIDDevice *button_device {nullptr};
     
     void startInterrupt(int source);
     
