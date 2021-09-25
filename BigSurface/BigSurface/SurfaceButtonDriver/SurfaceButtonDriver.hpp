@@ -6,8 +6,8 @@
 //  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
-#ifndef SurfaceButtons_hpp
-#define SurfaceButtons_hpp
+#ifndef SurfaceButtonDriver_hpp
+#define SurfaceButtonDriver_hpp
 
 #include <IOKit/IOLib.h>
 #include <IOKit/IOKitKeys.h>
@@ -34,8 +34,8 @@ const char *BTN_DESCRIPTION[BTN_CNT] = {"Power Button", "Volume Up Button", "Vol
 const UInt32 BTN_CMD[BTN_CNT] = {kHIDUsage_Csmr_Power, kHIDUsage_Csmr_VolumeIncrement, kHIDUsage_Csmr_VolumeDecrement};
 const UInt32 BTN_CMD_PAGE[BTN_CNT] = {kHIDPage_Consumer, kHIDPage_Consumer, kHIDPage_Consumer};
 
-class EXPORT SurfaceButtons : public IOHIDEventService {
-    OSDeclareDefaultStructors(SurfaceButtons);
+class EXPORT SurfaceButtonDriver : public IOHIDEventService {
+    OSDeclareDefaultStructors(SurfaceButtonDriver);
     
 private:
     IOCommandGate* command_gate;
@@ -47,8 +47,8 @@ private:
     IOInterruptEventSource* interrupt_source[BTN_CNT] = {nullptr, nullptr, nullptr};
     bool is_interrupt_started[BTN_CNT] = {false, false, false};
     
-    IOACPIPlatformDevice *acpi_device {nullptr};
-    SurfaceButtonHIDDevice *button_device {nullptr};
+    IOACPIPlatformDevice* acpi_device {nullptr};
+    SurfaceButtonHIDDevice* button_device {nullptr};
     
     void startInterrupt(int source);
     

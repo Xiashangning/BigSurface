@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2524C0A626F3233A00CAAF12 /* SurfaceButtons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */; };
-		2524C0A726F3233A00CAAF12 /* SurfaceButtons.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */; };
+		2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */; };
+		2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */; };
 		2524C0B526F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0B226F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp */; };
 		2524C0B626F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0B326F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp */; };
 		2524C0B726F3286D00CAAF12 /* linuxirq.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0B426F3286D00CAAF12 /* linuxirq.hpp */; };
@@ -100,8 +100,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtons.cpp; sourceTree = "<group>"; };
-		2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtons.hpp; sourceTree = "<group>"; };
+		2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonDriver.cpp; sourceTree = "<group>"; };
+		2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonDriver.hpp; sourceTree = "<group>"; };
 		2524C0B226F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CACPIResourcesParser.cpp; sourceTree = "<group>"; };
 		2524C0B326F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CACPIResourcesParser.hpp; sourceTree = "<group>"; };
 		2524C0B426F3286D00CAAF12 /* linuxirq.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = linuxirq.hpp; sourceTree = "<group>"; };
@@ -172,16 +172,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2524C0A326F3233A00CAAF12 /* SurfaceButtons */ = {
+		2524C0A326F3233A00CAAF12 /* SurfaceButtonDriver */ = {
 			isa = PBXGroup;
 			children = (
 				259040EB26FC0BB200D605D0 /* HIDReport.hpp */,
 				259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */,
 				259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */,
-				2524C0A426F3233A00CAAF12 /* SurfaceButtons.cpp */,
-				2524C0A526F3233A00CAAF12 /* SurfaceButtons.hpp */,
+				2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */,
+				2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */,
 			);
-			path = SurfaceButtons;
+			path = SurfaceButtonDriver;
 			sourceTree = "<group>";
 		};
 		2524C0B126F3286D00CAAF12 /* VoodooI2CACPIResourcesParser */ = {
@@ -199,7 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				AC0955711F4ED49E0052E343 /* Dependencies */,
-				2524C0A326F3233A00CAAF12 /* SurfaceButtons */,
+				2524C0A326F3233A00CAAF12 /* SurfaceButtonDriver */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
 			);
@@ -386,7 +386,7 @@
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				25B97DFF260B97AD00657C76 /* VoodooI2CCSGestureEngine.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
-				2524C0A726F3233A00CAAF12 /* SurfaceButtons.hpp in Headers */,
+				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
 				25B97DFB260B97AD00657C76 /* VoodooI2CDigitiserStylus.hpp in Headers */,
 				25B97E00260B97AD00657C76 /* AverageClasses.h in Headers */,
 				25B97E08260B97AD00657C76 /* csgesture-softc.h in Headers */,
@@ -560,7 +560,7 @@
 				25B97D7C260B950E00657C76 /* VoodooI2CController.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				25B97D82260B950E00657C76 /* VoodooI2CControllerDriver.cpp in Sources */,
-				2524C0A626F3233A00CAAF12 /* SurfaceButtons.cpp in Sources */,
+				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,
 				25B97E0C260B97AD00657C76 /* VoodooI2CDigitiserStylus.cpp in Sources */,
 				25B97E03260B97AD00657C76 /* VoodooCSGestureHIPointingWrapper.cpp in Sources */,
 			);

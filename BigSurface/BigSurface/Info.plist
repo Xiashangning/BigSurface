@@ -451,12 +451,12 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
-		<key>Surface Buttons</key>
+		<key>Surface Button Driver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.xavier.BigSurface</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
-			<string>SurfaceButtons</string>
+			<string>SurfaceButtonDriver</string>
 			<key>IOMatchCategory</key>
 			<string>IODefaultMatchCategory</string>
 			<key>IONameMatch</key>
@@ -476,22 +476,6 @@
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CControllerNub</string>
-		</dict>
-		<key>VoodooI2CHIDDevice</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>VoodooI2CHIDDevice</string>
-			<key>IOProbeScore</key>
-			<integer>100</integer>
-			<key>IOPropertyMatch</key>
-			<dict>
-				<key>compatible</key>
-				<string>PNP0C50</string>
-			</dict>
-			<key>IOProviderClass</key>
-			<string>VoodooI2CDeviceNub</string>
 		</dict>
 		<key>VoodooI2CPCILakeController</key>
 		<dict>
@@ -521,6 +505,8 @@
 		<string>2.0</string>
 		<key>com.apple.iokit.IOPCIFamily</key>
 		<string>2.9</string>
+		<key>com.apple.iokit.IOSerialFamily</key>
+		<string>11.0</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>8.0</string>
 		<key>com.apple.kpi.iokit</key>

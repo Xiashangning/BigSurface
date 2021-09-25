@@ -1,10 +1,10 @@
-#include "SurfaceButtons.hpp"
+#include "SurfaceButtonDriver.hpp"
 
 #define super IOHIDEventService
 
-OSDefineMetaClassAndStructors(SurfaceButtons, IOHIDEventService)
+OSDefineMetaClassAndStructors(SurfaceButtonDriver, IOHIDEventService)
 
-VoodooGPIO* SurfaceButtons::getGPIOController() {
+VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
     VoodooGPIO* gpio_controller = NULL;
 
     // Wait for GPIO controller, up to 1 second
@@ -22,7 +22,7 @@ VoodooGPIO* SurfaceButtons::getGPIOController() {
     return gpio_controller;
 }
 
-IOReturn SurfaceButtons::parseButtonResources(VoodooI2CACPIResourcesParser* parser1, VoodooI2CACPIResourcesParser* parser2, VoodooI2CACPIResourcesParser* parser3) {
+IOReturn SurfaceButtonDriver::parseButtonResources(VoodooI2CACPIResourcesParser* parser1, VoodooI2CACPIResourcesParser* parser2, VoodooI2CACPIResourcesParser* parser3) {
     OSObject *result = nullptr;
     OSData *data = nullptr;
     if (acpi_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
@@ -44,7 +44,7 @@ IOReturn SurfaceButtons::parseButtonResources(VoodooI2CACPIResourcesParser* pars
     return kIOReturnSuccess;
 }
 
-IOReturn SurfaceButtons::getDeviceResources() {
+IOReturn SurfaceButtonDriver::getDeviceResources() {
     VoodooI2CACPIResourcesParser parser1, parser2, parser3;
     
     parseButtonResources(&parser1, &parser2, &parser3);
@@ -78,38 +78,38 @@ IOReturn SurfaceButtons::getDeviceResources() {
     }
 }
 
-void SurfaceButtons::powerInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
+void SurfaceButtonDriver::powerInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
     stopInterrupt(PWBT_IDX);
     int group = PWBT_IDX;
     // TODO
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtons::response), &group);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), &group);
     
     startInterrupt(PWBT_IDX);
 }
 
-void SurfaceButtons::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
+void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
     stopInterrupt(VUBT_IDX);
     stopInterrupt(VDBT_IDX);
     int group = VUBT_IDX;
     // TODO
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtons::response), &group);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), &group);
     
     startInterrupt(VUBT_IDX);
     startInterrupt(VDBT_IDX);
 }
 
-void SurfaceButtons::volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
+void SurfaceButtonDriver::volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
     stopInterrupt(VUBT_IDX);
     stopInterrupt(VDBT_IDX);
     int group = VDBT_IDX;
     // TODO
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtons::response), &group);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), &group);
     
     startInterrupt(VUBT_IDX);
     startInterrupt(VDBT_IDX);
 }
 
-IOReturn SurfaceButtons::response(int *btn) {
+IOReturn SurfaceButtonDriver::response(int *btn) {
     int number = *btn;
     if (number >= BTN_CNT)
         return kIOReturnSuccess;
@@ -123,7 +123,7 @@ IOReturn SurfaceButtons::response(int *btn) {
     return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
-IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
+IOService *SurfaceButtonDriver::probe(IOService *provider, SInt32 *score){
     IOLog("%s::probing SurfaceButtons\n", getName());
     if (!super::probe(provider, score)) {
         IOLog("%s::super probe failed\n", getName());
@@ -141,7 +141,7 @@ IOService *SurfaceButtons::probe(IOService *provider, SInt32 *score){
     return this;
 }
 
-bool SurfaceButtons::start(IOService *provider) {
+bool SurfaceButtonDriver::start(IOService *provider) {
     if (!super::start(provider)) {
         IOLog("%s::WTF? super starts failed!\n", getName());
         return false;
@@ -173,9 +173,9 @@ bool SurfaceButtons::start(IOService *provider) {
         goto exit;
     }
     
-    interrupt_source[PWBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtons::powerInterruptOccured), this, PWBT_IDX);
-    interrupt_source[VUBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtons::volumeUpInterruptOccured), this, VUBT_IDX);
-    interrupt_source[VDBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtons::volumeDownInterruptOccured), this, VDBT_IDX);
+    interrupt_source[PWBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::powerInterruptOccured), this, PWBT_IDX);
+    interrupt_source[VUBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeUpInterruptOccured), this, VUBT_IDX);
+    interrupt_source[VDBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeDownInterruptOccured), this, VDBT_IDX);
     if (interrupt_source[PWBT_IDX] && interrupt_source[VUBT_IDX] && interrupt_source[VDBT_IDX]) {
         work_loop->addEventSource(interrupt_source[PWBT_IDX]);
         work_loop->addEventSource(interrupt_source[VUBT_IDX]);
@@ -207,13 +207,13 @@ exit:
     return false;
 }
 
-void SurfaceButtons::stop(IOService *provider) {
+void SurfaceButtonDriver::stop(IOService *provider) {
     IOLog("%s::stopped\n", getName());
     releaseResources();
     super::stop(provider);
 }
 
-IOReturn SurfaceButtons::disableInterrupt(int source) {
+IOReturn SurfaceButtonDriver::disableInterrupt(int source) {
     if (source == PWBT_IDX)
         return gpio_controller->disableInterrupt(gpio_pin[PWBT_IDX]);
     else if (source == VUBT_IDX)
@@ -222,7 +222,7 @@ IOReturn SurfaceButtons::disableInterrupt(int source) {
         return gpio_controller->disableInterrupt(gpio_pin[VDBT_IDX]);
 }
 
-IOReturn SurfaceButtons::enableInterrupt(int source) {
+IOReturn SurfaceButtonDriver::enableInterrupt(int source) {
     if (source == PWBT_IDX)
         return gpio_controller->enableInterrupt(gpio_pin[PWBT_IDX]);
     else if (source == VUBT_IDX)
@@ -231,7 +231,7 @@ IOReturn SurfaceButtons::enableInterrupt(int source) {
         return gpio_controller->enableInterrupt(gpio_pin[VDBT_IDX]);
 }
 
-IOReturn SurfaceButtons::getInterruptType(int source, int* interrupt_type) {
+IOReturn SurfaceButtonDriver::getInterruptType(int source, int* interrupt_type) {
     if (source == PWBT_IDX)
         return gpio_controller->getInterruptType(gpio_pin[PWBT_IDX], interrupt_type);
     else if (source == VUBT_IDX)
@@ -240,7 +240,7 @@ IOReturn SurfaceButtons::getInterruptType(int source, int* interrupt_type) {
         return gpio_controller->getInterruptType(gpio_pin[VDBT_IDX], interrupt_type);
 }
 
-IOReturn SurfaceButtons::registerInterrupt(int source, OSObject *target, IOInterruptAction handler, void *refcon) {
+IOReturn SurfaceButtonDriver::registerInterrupt(int source, OSObject *target, IOInterruptAction handler, void *refcon) {
     if (source == PWBT_IDX) {
         gpio_controller->setInterruptTypeForPin(gpio_pin[PWBT_IDX], gpio_irq[PWBT_IDX]);
         return gpio_controller->registerInterrupt(gpio_pin[PWBT_IDX], target, handler, refcon);
@@ -254,7 +254,7 @@ IOReturn SurfaceButtons::registerInterrupt(int source, OSObject *target, IOInter
     return kIOReturnSuccess;
 }
 
-IOReturn SurfaceButtons::unregisterInterrupt(int source) {
+IOReturn SurfaceButtonDriver::unregisterInterrupt(int source) {
     if (source == PWBT_IDX)
         return gpio_controller->unregisterInterrupt(gpio_pin[PWBT_IDX]);
     else if (source == VUBT_IDX)
@@ -264,7 +264,7 @@ IOReturn SurfaceButtons::unregisterInterrupt(int source) {
     return kIOReturnSuccess;
 }
 
-void SurfaceButtons::startInterrupt(int source) {
+void SurfaceButtonDriver::startInterrupt(int source) {
     if (is_interrupt_started[source])
         return;
 
@@ -273,7 +273,7 @@ void SurfaceButtons::startInterrupt(int source) {
     is_interrupt_started[source] = true;
 }
 
-void SurfaceButtons::stopInterrupt(int source) {
+void SurfaceButtonDriver::stopInterrupt(int source) {
     if (!is_interrupt_started[source])
         return;
 
@@ -283,7 +283,7 @@ void SurfaceButtons::stopInterrupt(int source) {
 }
 
 
-void SurfaceButtons::releaseResources() {
+void SurfaceButtonDriver::releaseResources() {
     if (command_gate) {
         command_gate->disable();
         work_loop->removeEventSource(command_gate);
