@@ -56,20 +56,20 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
         setProperty("powerBtnGpioPin", parser1.gpio_interrupts.pin_number, 16);
         setProperty("powerBtnGpioIRQ", parser1.gpio_interrupts.irq_type, 16);
 
-        gpio_pin[PWBT_IDX] = parser1.gpio_interrupts.pin_number;
-        gpio_irq[PWBT_IDX] = parser1.gpio_interrupts.irq_type;
+        gpio_pin[POWER_BUTTON_IDX] = parser1.gpio_interrupts.pin_number;
+        gpio_irq[POWER_BUTTON_IDX] = parser1.gpio_interrupts.irq_type;
         
         setProperty("volUpBtnGpioPin", parser2.gpio_interrupts.pin_number, 16);
         setProperty("volUpBtnGpioIRQ", parser2.gpio_interrupts.irq_type, 16);
 
-        gpio_pin[VUBT_IDX] = parser2.gpio_interrupts.pin_number;
-        gpio_irq[VUBT_IDX] = parser2.gpio_interrupts.irq_type;
+        gpio_pin[VOLUME_UP_BUTTON_IDX] = parser2.gpio_interrupts.pin_number;
+        gpio_irq[VOLUME_UP_BUTTON_IDX] = parser2.gpio_interrupts.irq_type;
         
         setProperty("volDownBtnGpioPin", parser3.gpio_interrupts.pin_number, 16);
         setProperty("volDownBtnGpioIRQ", parser3.gpio_interrupts.irq_type, 16);
 
-        gpio_pin[VDBT_IDX] = parser3.gpio_interrupts.pin_number;
-        gpio_irq[VDBT_IDX] = parser3.gpio_interrupts.irq_type;
+        gpio_pin[VOLUME_DOWN_BUTTON_IDX] = parser3.gpio_interrupts.pin_number;
+        gpio_irq[VOLUME_DOWN_BUTTON_IDX] = parser3.gpio_interrupts.irq_type;
         
         return kIOReturnSuccess;
     }else{
@@ -79,25 +79,25 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
 }
 
 void SurfaceButtonDriver::powerInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)PWBT_IDX, (void *)0);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&POWER_BUTTON_IDX, (void *)1);
 }
 
 void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    bool button_status = gpio_controller->getPinStatus(gpio_pin[VUBT_IDX]);
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VUBT_IDX, (void *)button_status);
+    bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_UP_BUTTON_IDX]);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&VOLUME_UP_BUTTON_IDX, (void *)button_status);
 }
 
 void SurfaceButtonDriver::volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    bool button_status = gpio_controller->getPinStatus(gpio_pin[VDBT_IDX]);
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VDBT_IDX, (void *)button_status);
+    bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_DOWN_BUTTON_IDX]);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&VOLUME_DOWN_BUTTON_IDX, (void *)button_status);
 }
 
-IOReturn SurfaceButtonDriver::response(void* btn, void* status) {
-    long number = (long)btn;
+IOReturn SurfaceButtonDriver::response(int* btn, void* status) {
+    int number = *btn;
     bool pressed = !!status;
     if (number >= BTN_CNT)
         return kIOReturnSuccess;
-    if (number == PWBT_IDX)
+    if (number == POWER_BUTTON_IDX)
         btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
      else
         btn_status[number] = pressed;
@@ -155,21 +155,21 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         goto exit;
     }
     
-    interrupt_source[PWBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::powerInterruptOccured), this, PWBT_IDX);
-    interrupt_source[VUBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeUpInterruptOccured), this, VUBT_IDX);
-    interrupt_source[VDBT_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeDownInterruptOccured), this, VDBT_IDX);
-    if (interrupt_source[PWBT_IDX] && interrupt_source[VUBT_IDX] && interrupt_source[VDBT_IDX]) {
-        work_loop->addEventSource(interrupt_source[PWBT_IDX]);
-        work_loop->addEventSource(interrupt_source[VUBT_IDX]);
-        work_loop->addEventSource(interrupt_source[VDBT_IDX]);
+    interrupt_source[POWER_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::powerInterruptOccured), this, POWER_BUTTON_IDX);
+    interrupt_source[VOLUME_UP_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeUpInterruptOccured), this, VOLUME_UP_BUTTON_IDX);
+    interrupt_source[VOLUME_DOWN_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeDownInterruptOccured), this, VOLUME_DOWN_BUTTON_IDX);
+    if (interrupt_source[POWER_BUTTON_IDX] && interrupt_source[VOLUME_UP_BUTTON_IDX] && interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
+        work_loop->addEventSource(interrupt_source[POWER_BUTTON_IDX]);
+        work_loop->addEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        work_loop->addEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
     } else {
         IOLog("%s::Warning: Could not get interrupt event source\n", getName());
         goto exit;
     }
     
-    startInterrupt(PWBT_IDX);
-    startInterrupt(VUBT_IDX);
-    startInterrupt(VDBT_IDX);
+    startInterrupt(POWER_BUTTON_IDX);
+    startInterrupt(VOLUME_UP_BUTTON_IDX);
+    startInterrupt(VOLUME_DOWN_BUTTON_IDX);
     
     button_device = new SurfaceButtonHIDDevice;
 
@@ -242,17 +242,17 @@ void SurfaceButtonDriver::releaseResources() {
         OSSafeReleaseNULL(command_gate);
     }
     
-    stopInterrupt(PWBT_IDX);
-    stopInterrupt(VUBT_IDX);
-    stopInterrupt(VDBT_IDX);
+    stopInterrupt(POWER_BUTTON_IDX);
+    stopInterrupt(VOLUME_UP_BUTTON_IDX);
+    stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
     
     if (work_loop) {
-        work_loop->removeEventSource(interrupt_source[PWBT_IDX]);
-        work_loop->removeEventSource(interrupt_source[VUBT_IDX]);
-        work_loop->removeEventSource(interrupt_source[VDBT_IDX]);
-        OSSafeReleaseNULL(interrupt_source[PWBT_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VUBT_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VDBT_IDX]);
+        work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
+        work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
         OSSafeReleaseNULL(work_loop);
     }
     

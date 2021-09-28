@@ -26,9 +26,9 @@
 
 #define BTN_CNT 3
 
-#define PWBT_IDX 0
-#define VUBT_IDX 1
-#define VDBT_IDX 2
+const int POWER_BUTTON_IDX = 0;
+const int VOLUME_UP_BUTTON_IDX = 1;
+const int VOLUME_DOWN_BUTTON_IDX = 2;
 
 const char *BTN_DESCRIPTION[BTN_CNT] = {"Power Button", "Volume Up Button", "Volume Down Button"};
 const UInt32 BTN_CMD[BTN_CNT] = {kHIDUsage_Csmr_Power, kHIDUsage_Csmr_VolumeIncrement, kHIDUsage_Csmr_VolumeDecrement};
@@ -68,7 +68,7 @@ private:
     
     void volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount);
     
-    IOReturn response(void* btn, void* status);
+    IOReturn response(int* btn, void* status);
     
 public:
     
