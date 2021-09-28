@@ -79,28 +79,29 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
 }
 
 void SurfaceButtonDriver::powerInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)PWBT_IDX);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)PWBT_IDX, (void *)0);
 }
 
 void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VUBT_IDX);
+    bool button_status = gpio_controller->getPinStatus(gpio_pin[VUBT_IDX]);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VUBT_IDX, (void *)button_status);
 }
 
 void SurfaceButtonDriver::volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VDBT_IDX);
+    bool button_status = gpio_controller->getPinStatus(gpio_pin[VDBT_IDX]);
+    command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)VDBT_IDX, (void *)button_status);
 }
 
-IOReturn SurfaceButtonDriver::response(void* btn) {
+IOReturn SurfaceButtonDriver::response(void* btn, void* status) {
     long number = (long)btn;
+    bool pressed = !!status;
     if (number >= BTN_CNT)
         return kIOReturnSuccess;
-    if (number == PWBT_IDX) {
+    if (number == PWBT_IDX)
         btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
-    } else {
-        btn_status[number] = gpio_controller->getPinStatus(gpio_pin[number]);
-    }
+     else
+        btn_status[number] = pressed;
     IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
-    
     return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
