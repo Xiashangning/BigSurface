@@ -68,7 +68,7 @@ private:
     
     void volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount);
     
-    IOReturn response(int *btn);
+    IOReturn response(void* btn);
     
 public:
     
