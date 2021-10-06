@@ -85,6 +85,8 @@ void SurfaceButtonDriver::powerInterruptOccured(OSObject* owner, IOInterruptEven
 }
 
 void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
+    if (!awake)
+        return;
     stopInterrupt(VOLUME_UP_BUTTON_IDX);
     stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
     bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_UP_BUTTON_IDX]);
@@ -94,6 +96,8 @@ void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptE
 }
 
 void SurfaceButtonDriver::volumeDownInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
+    if (!awake)
+        return;
     stopInterrupt(VOLUME_UP_BUTTON_IDX);
     stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
     bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_DOWN_BUTTON_IDX]);
@@ -109,14 +113,13 @@ IOReturn SurfaceButtonDriver::response(int* btn, void* status) {
         return kIOReturnSuccess;
     if (number == POWER_BUTTON_IDX)
         btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
-     else
+    else
         btn_status[number] = pressed;
     //IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
     return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
 IOService *SurfaceButtonDriver::probe(IOService *provider, SInt32 *score){
-    IOLog("%s::probing SurfaceButtons\n", getName());
     if (!super::probe(provider, score)) {
         IOLog("%s::super probe failed\n", getName());
         return nullptr;
@@ -181,8 +184,11 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     startInterrupt(VOLUME_UP_BUTTON_IDX);
     startInterrupt(VOLUME_DOWN_BUTTON_IDX);
     
+    PMinit();
+    acpi_device->joinPMtree(this);
+    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    
     button_device = new SurfaceButtonHIDDevice;
-
     if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
         IOLog("%s::Failed to init Surface Button HID Device!", getName());
         goto exit;
@@ -203,6 +209,31 @@ void SurfaceButtonDriver::stop(IOService *provider) {
     IOLog("%s::stopped\n", getName());
     releaseResources();
     super::stop(provider);
+}
+
+IOReturn SurfaceButtonDriver::setPowerState(unsigned long whichState, IOService *whatDevice) {
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+    if (whichState == 0) {
+        if (awake) {
+            stopInterrupt(POWER_BUTTON_IDX);
+            stopInterrupt(VOLUME_UP_BUTTON_IDX);
+            stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
+
+            IOLog("%s::Going to sleep\n", getName());
+            awake = false;
+        }
+    } else {
+        if (!awake) {
+            startInterrupt(POWER_BUTTON_IDX);
+            startInterrupt(VOLUME_UP_BUTTON_IDX);
+            startInterrupt(VOLUME_DOWN_BUTTON_IDX);
+
+            IOLog("%s::Woke up\n", getName());
+            awake = true;
+        }
+    }
+    return kIOPMAckImplied;
 }
 
 IOReturn SurfaceButtonDriver::disableInterrupt(int source) {

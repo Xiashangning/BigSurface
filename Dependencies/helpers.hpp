@@ -17,7 +17,7 @@
 #endif
 
 #define kIOPMPowerOff                       0
-#define kVoodooI2CIOPMNumberPowerStates     2
+#define kIOPMNumberPowerStates              2
 
 #define BIT(nr) (1UL << (nr))
 
@@ -44,7 +44,7 @@ enum VoodooI2CState {
     kVoodooI2CStateOn = 1
 };
 
-static IOPMPowerState VoodooI2CIOPMPowerStates[kVoodooI2CIOPMNumberPowerStates] = {
+static IOPMPowerState MyIOPMPowerStates[kIOPMNumberPowerStates] = {
     {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
     {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
 };

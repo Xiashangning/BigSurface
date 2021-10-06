@@ -127,7 +127,7 @@ bool VoodooI2CController::start(IOService* provider) {
 
     PMinit();
     physical_device.provider->joinPMtree(this);
-    registerPowerDriver(this, VoodooI2CIOPMPowerStates, kVoodooI2CIOPMNumberPowerStates);
+    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
     IOLog("%s::%s Starting I2C controller\n", getName(), physical_device.name);
 
