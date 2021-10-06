@@ -106,7 +106,7 @@ IOReturn SurfaceButtonHIDDevice::getReport(IOMemoryDescriptor *report, IOHIDRepo
 }
 
 OSString *SurfaceButtonHIDDevice::newManufacturerString() const {
-    return OSString::withCString("Apple Inc.");
+    return OSString::withCString("Microsoft Inc.");
 }
 
 OSString *SurfaceButtonHIDDevice::newProductString() const {
@@ -122,7 +122,7 @@ OSNumber *SurfaceButtonHIDDevice::newProductIDNumber() const {
 }
 
 OSNumber *SurfaceButtonHIDDevice::newLocationIDNumber() const {
-    return OSNumber::withNumber(0x1000000, 32);
+    return OSNumber::withNumber(0x14400000, 32);
 }
 
 OSNumber *SurfaceButtonHIDDevice::newCountryCodeNumber() const {

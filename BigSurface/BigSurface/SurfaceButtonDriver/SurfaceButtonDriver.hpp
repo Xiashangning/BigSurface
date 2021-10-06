@@ -17,6 +17,7 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
+#include "../../../Dependencies/helpers.hpp"
 #include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
 #include "SurfaceButtonHIDDevice.hpp"
 
@@ -38,6 +39,7 @@ class EXPORT SurfaceButtonDriver : public IOHIDEventService {
     OSDeclareDefaultStructors(SurfaceButtonDriver);
     
 private:
+    bool awake {true};
     IOCommandGate* command_gate;
     VoodooGPIO* gpio_controller;
     bool btn_status[BTN_CNT] = {false, false, false};
@@ -87,6 +89,8 @@ public:
     bool start(IOService* provider) override;
     
     void stop(IOService* provider) override;
+    
+    IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
     
 };
 

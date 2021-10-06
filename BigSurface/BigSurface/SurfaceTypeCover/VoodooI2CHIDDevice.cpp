@@ -489,7 +489,7 @@ bool VoodooI2CHIDDevice::handleStart(IOService* provider) {
 
     PMinit();
     api->joinPMtree(this);
-    registerPowerDriver(this, VoodooI2CIOPMPowerStates, kVoodooI2CIOPMNumberPowerStates);
+    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
     // Give the reset a bit of time so that IOHIDDevice doesnt happen to start requesting the report
     // descriptor before the driver is ready
