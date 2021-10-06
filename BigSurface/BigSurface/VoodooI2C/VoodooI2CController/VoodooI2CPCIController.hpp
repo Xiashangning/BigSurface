@@ -9,11 +9,6 @@
 #ifndef VoodooI2CPCIController_hpp
 #define VoodooI2CPCIController_hpp
 
-#define LPSS_PRIV                   (0x200)
-#define LPSS_PRIV_RESETS            (0x04)
-#define LPSS_PRIV_RESETS_FUNC       (2<<1)
-#define LPSS_PRIV_RESETS_IDMA       (0x3)
-
 #include "VoodooI2CController.hpp"
 
 /* Implements a PCI Intel LPSS Designware I2C Controller

@@ -466,6 +466,19 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
+		<key>VoodooUARTController</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>VoodooUARTController</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x34a88086</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
 		<key>VoodooI2CControllerDriver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -499,14 +512,14 @@
 	<dict>
 		<key>com.alexandred.VoodooI2CServices</key>
 		<string>1.0</string>
+		<key>org.coolstar.VoodooGPIO</key>
+		<string>1.1</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.4</string>
 		<key>com.apple.iokit.IOHIDFamily</key>
 		<string>2.0</string>
 		<key>com.apple.iokit.IOPCIFamily</key>
 		<string>2.9</string>
-		<key>com.apple.iokit.IOSerialFamily</key>
-		<string>11.0</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>8.0</string>
 		<key>com.apple.kpi.iokit</key>
@@ -515,8 +528,6 @@
 		<string>14</string>
 		<key>com.apple.kpi.mach</key>
 		<string>13</string>
-		<key>org.coolstar.VoodooGPIO</key>
-		<string>1.1</string>
 	</dict>
 	<key>OSBundleRequired</key>
 	<string>Root</string>
