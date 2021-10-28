@@ -423,6 +423,21 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CMultitouchInterface</string>
 		</dict>
+		<key>Surface Button Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceButtonDriver</string>
+			<key>IOMatchCategory</key>
+			<string>IODefaultMatchCategory</string>
+			<key>IONameMatch</key>
+			<string>MSHW0040</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
 		<key>Surface Type Cover Driver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -451,20 +466,21 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
-		<key>Surface Button Driver</key>
+		<key>Surface Ambient Light Sensor</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
-			<string>SurfaceButtonDriver</string>
-			<key>IOMatchCategory</key>
-			<string>IODefaultMatchCategory</string>
-			<key>IONameMatch</key>
-			<string>MSHW0040</string>
+			<string>SurfaceAmbientLightSensorDriver</string>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>name</key>
+				<string>MSHW0184</string>
+			</dict>
 			<key>IOProbeScore</key>
 			<integer>400</integer>
 			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
+			<string>VoodooI2CDeviceNub</string>
 		</dict>
 		<key>VoodooI2CControllerDriver</key>
 		<dict>
@@ -492,7 +508,7 @@
 		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2021 Xavier Xia. All rights reserved.</string>
+	<string>Copyright © 2021 Xia Shangning. All rights reserved.</string>
 	<key>OSBundleCompatibleVersion</key>
 	<string>1.0.0</string>
 	<key>OSBundleLibraries</key>

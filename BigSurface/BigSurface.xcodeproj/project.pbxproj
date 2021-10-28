@@ -16,6 +16,9 @@
 		259040E926FC065400D605D0 /* SurfaceButtonHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */; };
 		259040EA26FC065400D605D0 /* SurfaceButtonHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */; };
 		259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040EB26FC0BB200D605D0 /* HIDReport.hpp */; };
+		25962E23272A8C7E00A9877B /* APDS9960Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 25A331D42729A834007F144D /* APDS9960Constants.h */; };
+		25A6682C2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25A6682A2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp */; };
+		25A6682D2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25A6682B2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp */; };
 		25B97D78260B950E00657C76 /* VoodooI2CDeviceNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC0AD4561F3842800070A642 /* VoodooI2CDeviceNub.cpp */; };
 		25B97D7A260B950E00657C76 /* VoodooI2CPCILakeController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FE8F89A25290B9600318126 /* VoodooI2CPCILakeController.cpp */; };
 		25B97D7B260B950E00657C76 /* VoodooI2CControllerNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF810E61F3304720031A6F5 /* VoodooI2CControllerNub.cpp */; };
@@ -109,6 +112,9 @@
 		259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonHIDDevice.cpp; sourceTree = "<group>"; };
 		259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonHIDDevice.hpp; sourceTree = "<group>"; };
 		259040EB26FC0BB200D605D0 /* HIDReport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HIDReport.hpp; sourceTree = "<group>"; };
+		25A331D42729A834007F144D /* APDS9960Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APDS9960Constants.h; sourceTree = "<group>"; };
+		25A6682A2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceAmbientLightSensorDriver.cpp; sourceTree = "<group>"; };
+		25A6682B2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceAmbientLightSensorDriver.hpp; sourceTree = "<group>"; };
 		25B97DA5260B950E00657C76 /* BigSurface.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BigSurface.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooGPIO.xcodeproj; path = ../../../Dependencies/VoodooGPIO/VoodooGPIO.xcodeproj; sourceTree = "<group>"; };
 		25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooI2CServices.xcodeproj; path = ../../../Dependencies/VoodooI2CServices/VoodooI2CServices.xcodeproj; sourceTree = "<group>"; };
@@ -195,10 +201,21 @@
 			path = ../../../Dependencies/VoodooI2CACPIResourcesParser;
 			sourceTree = "<group>";
 		};
+		25A668272728E34600F1F360 /* SurfaceAmbientLightSensor */ = {
+			isa = PBXGroup;
+			children = (
+				25A6682A2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp */,
+				25A6682B2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp */,
+				25A331D42729A834007F144D /* APDS9960Constants.h */,
+			);
+			path = SurfaceAmbientLightSensor;
+			sourceTree = "<group>";
+		};
 		25B97D6E260B943E00657C76 /* BigSurface */ = {
 			isa = PBXGroup;
 			children = (
 				AC0955711F4ED49E0052E343 /* Dependencies */,
+				25A668272728E34600F1F360 /* SurfaceAmbientLightSensor */,
 				2524C0A326F3233A00CAAF12 /* SurfaceButtonDriver */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
@@ -355,8 +372,8 @@
 				AC6268931F2F6CF1000CBF2D /* VoodooI2CController.hpp */,
 				6FE8F89A25290B9600318126 /* VoodooI2CPCILakeController.cpp */,
 				6FE8F89B25290B9600318126 /* VoodooI2CPCILakeController.hpp */,
-				25B97E23260BA01900657C76 /* VoodooI2CPCIController.hpp */,
 				258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */,
+				25B97E23260BA01900657C76 /* VoodooI2CPCIController.hpp */,
 				ACF810E61F3304720031A6F5 /* VoodooI2CControllerNub.cpp */,
 				ACF810E71F3304720031A6F5 /* VoodooI2CControllerNub.hpp */,
 				ACFCBA8E1F33644D00F9B59C /* VoodooI2CControllerDriver.cpp */,
@@ -385,7 +402,9 @@
 				25B97DFE260B97AD00657C76 /* MultitouchHelpers.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				25B97DFF260B97AD00657C76 /* VoodooI2CCSGestureEngine.hpp in Headers */,
+				25962E23272A8C7E00A9877B /* APDS9960Constants.h in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
+				25A6682D2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
 				25B97DFB260B97AD00657C76 /* VoodooI2CDigitiserStylus.hpp in Headers */,
 				25B97E00260B97AD00657C76 /* AverageClasses.h in Headers */,
@@ -443,7 +462,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1250;
-				ORGANIZATIONNAME = "Alexandre Daoud";
+				ORGANIZATIONNAME = "Xia Shangning";
 				TargetAttributes = {
 					25B97D6F260B950E00657C76 = {
 						DevelopmentTeam = K8RXBXZGN4;
@@ -550,6 +569,7 @@
 				25B97E01260B97AD00657C76 /* VoodooCSGestureHIDWrapper.cpp in Sources */,
 				25B97E0A260B97AD00657C76 /* VoodooI2CMultitouchInterface.cpp in Sources */,
 				25B97E2B260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp in Sources */,
+				25A6682C2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp in Sources */,
 				25B97E09260B97AD00657C76 /* VoodooI2CDigitiserTransducer.cpp in Sources */,
 				25B97E04260B97AD00657C76 /* csgesturescroll.cpp in Sources */,
 				258836AB260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp in Sources */,

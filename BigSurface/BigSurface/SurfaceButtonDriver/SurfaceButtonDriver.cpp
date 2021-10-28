@@ -159,7 +159,7 @@ bool SurfaceButtonDriver::start(IOService *provider) {
 
     if (!work_loop) {
         IOLog("%s Could not get work loop\n", getName());
-        goto exit;
+        return false;
     }
 
     command_gate = IOCommandGate::commandGate(this);
@@ -283,19 +283,25 @@ void SurfaceButtonDriver::releaseResources() {
         OSSafeReleaseNULL(command_gate);
     }
     
-    stopInterrupt(POWER_BUTTON_IDX);
-    stopInterrupt(VOLUME_UP_BUTTON_IDX);
-    stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
-    
-    if (work_loop) {
+    if (interrupt_source[POWER_BUTTON_IDX]) {
+        stopInterrupt(POWER_BUTTON_IDX);
         work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
-        work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-        work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
         OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
-        OSSafeReleaseNULL(work_loop);
     }
+    
+    if (interrupt_source[VOLUME_UP_BUTTON_IDX]) {
+        stopInterrupt(VOLUME_UP_BUTTON_IDX);
+        work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+    }
+    
+    if (interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
+        stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
+        work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+    }
+    
+    OSSafeReleaseNULL(work_loop);
     
     OSSafeReleaseNULL(acpi_device);
     OSSafeReleaseNULL(button_device);
