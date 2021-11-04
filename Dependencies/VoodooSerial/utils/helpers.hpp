@@ -21,10 +21,10 @@
 
 #define BIT(nr) (1UL << (nr))
 
-#define LPSS_PRIV                   (0x200)
-#define LPSS_PRIV_RESETS            (0x04)
-#define LPSS_PRIV_RESETS_FUNC       (2<<1)
-#define LPSS_PRIV_RESETS_IDMA       (0x3)
+#define LPSS_PRIV                   0x200
+#define LPSS_PRIV_RESETS            0x04
+#define LPSS_PRIV_RESETS_FUNC       BIT(2)
+#define LPSS_PRIV_RESETS_IDMA       0x3
 #define LPSS_PRIVATE_CLOCK_GATING   0x800
 
 

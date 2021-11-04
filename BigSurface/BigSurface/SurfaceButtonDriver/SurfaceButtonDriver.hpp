@@ -2,7 +2,7 @@
 //  SurfaceButtons.hpp
 //  SurfaceButtons
 //
-//  Created by Xia on 22/03/2021.
+//  Created by Xavier on 22/03/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
@@ -13,12 +13,11 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOService.h>
 #include <IOKit/hid/IOHIDEventService.h>
-
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/helpers.hpp"
-#include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
+#include "../../../Dependencies/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../../Dependencies/VoodooSerial/utils/helpers.hpp"
 #include "SurfaceButtonHIDDevice.hpp"
 
 #ifndef EXPORT
@@ -60,7 +59,7 @@ private:
     
     IOReturn getDeviceResources();
     
-    IOReturn parseButtonResources(VoodooI2CACPIResourcesParser* parser1, VoodooI2CACPIResourcesParser* parser2, VoodooI2CACPIResourcesParser* parser3);
+    IOReturn parseButtonResources(VoodooACPIResourcesParser* parser1, VoodooACPIResourcesParser* parser2, VoodooACPIResourcesParser* parser3);
     
     VoodooGPIO* getGPIOController();
     

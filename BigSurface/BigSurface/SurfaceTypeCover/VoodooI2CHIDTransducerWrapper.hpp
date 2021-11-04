@@ -15,7 +15,7 @@
 
 #include <IOKit/hid/IOHIDElement.h>
 
-#include "../Multitouch Support/VoodooI2CDigitiserTransducer.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CDigitiserTransducer.hpp"
 
 class EXPORT VoodooI2CHIDTransducerWrapper : public OSObject {
   OSDeclareDefaultStructors(VoodooI2CHIDTransducerWrapper);

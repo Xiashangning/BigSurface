@@ -17,7 +17,7 @@
 #include "VoodooI2CControllerConstants.hpp"
 #include "VoodooI2CControllerNub.hpp"
 #include "../VoodooI2CDevice/VoodooI2CDeviceNub.hpp"
-#include "../../Dependencies/helpers.hpp"
+#include "../../../utils/helpers.hpp"
 
 typedef struct _VoodooI2CControllerBusMessage {
     UInt16 address;

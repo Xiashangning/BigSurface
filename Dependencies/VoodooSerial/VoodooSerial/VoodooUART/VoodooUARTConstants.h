@@ -2,8 +2,8 @@
 //  VoodooUARTConstants.h
 //  BigSurface
 //
-//  Created by 夏尚宁 on 2021/9/23.
-//  Copyright © 2021 Alexandre Daoud. All rights reserved.
+//  Created by Xavier on 2021/9/23.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
 #ifndef VoodooUARTConstants_h
@@ -11,8 +11,12 @@
 
 // register length: 32 => 8*4 = 8<<2 = 8<<REG_SHIFT
 #define REG_SHIFT 2
+#define UART_CLOCK          64000000
 
-#define UART_CLOCK 120000000
+#define LPSS_UART_CLK       0x00
+#define UART_ENABLE_CLK     0x01
+#define UART_UPDATE_CLK     BIT(31)
+#define CALC_CLK(M, N)      (((N)&0x7F)<<16|((M)&0x7F)<<1)
 
 /* Surface Pro 7 UART type 16550A specific register layout. See https://linux-sunxi.org/images/d/d2/Dw_apb_uart_db.pdf*/
 #define DW_UART_RX  0x0                     /*receive buffer */
@@ -31,6 +35,7 @@
 #define DW_UART_MSR (0x06<<REG_SHIFT)       /*Modem Status Register */
 
 #define DW_UART_USR    (0x1F<<REG_SHIFT)    /* UART Status Register */
+#define DW_UART_SRR    (0x22<<REG_SHIFT)    /* Software Reset Register */
 #define DW_UART_CPR    (0x3D<<REG_SHIFT)    /* Component Parameter Register */
 #define DW_UART_UCV    (0x3E<<REG_SHIFT)    /* UART Component Version */
 

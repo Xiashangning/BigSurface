@@ -40,7 +40,7 @@ class EXPORT VoodooI2CNativeEngine : public VoodooI2CMultitouchEngine {
     void handleClose(IOService *forClient, IOOptionBits options) override;
     void onPropertyChange() override;
     
-    MultitouchReturn handleInterruptReport(VoodooI2CMultitouchEvent event, AbsoluteTime timestamp);
+    MultitouchReturn handleInterruptReport(VoodooI2CMultitouchEvent event, AbsoluteTime timestamp) override;
  private:
     int stylus_check = 0;
 };

@@ -1,3 +1,11 @@
+//
+//  SurfaceTypeCoverDriver.hpp
+//  BigSurface
+//
+//  Created by Xavier on 21/04/2021.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
+//
+
 #include "SurfaceTypeCoverDriver.hpp"
 
 #include <IOKit/hid/AppleHIDUsageTables.h>

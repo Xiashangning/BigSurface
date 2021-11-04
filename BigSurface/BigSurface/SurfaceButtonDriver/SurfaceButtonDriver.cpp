@@ -1,7 +1,14 @@
+//
+//  SurfaceButtons.hpp
+//  SurfaceButtons
+//
+//  Created by Xavier on 22/03/2021.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
+//
+
 #include "SurfaceButtonDriver.hpp"
 
 #define super IOHIDEventService
-
 OSDefineMetaClassAndStructors(SurfaceButtonDriver, IOHIDEventService)
 
 VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
@@ -12,7 +19,6 @@ VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
 
     IOService* matched = waitForMatchingService(name_match, 1000000000);
     gpio_controller = OSDynamicCast(VoodooGPIO, matched);
-
     if (gpio_controller != NULL) {
         IOLog("%s::Got GPIO Controller! %s\n", getName(), gpio_controller->getName());
     }
@@ -22,7 +28,7 @@ VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
     return gpio_controller;
 }
 
-IOReturn SurfaceButtonDriver::parseButtonResources(VoodooI2CACPIResourcesParser* parser1, VoodooI2CACPIResourcesParser* parser2, VoodooI2CACPIResourcesParser* parser3) {
+IOReturn SurfaceButtonDriver::parseButtonResources(VoodooACPIResourcesParser* parser1, VoodooACPIResourcesParser* parser2, VoodooACPIResourcesParser* parser3) {
     OSObject *result = nullptr;
     OSData *data = nullptr;
     if (acpi_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
@@ -45,7 +51,7 @@ IOReturn SurfaceButtonDriver::parseButtonResources(VoodooI2CACPIResourcesParser*
 }
 
 IOReturn SurfaceButtonDriver::getDeviceResources() {
-    VoodooI2CACPIResourcesParser parser1, parser2, parser3;
+    VoodooACPIResourcesParser parser1, parser2, parser3;
     
     parseButtonResources(&parser1, &parser2, &parser3);
 
@@ -115,32 +121,26 @@ IOReturn SurfaceButtonDriver::response(int* btn, void* status) {
         btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
     else
         btn_status[number] = pressed;
-    //IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
+    IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
     return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
 IOService *SurfaceButtonDriver::probe(IOService *provider, SInt32 *score){
-    if (!super::probe(provider, score)) {
-        IOLog("%s::super probe failed\n", getName());
+    if (!super::probe(provider, score))
         return nullptr;
-    }
     
     acpi_device = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!acpi_device) {
-        IOLog("%s::WTF? Device is not MSBT!\n", getName());
+    if (!acpi_device)
         return nullptr;
-    }
     
-    IOLog("%s::Microsoft ACPI button device found!\n", getName());
+    IOLog("%s::Surface ACPI button device found!\n", getName());
     
     return this;
 }
 
 bool SurfaceButtonDriver::start(IOService *provider) {
-    if (!super::start(provider)) {
-        IOLog("%s::WTF? super starts failed!\n", getName());
+    if (!super::start(provider))
         return false;
-    }
     
     if (getDeviceResources() != kIOReturnSuccess) {
         IOLog("%s::No! Could not get GPIO infos\n", getName());
@@ -156,7 +156,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     IOSleep(500);
     
     work_loop = IOWorkLoop::workLoop();
-
     if (!work_loop) {
         IOLog("%s Could not get work loop\n", getName());
         goto exit;
@@ -179,7 +178,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         IOLog("%s::Warning: Could not get interrupt event source\n", getName());
         goto exit;
     }
-    
     startInterrupt(POWER_BUTTON_IDX);
     startInterrupt(VOLUME_UP_BUTTON_IDX);
     startInterrupt(VOLUME_DOWN_BUTTON_IDX);
@@ -195,10 +193,8 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     }
     
     IOLog("%s::started\n", getName());
-
     acpi_device->retain();
     button_device->retain();
-
     return true;
 exit:
     releaseResources();
@@ -219,7 +215,6 @@ IOReturn SurfaceButtonDriver::setPowerState(unsigned long whichState, IOService 
             stopInterrupt(POWER_BUTTON_IDX);
             stopInterrupt(VOLUME_UP_BUTTON_IDX);
             stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
-
             IOLog("%s::Going to sleep\n", getName());
             awake = false;
         }
@@ -228,7 +223,6 @@ IOReturn SurfaceButtonDriver::setPowerState(unsigned long whichState, IOService 
             startInterrupt(POWER_BUTTON_IDX);
             startInterrupt(VOLUME_UP_BUTTON_IDX);
             startInterrupt(VOLUME_DOWN_BUTTON_IDX);
-
             IOLog("%s::Woke up\n", getName());
             awake = true;
         }
@@ -262,7 +256,6 @@ void SurfaceButtonDriver::startInterrupt(int source) {
         return;
 
     interrupt_source[source]->enable();
-    
     is_interrupt_started[source] = true;
 }
 
@@ -271,29 +264,33 @@ void SurfaceButtonDriver::stopInterrupt(int source) {
         return;
 
     interrupt_source[source]->disable();
-    
     is_interrupt_started[source] = false;
 }
 
 
 void SurfaceButtonDriver::releaseResources() {
-    if (command_gate) {
-        command_gate->disable();
-        work_loop->removeEventSource(command_gate);
-        OSSafeReleaseNULL(command_gate);
-    }
-    
-    stopInterrupt(POWER_BUTTON_IDX);
-    stopInterrupt(VOLUME_UP_BUTTON_IDX);
-    stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
-    
     if (work_loop) {
-        work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
-        work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-        work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
-        OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-        OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+        if (command_gate) {
+            command_gate->disable();
+            work_loop->removeEventSource(command_gate);
+            OSSafeReleaseNULL(command_gate);
+        }
+        
+        if (interrupt_source[POWER_BUTTON_IDX]) {
+            stopInterrupt(POWER_BUTTON_IDX);
+            work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
+            OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
+        }
+        if (interrupt_source[VOLUME_UP_BUTTON_IDX]) {
+            stopInterrupt(VOLUME_UP_BUTTON_IDX);
+            work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+            OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        }
+        if (interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
+            stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
+            work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+            OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+        }
         OSSafeReleaseNULL(work_loop);
     }
     

@@ -27,7 +27,7 @@ You will need to add the kext into opencore's `config.plist` in the order specif
   > Depends on Surface Serial Hub driver
 - Buttons
   
-  > WIP
+  > Done, but power button fails to function after wake up.
 - Ambient Light Sensor
   > ACPI device name: ACSD, attached under I2C4
   > The Linux source code is attached in the folder, just one source file, should be 'easy' to port.(Maybe we don't need gesture and proximity)

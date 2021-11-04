@@ -17,7 +17,7 @@
 #include <IOKit/IOTimerEventSource.h>
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/hid/IOHIDElement.h>
-#include "../../../Dependencies/helpers.hpp"
+#include "../../../Dependencies/VoodooSerial/utils/helpers.hpp"
 
 #define INTERRUPT_SIMULATOR_TIMEOUT 5
 #define INTERRUPT_SIMULATOR_TIMEOUT_BUSY 2

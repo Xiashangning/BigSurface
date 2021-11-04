@@ -2,8 +2,8 @@
 //  VoodooUARTController.hpp
 //  BigSurface
 //
-//  Created by 夏尚宁 on 2021/9/23.
-//  Copyright © 2021 Alexandre Daoud. All rights reserved.
+//  Created by Xavier on 2021/9/23.
+//  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 /* Implements an Intel LPSS Designware UART Controller
  * type 16550A (8250)
@@ -22,26 +22,17 @@
 #include <IOKit/IOWorkLoop.h>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOTimerEventSource.h>
+#include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
-#include "../../Dependencies/helpers.hpp"
+#include "../../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../utils/helpers.hpp"
 #include "VoodooUARTConstants.h"
 
-#ifndef kIOPMPowerOff
-#define kIOPMPowerOff                       0
-#endif
-#define kVoodooUARTIOPMNumberPowerStates    2
-
-#define UART_IDLE_LONG_TIMEOUT  500
-#define UART_IDLE_TIMEOUT       200
-#define UART_ACTIVE_TIMEOUT     2
-
-enum UART_Parity {
-    PARITY_NONE=0,
-    PARITY_ODD,
-    PARITY_EVEN
-};
+#define UART_IDLE_LONG_TIMEOUT  200
+#define UART_IDLE_TIMEOUT       50
+#define UART_ACTIVE_TIMEOUT     5
 
 enum UART_State {
     UART_SLEEP=0,
@@ -54,36 +45,34 @@ enum VoodooUARTState {
     kVoodooUARTStateOn = 1
 };
 
-static IOPMPowerState VoodooUARTIOPMPowerStates[kVoodooUARTIOPMNumberPowerStates] = {
-    {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
-    {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
-};
-
-typedef struct _VoodooUARTPhysicalDevice {
+struct VoodooUARTPhysicalDevice {
     UART_State state;
     const char* name;
     IOPCIDevice* device;
     IOMemoryMap* mmap;
-} VoodooUARTPhysicalDevice;
+};
 
-typedef struct _VoodooUARTMessage {
+struct VoodooUARTMessage {
     UInt8* buffer;
     UInt16 length;
-} VoodooUARTMessage;
+};
 
-typedef struct _VoodooUARTBus {
+struct VoodooUARTBus {
     UInt32 interrupt_source;
     bool command_error;
     UInt32 baud_rate;
-    int data_bits;
-    int stop_bits;
-    UART_Parity parity;
-    UInt32 transmit_buffer_length;
-    VoodooUARTMessage* transmit_buffer;
-    UInt transmit_fifo_depth;
-} VoodooUARTBus;
+    UInt8 data_bits;
+    UInt8 stop_bits;
+    UInt8 parity;
+    UInt32 tx_buffer_length;
+    VoodooUARTMessage* tx_buffer;
+    UInt32 tx_fifo_depth;
+    UInt8 *rx_buffer;
+};
 
-class EXPORT VoodooUARTClient : IOService {
+class EXPORT VoodooUARTClient : public IOService {
+    OSDeclareAbstractStructors(VoodooUARTClient);
+    
 public:
     virtual void dataReceived(UInt8 *buffer, UInt16 length) = 0;
 };
@@ -105,7 +94,7 @@ class EXPORT VoodooUARTController : public IOService {
     void writeRegister(UInt32 value, int offset);
 
     IOService* probe(IOService* provider, SInt32* score) override;
-
+    
     bool start(IOService* provider) override;
 
     void stop(IOService* provider) override;
@@ -114,7 +103,7 @@ class EXPORT VoodooUARTController : public IOService {
 
     bool init(OSDictionary* properties) override;
     
-    IOReturn requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, int data_bits, int stop_bits, UART_Parity parity);
+    IOReturn requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity);
 
     void requestDisconnect(VoodooUARTClient *_client);
 
@@ -129,6 +118,8 @@ class EXPORT VoodooUARTController : public IOService {
     IOReturn unmapMemory();
     
     IOReturn configureDevice();
+    
+    void resetDevice();
 
  private:
     VoodooUARTClient* client {nullptr};
@@ -136,10 +127,12 @@ class EXPORT VoodooUARTController : public IOService {
     IOCommandGate* command_gate {nullptr};
     IOLock* lock {nullptr};
     bool is_interrupt_enabled {false};
+    IOInterruptEventSource *interrupt_source {nullptr};
     
     IOTimerEventSource* interrupt_simulator {nullptr};
     AbsoluteTime last_activate_time {0};
     bool is_polling {false};
+    bool ready {false};
     
     int fifo_size {0};
     UInt32 fcr {0};
@@ -147,6 +140,11 @@ class EXPORT VoodooUARTController : public IOService {
     UInt32 ier {0};
     
     VoodooUARTBus bus;
+    bool write_complete {false};
+    
+    void startUARTClock();
+    
+    void stopUARTClock();
 
     void releaseResources();
     
@@ -169,11 +167,7 @@ class EXPORT VoodooUARTController : public IOService {
 
     void stopInterrupt();
     
-    void logRegister(void* reg);
-    
     void toggleInterruptType(UInt32 type, bool enable);
-    
-    inline void toggleClockGating(bool enable);
 };
 
 #endif /* VoodooUARTController_hpp */
