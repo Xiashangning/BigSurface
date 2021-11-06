@@ -22,7 +22,7 @@ OSDefineMetaClassAndStructors(VoodooUARTController, IOService);
 bool VoodooUARTController::init(OSDictionary* properties) {
     if (!super::init(properties))
         return false;
-    
+    LOG("starting\n");
     memset(&bus, 0, sizeof(VoodooUARTBus));
     memset(&physical_device, 0, sizeof(VoodooUARTPhysicalDevice));
     physical_device.state = UART_IDLE;
@@ -67,9 +67,6 @@ void VoodooUARTController::resetDevice() {
     readRegister(DW_UART_USR);
     
     //DMA TBD Here
-    
-    mcr = UART_MCR_OUT2;
-    writeRegister(mcr, DW_UART_MCR);
     
     toggleInterruptType(UART_IER_ENABLE_MODEM_STA_INT, true);
 }
@@ -118,7 +115,7 @@ void VoodooUARTController::stopUARTClock() {
 bool VoodooUARTController::start(IOService* provider) {
     UInt32 reg;
     if (!super::start(provider))
-        goto exit;
+        return false;
     
     lock = IOLockAlloc();
     if (!lock) {
@@ -137,7 +134,6 @@ bool VoodooUARTController::start(IOService* provider) {
         LOG("Could not open command gate\n");
         goto exit;
     }
-    command_gate->enable();
     
     if (!physical_device.device->open(this)) {
         LOG("Could not open provider\n");
@@ -151,9 +147,9 @@ bool VoodooUARTController::start(IOService* provider) {
     resetDevice();
     
     fifo_size = DW_UART_CPR_FIFO_SIZE(readRegister(DW_UART_CPR));
-    bus.tx_buffer = static_cast<VoodooUARTMessage *>(IOMalloc(sizeof(VoodooUARTMessage)));
+    bus.tx_buffer = new VoodooUARTMessage;
     bus.tx_buffer->length = 0;
-    bus.rx_buffer = static_cast<UInt8 *>(IOMalloc(sizeof(UInt8)*fifo_size));
+    bus.rx_buffer = new UInt8[fifo_size];
     reg = readRegister(DW_UART_UCV);
     LOG("Designware UART version %c.%c%c\n", (reg >> 24) & 0xff, (reg >> 16) & 0xff, (reg >> 8) & 0xff);
 //    reg = readRegister(DW_UART_CPR);
@@ -172,17 +168,13 @@ bool VoodooUARTController::start(IOService* provider) {
 //    LOG("    DMA_EXTRA           : %s\n", CONFIGURED(reg&UART_CPR_DMA_EXTRA));
 //    LOG("    FIFO_SIZE           : %d\n", fifo_size);
     
-    interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &VoodooUARTController::handleInterrupt), physical_device.device, 0);
-    if (!interrupt_source) {
-        LOG("Could not register interrupt! Using polling instead\n");
-        is_polling = true;
-        interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
-        if (!interrupt_simulator) {
-            LOG("No! Even timer event source cannot be created!\n");
-            goto exit;
-        }
-        work_loop->addEventSource(interrupt_simulator);
+    is_polling = true;
+    interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
+    if (!interrupt_simulator) {
+        LOG("No! Even timer event source cannot be created!\n");
+        goto exit;
     }
+    work_loop->addEventSource(interrupt_simulator);
     startInterrupt();
     
     PMinit();
@@ -191,6 +183,7 @@ bool VoodooUARTController::start(IOService* provider) {
     
     physical_device.device->retain();
     registerService();
+    LOG("started\n");
     return true;
 exit:
     releaseResources();
@@ -198,6 +191,7 @@ exit:
 }
 
 void VoodooUARTController::stop(IOService *provider) {
+    stopCommunication();
     releaseResources();
     PMstop();
     super::stop(provider);
@@ -238,34 +232,32 @@ void VoodooUARTController::writeRegister(UInt32 value, int offset) {
 }
 
 void VoodooUARTController::releaseResources() {
+    stopInterrupt();
+    if (interrupt_simulator) {
+        work_loop->removeEventSource(interrupt_simulator);
+        OSSafeReleaseNULL(interrupt_simulator);
+    }
+    if (interrupt_source) {
+        work_loop->removeEventSource(interrupt_source);
+        OSSafeReleaseNULL(interrupt_source);
+    }
+    if (bus.tx_buffer)
+        delete bus.tx_buffer;
+    if (bus.rx_buffer)
+        delete[] bus.rx_buffer;
+    unmapMemory();
+    if (physical_device.device->isOpen(this))
+        physical_device.device->close(this);
     if (command_gate) {
         command_gate->disable();
         work_loop->removeEventSource(command_gate);
         OSSafeReleaseNULL(command_gate);
     }
-
-    stopInterrupt();
-
-    if (interrupt_simulator) {
-        work_loop->removeEventSource(interrupt_simulator);
-        OSSafeReleaseNULL(interrupt_simulator);
-    }
-    if (!is_polling) {
-        physical_device.device->unregisterInterrupt(0);
-    }
-
     OSSafeReleaseNULL(work_loop);
-    
-    unmapMemory();
-
-    physical_device.device->close(this);
-    IOFree(bus.tx_buffer, sizeof(VoodooUARTMessage));
-    IOFree(bus.rx_buffer, sizeof(UInt8) * fifo_size);
-    OSSafeReleaseNULL(physical_device.device);
-    
     if (lock) {
         IOLockFree(lock);
     }
+    OSSafeReleaseNULL(physical_device.device);
 }
 
 IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService* whatDevice) {
@@ -354,12 +346,9 @@ IOReturn VoodooUARTController::prepareCommunication() {
     if (ready)
         return kIOReturnStillOpen;
     if (bus.baud_rate != 4000000)
-        LOG("Warning: baudrate should be 4000000\n");
+        LOG("Warning: baudrate should be 4000000, %d\n", bus.baud_rate);
+    bus.baud_rate = 4000000;
     UInt16 divisor = UART_CLOCK / bus.baud_rate / 16;
-    float err_rate_lower = (divisor*bus.baud_rate*16.0) / UART_CLOCK;
-    float err_rate_upper = ((divisor+1)*bus.baud_rate*16.0) / UART_CLOCK;
-    if (1-err_rate_lower > err_rate_upper-1)
-        divisor += 1;
     
     UInt32 lcr = 0;
     if (bus.data_bits >= UART_DATABITS_9) {
@@ -418,6 +407,8 @@ IOReturn VoodooUARTController::prepareCommunication() {
 }
 
 void VoodooUARTController::stopCommunication() {
+    if (!ready)
+        return;
     waitUntilNotBusy();
     
     writeRegister(UART_LCR_DLAB, DW_UART_LCR);
@@ -492,7 +483,6 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
             if (!bus.tx_buffer->length) {
                 toggleInterruptType(UART_IER_ENABLE_TX_EMPTY_INT, false);
                 command_gate->commandWakeup(&write_complete);
-                LOG("tx finished\n");
             }
         }
     }
@@ -505,7 +495,6 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
             *pos++ = readRegister(DW_UART_RX);
             length++;
         } while (readRegister(DW_UART_LSR) & (UART_LSR_DATA_READY|UART_LSR_BREAK_INT) && length<64);
-        LOG("rx finished\n");
         if (client) {
             client->dataReceived(bus.rx_buffer, length);
         }

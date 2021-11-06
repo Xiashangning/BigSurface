@@ -27,7 +27,6 @@
 #define LPSS_PRIV_RESETS_IDMA       0x3
 #define LPSS_PRIVATE_CLOCK_GATING   0x800
 
-
 UInt16 abs(SInt16 x);
 
 const char* getMatchedName(IOService* provider);

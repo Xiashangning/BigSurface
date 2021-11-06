@@ -11,6 +11,16 @@
 
 #include <IOKit/IOLib.h>
 
+/*      Surface SAM Command          tc    tid   iid   cid    pay   len  seq */
+#define COMMAND_SAM_VERSION         0x01, 0x01, 0x00, 0x13, nullptr, 0, true
+#define COMMAND_D0_EXIT             0x01, 0x01, 0x00, 0x33, nullptr, 0, true
+#define COMMAND_D0_ENTRY            0x01, 0x01, 0x00, 0x34, nullptr, 0, true
+#define COMMAND_DISPLAY_OFF         0x01, 0x01, 0x00, 0x15, nullptr, 0, true
+#define COMMAND_DISPLAY_ON          0x01, 0x01, 0x00, 0x16, nullptr, 0, true
+#define COMMAND_ENABLE_EVENT(p, l)  0x01, 0x01, 0x00, 0x0B,       p, l, true
+
+#define EVENT_FLAG_SEQUENCED    BIT(0)
+
 #define SYN_BYTE_1  0xAA
 #define SYN_BYTE_2  0x55
 #define SYN_BYTES   0x55AA
@@ -48,6 +58,13 @@ struct PACKED SurfaceSerialMessage {
     UInt16 syn;
     SurfaceSerialFrame frame;
     UInt16 frame_crc;
+};
+
+struct PACKED SurfaceEventEnablePayload {
+    UInt8 target_category;
+    UInt8 flags;
+    UInt16 request_id;  /* the request id used for the event*/
+    UInt8 instance_id;
 };
 
 #define CRC_INITIAL     0xFFFF

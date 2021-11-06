@@ -28,14 +28,13 @@
 #include <IOKit/hid/IOHIDUsageTables.h>
 #include <IOKit/hid/IOHIDDevice.h>
 
-#include "VoodooI2CHIDDevice.hpp"
 #include "VoodooI2CHIDTransducerWrapper.hpp"
 
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CDigitiserStylus.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CMultitouchInterface.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/MultitouchHelpers.hpp"
 
-#include "../../Dependencies/VoodooSerial/utils/helpers.hpp"
+#include "../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
 
 #define kHIDUsage_Dig_Confidence kHIDUsage_Dig_TouchValid
 

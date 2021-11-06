@@ -81,9 +81,9 @@ public:
     void write_report_to_buffer(IOMemoryDescriptor *buffer);
     void write_report_descriptor_to_buffer(IOMemoryDescriptor *buffer);
 
-    MultitouchReturn handleInterruptReport(VoodooI2CMultitouchEvent event, AbsoluteTime timestamp) override;
-    bool start(IOService* service) override;
-    void stop(IOService* provider) override;
+    MultitouchReturn handleInterruptReport(VoodooI2CMultitouchEvent event, AbsoluteTime timestamp);
+    bool start(IOService* service);
+    void stop(IOService* provider);
 };
 
 

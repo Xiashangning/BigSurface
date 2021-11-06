@@ -61,6 +61,22 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
+		<key>Surface Ambient Light Sensor Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceAmbientLightSensorDriver</string>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>name</key>
+				<string>MSHW0184</string>
+			</dict>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>VoodooI2CDeviceNub</string>
+		</dict>
 		<key>Surface Serial Hub Driver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -70,7 +86,7 @@
 			<key>IONameMatch</key>
 			<string>MSHW0084</string>
 			<key>IOProbeScore</key>
-			<integer>400</integer>
+			<integer>600</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
@@ -81,24 +97,24 @@
 	<string>1.0.0</string>
 	<key>OSBundleLibraries</key>
 	<dict>
-		<key>org.coolstar.VoodooGPIO</key>
-		<string>1.2</string>
 		<key>com.xavier.VoodooSerial</key>
 		<string>1.0</string>
+		<key>com.alexandred.VoodooI2CServices</key>
+		<string>1.0</string>
+		<key>org.coolstar.VoodooGPIO</key>
+		<string>1.2</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.4</string>
 		<key>com.apple.iokit.IOHIDFamily</key>
 		<string>2.0</string>
-		<key>com.apple.iokit.IOPCIFamily</key>
-		<string>2.9</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>8.0</string>
 		<key>com.apple.kpi.iokit</key>
-		<string>14</string>
+		<string>14.0</string>
 		<key>com.apple.kpi.libkern</key>
-		<string>14</string>
+		<string>14.0</string>
 		<key>com.apple.kpi.mach</key>
-		<string>13</string>
+		<string>13.0</string>
 	</dict>
 	<key>OSBundleRequired</key>
 	<string>Root</string>

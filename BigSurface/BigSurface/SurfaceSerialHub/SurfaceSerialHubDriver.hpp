@@ -19,7 +19,7 @@
 
 #define MIN_REQID 32
 
-#define ACK_TIMEOUT 500
+#define ACK_TIMEOUT 200
 
 enum EventType {
     DUMMY = 1
@@ -97,7 +97,7 @@ private:
     int                     msg_len {-1};
     bool                    partial_syn {false};
     PendingCommand*         pending_commands {nullptr};
-    WaitingRequest*            waiting_requests {nullptr};
+    WaitingRequest*         waiting_requests {nullptr};
     CircleIDCounter         seq_counter {CircleIDCounter(0x00, 0xff)};
     CircleIDCounter         req_counter {CircleIDCounter(MIN_REQID, 0xffff)};
     UInt32                  baudrate {0};

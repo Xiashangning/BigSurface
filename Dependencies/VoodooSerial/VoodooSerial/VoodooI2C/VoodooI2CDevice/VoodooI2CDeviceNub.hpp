@@ -14,7 +14,7 @@
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "../../../../VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
 #include "../VoodooI2CController/VoodooI2CController.hpp"
 
 #ifndef EXPORT

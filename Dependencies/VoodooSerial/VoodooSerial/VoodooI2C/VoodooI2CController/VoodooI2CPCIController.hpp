@@ -42,7 +42,7 @@ class EXPORT VoodooI2CPCIController : public VoodooI2CController {
 
     /* @inherit */
 
-    IOReturn setPowerState(unsigned long whichState, IOService * whatDevice) override;
+    IOReturn setPowerState(unsigned long whichState, IOService * whatDevice);
 
     /* Skylake LPSS Reset Hack
      *
@@ -54,11 +54,11 @@ class EXPORT VoodooI2CPCIController : public VoodooI2CController {
 
     /* @inherit */
 
-    bool start(IOService* provider) override;
+    bool start(IOService* provider);
 
     /* @inherit */
 
-    void stop(IOService* provider) override;
+    void stop(IOService* provider);
 };
 
 #endif /* VoodooI2CPCIController_hpp */

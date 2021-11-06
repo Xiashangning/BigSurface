@@ -133,6 +133,11 @@ IOService *SurfaceButtonDriver::probe(IOService *provider, SInt32 *score){
     if (!acpi_device)
         return nullptr;
     
+    if (getDeviceResources() != kIOReturnSuccess) {
+        IOLog("%s::No! Could not get GPIO infos\n", getName());
+        return nullptr;
+    }
+    
     IOLog("%s::Surface ACPI button device found!\n", getName());
     
     return this;
@@ -142,11 +147,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     if (!super::start(provider))
         return false;
     
-    if (getDeviceResources() != kIOReturnSuccess) {
-        IOLog("%s::No! Could not get GPIO infos\n", getName());
-        return false;
-    }
-
     gpio_controller = getGPIOController();
     if (!gpio_controller) {
         IOLog("%s::Could not find GPIO controller, exiting\n", getName());
@@ -204,6 +204,8 @@ exit:
 void SurfaceButtonDriver::stop(IOService *provider) {
     IOLog("%s::stopped\n", getName());
     releaseResources();
+    PMstop();
+    OSSafeReleaseNULL(acpi_device);
     super::stop(provider);
 }
 
@@ -267,33 +269,28 @@ void SurfaceButtonDriver::stopInterrupt(int source) {
     is_interrupt_started[source] = false;
 }
 
-
 void SurfaceButtonDriver::releaseResources() {
-    if (work_loop) {
-        if (command_gate) {
-            command_gate->disable();
-            work_loop->removeEventSource(command_gate);
-            OSSafeReleaseNULL(command_gate);
-        }
-        
-        if (interrupt_source[POWER_BUTTON_IDX]) {
-            stopInterrupt(POWER_BUTTON_IDX);
-            work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
-            OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
-        }
-        if (interrupt_source[VOLUME_UP_BUTTON_IDX]) {
-            stopInterrupt(VOLUME_UP_BUTTON_IDX);
-            work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-            OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
-        }
-        if (interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
-            stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
-            work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
-            OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
-        }
-        OSSafeReleaseNULL(work_loop);
+    if (interrupt_source[POWER_BUTTON_IDX]) {
+        stopInterrupt(POWER_BUTTON_IDX);
+        work_loop->removeEventSource(interrupt_source[POWER_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[POWER_BUTTON_IDX]);
     }
+    if (interrupt_source[VOLUME_UP_BUTTON_IDX]) {
+        stopInterrupt(VOLUME_UP_BUTTON_IDX);
+        work_loop->removeEventSource(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_UP_BUTTON_IDX]);
+    }
+    if (interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
+        stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
+        work_loop->removeEventSource(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+        OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
+    }
+    if (command_gate) {
+        command_gate->disable();
+        work_loop->removeEventSource(command_gate);
+        OSSafeReleaseNULL(command_gate);
+    }
+    OSSafeReleaseNULL(work_loop);
     
-    OSSafeReleaseNULL(acpi_device);
     OSSafeReleaseNULL(button_device);
 }

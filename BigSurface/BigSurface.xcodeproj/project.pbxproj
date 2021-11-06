@@ -7,23 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2518A2F62734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */; };
+		2518A2F72734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2518A2F42734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp */; };
+		2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */; };
 		2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */; };
 		2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */; };
-		258135DC272D4AD600EED5C9 /* SurfaceSerialHubDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 258135D9272D4AD600EED5C9 /* SurfaceSerialHubDriver.cpp */; };
-		258135DD272D4AD600EED5C9 /* SurfaceSerialHubDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 258135DA272D4AD600EED5C9 /* SurfaceSerialHubDriver.hpp */; };
-		258135DF272D502100EED5C9 /* SerialProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 258135DE272D502100EED5C9 /* SerialProtocol.h */; };
 		259040E926FC065400D605D0 /* SurfaceButtonHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */; };
 		259040EA26FC065400D605D0 /* SurfaceButtonHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */; };
 		259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040EB26FC0BB200D605D0 /* HIDReport.hpp */; };
 		25B97D89260B950E00657C76 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BE66D8F258AC5DC003CA4AD /* libkmod.a */; };
-		25B97E19260B9F1100657C76 /* VoodooI2CHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E13260B9F1000657C76 /* VoodooI2CHIDDevice.cpp */; };
 		25B97E1A260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */; };
 		25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */; };
 		25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */; };
-		25B97E1D260B9F1100657C76 /* VoodooI2CHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25B97E17260B9F1100657C76 /* VoodooI2CHIDDevice.hpp */; };
 		25B97E1E260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25B97E18260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp */; };
 		25B97E2B260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E2A260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp */; };
 		25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */; };
+		25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D7E827359FCD00F58956 /* SerialProtocol.h */; };
+		25C8D7EC27359FCD00F58956 /* SurfaceSerialHubDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */; };
+		25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +67,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 25813606272D6A2800EED5C9;
+			remoteGlobalIDString = 25B97D6F260B950E00657C76;
 			remoteInfo = VoodooSerial;
 		};
 		AC94C83C2119E50400D26081 /* PBXContainerItemProxy */ = {
@@ -79,11 +80,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceAmbientLightSensorDriver.hpp; sourceTree = "<group>"; };
+		2518A2F42734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceAmbientLightSensorDriver.cpp; sourceTree = "<group>"; };
+		2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APDS9960Constants.h; sourceTree = "<group>"; };
 		2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonDriver.cpp; sourceTree = "<group>"; };
 		2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonDriver.hpp; sourceTree = "<group>"; };
-		258135D9272D4AD600EED5C9 /* SurfaceSerialHubDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceSerialHubDriver.cpp; sourceTree = "<group>"; };
-		258135DA272D4AD600EED5C9 /* SurfaceSerialHubDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceSerialHubDriver.hpp; sourceTree = "<group>"; };
-		258135DE272D502100EED5C9 /* SerialProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialProtocol.h; sourceTree = "<group>"; };
 		25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooSerial.xcodeproj; path = VoodooSerial/VoodooSerial.xcodeproj; sourceTree = "<group>"; };
 		259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonHIDDevice.cpp; sourceTree = "<group>"; };
 		259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonHIDDevice.hpp; sourceTree = "<group>"; };
@@ -91,15 +92,16 @@
 		25B97DA5260B950E00657C76 /* BigSurface.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BigSurface.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooGPIO.xcodeproj; path = VoodooGPIO/VoodooGPIO.xcodeproj; sourceTree = "<group>"; };
 		25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooI2CServices.xcodeproj; path = VoodooI2CServices/VoodooI2CServices.xcodeproj; sourceTree = "<group>"; };
-		25B97E13260B9F1000657C76 /* VoodooI2CHIDDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CHIDDevice.cpp; sourceTree = "<group>"; };
 		25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CMultitouchHIDEventDriver.cpp; sourceTree = "<group>"; };
 		25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceTypeCoverDriver.cpp; sourceTree = "<group>"; };
 		25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CMultitouchHIDEventDriver.hpp; sourceTree = "<group>"; };
-		25B97E17260B9F1100657C76 /* VoodooI2CHIDDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CHIDDevice.hpp; sourceTree = "<group>"; };
 		25B97E18260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceTypeCoverDriver.hpp; sourceTree = "<group>"; };
 		25B97E2A260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CHIDTransducerWrapper.cpp; sourceTree = "<group>"; };
 		25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CHIDTransducerWrapper.hpp; sourceTree = "<group>"; };
 		25B97E43260BA33B00657C76 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = BigSurface/Info.plist; sourceTree = "<group>"; };
+		25C8D7E827359FCD00F58956 /* SerialProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialProtocol.h; sourceTree = "<group>"; };
+		25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceSerialHubDriver.cpp; sourceTree = "<group>"; };
+		25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceSerialHubDriver.hpp; sourceTree = "<group>"; };
 		7BE66D8F258AC5DC003CA4AD /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = ../MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = "<group>"; };
 		AC94C8382119E50400D26081 /* VoodooI2CSynaptics.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooI2CSynaptics.xcodeproj; path = "../../VoodooI2C Satellites/VoodooI2CSynaptics/VoodooI2CSynaptics.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -116,7 +118,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2524C0A326F3233A00CAAF12 /* SurfaceButtonDriver */ = {
+		2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */ = {
+			isa = PBXGroup;
+			children = (
+				2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */,
+				2518A2F42734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp */,
+				2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */,
+			);
+			path = SurfaceAmbientLightSensor;
+			sourceTree = "<group>";
+		};
+		2524C0A326F3233A00CAAF12 /* SurfaceButton */ = {
 			isa = PBXGroup;
 			children = (
 				259040EB26FC0BB200D605D0 /* HIDReport.hpp */,
@@ -125,17 +137,7 @@
 				2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */,
 				2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */,
 			);
-			path = SurfaceButtonDriver;
-			sourceTree = "<group>";
-		};
-		258135D7272D4AD600EED5C9 /* SurfaceSerialHub */ = {
-			isa = PBXGroup;
-			children = (
-				258135DE272D502100EED5C9 /* SerialProtocol.h */,
-				258135D9272D4AD600EED5C9 /* SurfaceSerialHubDriver.cpp */,
-				258135DA272D4AD600EED5C9 /* SurfaceSerialHubDriver.hpp */,
-			);
-			path = SurfaceSerialHub;
+			path = SurfaceButton;
 			sourceTree = "<group>";
 		};
 		25B97D6E260B943E00657C76 /* BigSurface */ = {
@@ -143,8 +145,9 @@
 			children = (
 				AC0955711F4ED49E0052E343 /* Dependencies */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
-				2524C0A326F3233A00CAAF12 /* SurfaceButtonDriver */,
-				258135D7272D4AD600EED5C9 /* SurfaceSerialHub */,
+				2524C0A326F3233A00CAAF12 /* SurfaceButton */,
+				2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */,
+				25C8D7E727359FCD00F58956 /* SurfaceSerialHub */,
 			);
 			path = BigSurface;
 			sourceTree = "<group>";
@@ -152,8 +155,6 @@
 		25B97DAF260B95B600657C76 /* SurfaceTypeCover */ = {
 			isa = PBXGroup;
 			children = (
-				25B97E13260B9F1000657C76 /* VoodooI2CHIDDevice.cpp */,
-				25B97E17260B9F1100657C76 /* VoodooI2CHIDDevice.hpp */,
 				25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */,
 				25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */,
 				25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */,
@@ -162,6 +163,16 @@
 				25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */,
 			);
 			path = SurfaceTypeCover;
+			sourceTree = "<group>";
+		};
+		25C8D7E727359FCD00F58956 /* SurfaceSerialHub */ = {
+			isa = PBXGroup;
+			children = (
+				25C8D7E827359FCD00F58956 /* SerialProtocol.h */,
+				25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */,
+				25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */,
+			);
+			path = SurfaceSerialHub;
 			sourceTree = "<group>";
 		};
 		25CBB3572733D4B8009B568B /* Products */ = {
@@ -240,14 +251,15 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2518A2F62734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
-				258135DD272D4AD600EED5C9 /* SurfaceSerialHubDriver.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
+				2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
+				25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */,
+				25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */,
 				259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */,
 				259040EA26FC065400D605D0 /* SurfaceButtonHIDDevice.hpp in Headers */,
-				25B97E1D260B9F1100657C76 /* VoodooI2CHIDDevice.hpp in Headers */,
-				258135DF272D502100EED5C9 /* SerialProtocol.h in Headers */,
 				25B97E1E260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,9 +280,9 @@
 			buildRules = (
 			);
 			dependencies = (
-				25CBB36B2733D50A009B568B /* PBXTargetDependency */,
-				25CBB3692733D507009B568B /* PBXTargetDependency */,
 				25CBB3672733D503009B568B /* PBXTargetDependency */,
+				25CBB3692733D507009B568B /* PBXTargetDependency */,
+				25CBB36B2733D50A009B568B /* PBXTargetDependency */,
 			);
 			name = BigSurface;
 			productName = VoodooI2C;
@@ -394,9 +406,9 @@
 			files = (
 				25B97E1A260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp in Sources */,
 				25B97E2B260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp in Sources */,
+				25C8D7EC27359FCD00F58956 /* SurfaceSerialHubDriver.cpp in Sources */,
 				259040E926FC065400D605D0 /* SurfaceButtonHIDDevice.cpp in Sources */,
-				258135DC272D4AD600EED5C9 /* SurfaceSerialHubDriver.cpp in Sources */,
-				25B97E19260B9F1100657C76 /* VoodooI2CHIDDevice.cpp in Sources */,
+				2518A2F72734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,
 			);

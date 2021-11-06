@@ -9,6 +9,8 @@
 #ifndef VoodooI2CControllerConstants_h
 #define VoodooI2CControllerConstants_h
 
+#define LPSS_PRIVATE_CLOCK_GATING              0x800
+
 #define DW_IC_CON_MASTER                0x1
 #define DW_IC_CON_SPEED_STD             0x2
 #define DW_IC_CON_SPEED_FAST            0x4

@@ -73,11 +73,6 @@ UInt32 VoodooI2CMultitouchHIDEventDriver::getElementValue(IOHIDElement* element)
 }
 
 const char* VoodooI2CMultitouchHIDEventDriver::getProductName() {
-    VoodooI2CHIDDevice* i2c_hid_device = OSDynamicCast(VoodooI2CHIDDevice, hid_device);
-
-    if (i2c_hid_device)
-        return i2c_hid_device->name;
-
     if (OSString* name = getProduct())
         return name->getCStringNoCopy();
 

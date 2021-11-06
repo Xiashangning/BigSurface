@@ -26,8 +26,8 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
-#include "../../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
-#include "../../utils/helpers.hpp"
+#include "../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../utils/helpers.hpp"
 #include "VoodooUARTConstants.h"
 
 #define UART_IDLE_LONG_TIMEOUT  200
@@ -98,8 +98,6 @@ class EXPORT VoodooUARTController : public IOService {
     bool start(IOService* provider) override;
 
     void stop(IOService* provider) override;
-
-    void free() override;
 
     bool init(OSDictionary* properties) override;
     

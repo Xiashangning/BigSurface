@@ -16,13 +16,9 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
-#include "../../../Dependencies/VoodooSerial/utils/helpers.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
 #include "SurfaceButtonHIDDevice.hpp"
-
-#ifndef EXPORT
-#define EXPORT __attribute__((visibility("default")))
-#endif
 
 #define BTN_CNT 3
 
