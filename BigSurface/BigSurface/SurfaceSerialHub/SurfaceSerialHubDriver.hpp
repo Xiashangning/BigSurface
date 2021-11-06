@@ -17,13 +17,9 @@
 
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/VoodooUART/VoodooUARTController.hpp"
 
-#define MIN_REQID 32
+#define REQID_MIN 34
 
 #define ACK_TIMEOUT 200
-
-enum EventType {
-    DUMMY = 1
-};
 
 class CircleIDCounter {
 private:
@@ -59,6 +55,13 @@ struct PendingCommand {
     PendingCommand *next;
 };
 
+class EXPORT SurfaceSerialHubClient : public IOService {
+    OSDeclareAbstractStructors(SurfaceSerialHubClient);
+    
+public:
+    virtual void eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) = 0;
+};
+
 class EXPORT SurfaceSerialHubDriver : public VoodooUARTClient {
     OSDeclareDefaultStructors(SurfaceSerialHubDriver);
     
@@ -69,7 +72,9 @@ public:
 
     IOReturn getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 size, bool seq, UInt8 *buffer, UInt16 buffer_size);
 
-//    IOReturn registEvent(EventType type, Action action);
+    IOReturn registerEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
+    
+    void unregisterEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
     
     IOService* probe(IOService* provider, SInt32* score) override;
 
@@ -98,8 +103,9 @@ private:
     bool                    partial_syn {false};
     PendingCommand*         pending_commands {nullptr};
     WaitingRequest*         waiting_requests {nullptr};
+    SurfaceSerialHubClient* event_handler[33] {nullptr};
     CircleIDCounter         seq_counter {CircleIDCounter(0x00, 0xff)};
-    CircleIDCounter         req_counter {CircleIDCounter(MIN_REQID, 0xffff)};
+    CircleIDCounter         req_counter {CircleIDCounter(REQID_MIN, 0xffff)};
     UInt32                  baudrate {0};
     UInt8                   data_bits {0};
     UInt8                   stop_bits {0};

@@ -85,10 +85,11 @@ exit:
 }
 
 void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
+    IOLog("%s::stopped\n", getName());
     writeRegister(APDS9960_ENABLE, 0x00);
     releaseResources();
     PMstop();
-    IOLog("%s::stopped\n", getName());
+    OSSafeReleaseNULL(acpi_device);
     super::stop(provider);
 }
 
@@ -111,8 +112,8 @@ IOReturn SurfaceAmbientLightSensorDriver::initDevice() {
     ENSURE(configDevice(ENABLE_WAIT, true))
     // set ADC integration time to 100 ms
     ENSURE(writeRegister(APDS9960_ATIME, TIME_TO_VALUE(100)))
-//    ENSURE(writeRegister(APDS9960_WTIME, TIME_TO_VALUE(100)))
-    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_16X))
+    ENSURE(writeRegister(APDS9960_WTIME, TIME_TO_VALUE(100)))
+    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_4X))
     IODelay(10);
     ENSURE(configDevice(ENABLE_POWER, true))
     
@@ -170,13 +171,16 @@ IOReturn SurfaceAmbientLightSensorDriver::setPowerState(unsigned long whichState
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
-
+            poller->disable();
+            writeRegister(APDS9960_ENABLE, 0x00);
             IOLog("%s::Going to sleep\n", getName());
             awake = false;
         }
     } else {
         if (!awake) {
-
+            initDevice();
+            poller->setTimeoutMS(POLLING_INTERVAL);
+            poller->enable();
             IOLog("%s::Woke up\n", getName());
             awake = true;
         }
@@ -185,19 +189,17 @@ IOReturn SurfaceAmbientLightSensorDriver::setPowerState(unsigned long whichState
 }
 
 void SurfaceAmbientLightSensorDriver::releaseResources() {
-    if (command_gate) {
-        work_loop->removeEventSource(command_gate);
-        OSSafeReleaseNULL(command_gate);
-    }
-
     if (poller) {
         poller->disable();
         work_loop->removeEventSource(poller);
         OSSafeReleaseNULL(poller);
     }
-
+    if (command_gate) {
+        work_loop->removeEventSource(command_gate);
+        OSSafeReleaseNULL(command_gate);
+    }
+    
     OSSafeReleaseNULL(work_loop);
-    OSSafeReleaseNULL(acpi_device);
 
     if (api) {
         if (api->isOpen(this)) {

@@ -51,7 +51,7 @@ bool VoodooI2CDeviceNub::attach(IOService* provider, IOService* child) {
             return false;
         }
         // Give the GPIO controller some time to load
-        IOSleep(500);
+        IOSleep(100);
     }
 
     setName(child->getName());

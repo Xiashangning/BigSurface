@@ -10,6 +10,8 @@
 #include "SerialProtocol.h"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
 
+OSDefineMetaClassAndAbstractStructors(SurfaceSerialHubClient, IOService);
+
 #define super VoodooUARTClient
 OSDefineMetaClassAndStructors(SurfaceSerialHubDriver, VoodooUARTClient);
 
@@ -107,6 +109,7 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
     WaitingRequest *waiting_pos = &t1;
     PendingCommand t2 = {nullptr, 0, nullptr, 0, pending_commands};
     PendingCommand *pending_pos = &t2;
+    bool found = false;
     if (msg->syn != SYN_BYTES) {
         ERR_DUMP_MSG("syn btyes error!");
         return kIOReturnError;
@@ -129,6 +132,7 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
                 PendingCommand *cmd = pending_pos->next;
                 SurfaceSerialMessage *pending_msg = reinterpret_cast<SurfaceSerialMessage *>(cmd->buffer);
                 if (pending_msg->frame.seq_id == msg->frame.seq_id) {
+                    found = true;
                     cmd->timer->disable();
                     work_loop->removeEventSource(cmd->timer);
                     OSSafeReleaseNULL(cmd->timer);
@@ -141,6 +145,8 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
                 }
                 pending_pos = pending_pos->next;
             }
+            if (!found)
+                IOLog("%s::Warning, no pending command found for seq_id %d\n", getName(), msg->frame.seq_id);
             break;
         case FRAME_TYPE_NAK:
             break;
@@ -156,19 +162,30 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
                 ERR_DUMP_MSG("payload crc error!");
                 return kIOReturnError;
             }
-            while (waiting_pos->next) {
-                if (waiting_pos->next->req_id == command->request_id) {
-                    command_gate->commandWakeup(&waiting_pos->next->waiting);
-                    waiting_pos->next = waiting_pos->next->next;
-                    waiting_requests = t1.next;
-                    break;
+            if (command->request_id >= REQID_MIN) {
+                while (waiting_pos->next) {
+                    if (waiting_pos->next->req_id == command->request_id) {
+                        found = true;
+                        command_gate->commandWakeup(&waiting_pos->next->waiting);
+                        waiting_pos->next = waiting_pos->next->next;
+                        waiting_requests = t1.next;
+                        break;
+                    }
+                    waiting_pos = waiting_pos->next;
                 }
-                waiting_pos = waiting_pos->next;
+                if (!found)
+                    IOLog("%s::Warning, received data with unknown req_id %d\n", getName(), command->request_id);
+            } else {
+                if (event_handler[command->request_id]) {
+                    event_handler[command->request_id]->eventReceived(command->target_category, command->instance_id, command->command_id, rx_data, rx_data_len);
+                } else {
+                    ERR_DUMP_MSG("Event unregistered!");
+                }
             }
             break;
         default:
-            // error
-            break;
+            ERR_DUMP_MSG("Unknown message type!");
+            return kIOReturnError;
     }
     
     return kIOReturnSuccess;
@@ -321,6 +338,45 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
     return kIOReturnSuccess;
 }
 
+IOReturn SurfaceSerialHubDriver::registerEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client) {
+    if (!client)
+        return kIOReturnError;
+    if (event_handler[tc]) {
+        IOLog("%s::Already has an event handler registered!\n", getName());
+        return kIOReturnNoResources;
+    }
+    SurfaceEventPayload payload;
+    UInt8 ret;
+    payload.target_category = tc;
+    payload.instance_id = iid;
+    payload.request_id = tc;
+    payload.flags = EVENT_FLAG_SEQUENCED;
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_ENABLE_EVENT, reinterpret_cast<UInt8 *>(&payload), sizeof(SurfaceEventPayload), true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+        IOLog("%s::Unexpected response from event-enable request\n", getName());
+        return kIOReturnError;
+    }
+    event_handler[tc] = client;
+    return kIOReturnSuccess;
+}
+
+void SurfaceSerialHubDriver::unregisterEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client) {
+    if (event_handler[tc] && event_handler[tc] == client) {
+        SurfaceEventPayload payload;
+        UInt8 ret;
+        payload.target_category = tc;
+        payload.instance_id = iid;
+        payload.request_id = tc;
+        payload.flags = EVENT_FLAG_SEQUENCED;
+        if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISABLE_EVENT, reinterpret_cast<UInt8 *>(&payload), sizeof(SurfaceEventPayload), true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+            IOLog("%s::Unexpected response from event-disable request\n", getName());
+            return;
+        }
+        event_handler[tc] = nullptr;
+    } else {
+        IOLog("%s::Event not registered yet!\n", getName());
+    }
+}
+
 IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
     if (!super::probe(provider, score))
         return nullptr;
@@ -339,14 +395,10 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
     return this;
 }
 
-UInt8 test_buffer[18] = {0xAA,0x55,0x80,0x08,0x00,0x00,0x59,0xF0,0x80,0x01,0x01,0x00,0x00,0x00,0x00,0x13,0x2c,0x13};
-
 bool SurfaceSerialHubDriver::start(IOService *provider) {
     UInt8 sam_version[4];
     UInt8 ret;
     UInt32 version;
-    SurfaceEventEnablePayload payload;
-    IOTimerEventSource *timer;
     if (!super::start(provider))
         return false;
     
@@ -356,7 +408,7 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
         return false;
     }
     // Give the UART controller some time to load
-    IOSleep(500);
+    IOSleep(100);
     
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
@@ -386,47 +438,27 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
     acpi_device->retain();
-    
-    timer = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-        auto self = OSDynamicCast(SurfaceSerialHubDriver, object);
-        UInt8 bst[16];
-        if (self->getResponse(0x02, 0x01, 0x01, 0x03, nullptr, 0, true, bst, 16) == kIOReturnSuccess) {
-            UInt32 *_bst = reinterpret_cast<UInt32 *>(bst);
-            IOLog("%s::BST: %x, %x, %x, %x\n", self->getName(), _bst[0], _bst[1], _bst[2], _bst[3]);
-        }
-        sender->setTimeoutMS(2000);
-    });
-    work_loop->addEventSource(timer);
-    timer->setTimeoutMS(2000);
 
     if (uart_controller->requestConnect(this, baudrate, data_bits, stop_bits, parity) != kIOReturnSuccess) {
         IOLog("%s::UARTController already occupied!\n", getName());
         goto exit;
     }
-    if (getResponse(COMMAND_SAM_VERSION, sam_version, 4) != kIOReturnSuccess) {
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_VERSION, nullptr, 0, true, sam_version, 4) != kIOReturnSuccess) {
         IOLog("%s::Failed to get SAM version from UART!\n", getName());
         goto exit;
     }
     version = *(reinterpret_cast<UInt32 *>(sam_version));
     IOLog("%s::SAM version %u.%u.%u\n", getName(), (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
-    if (getResponse(COMMAND_D0_ENTRY, &ret, 1) != kIOReturnSuccess || ret != 0) {
+    
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
         IOLog("%s::Unexpected response from D0-entry notification\n", getName());
         goto exit;
     }
-    if (getResponse(COMMAND_DISPLAY_ON, &ret, 1) != kIOReturnSuccess || ret != 0) {
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
         IOLog("%s::Unexpected response from display-on notification\n", getName());
         goto exit;
     }
     
-//    payload.target_category = 0x02;
-//    payload.instance_id = 0x01;
-//    payload.request_id = 0x01;
-//    payload.flags = EVENT_FLAG_SEQUENCED;
-//    if (getResponse(COMMAND_ENABLE_EVENT(reinterpret_cast<UInt8 *>(&payload), sizeof(SurfaceEventEnablePayload)), &ret, 1) != kIOReturnSuccess || ret != 0) {
-//        IOLog("%s::Unexpected response from event-enable request\n", getName());
-//    }
-    
-    // request event ...
     registerService();
     return true;
 exit:

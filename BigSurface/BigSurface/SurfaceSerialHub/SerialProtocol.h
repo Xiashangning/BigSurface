@@ -11,13 +11,54 @@
 
 #include <IOKit/IOLib.h>
 
-/*      Surface SAM Command          tc    tid   iid   cid    pay   len  seq */
-#define COMMAND_SAM_VERSION         0x01, 0x01, 0x00, 0x13, nullptr, 0, true
-#define COMMAND_D0_EXIT             0x01, 0x01, 0x00, 0x33, nullptr, 0, true
-#define COMMAND_D0_ENTRY            0x01, 0x01, 0x00, 0x34, nullptr, 0, true
-#define COMMAND_DISPLAY_OFF         0x01, 0x01, 0x00, 0x15, nullptr, 0, true
-#define COMMAND_DISPLAY_ON          0x01, 0x01, 0x00, 0x16, nullptr, 0, true
-#define COMMAND_ENABLE_EVENT(p, l)  0x01, 0x01, 0x00, 0x0B,       p, l, true
+/* SSH Protocol Config see https://github.com/linux-surface/surface-aggregator-module/blob/master/doc/requests.txt for reference*/
+#define SSH_TC_SAM              0x01    /* Generic system functionality, real-time clock. */
+#define SSH_TC_BAT              0x02    /* Battery/power subsystem. */
+#define SSH_TC_TMP              0x03    /* Thermal subsystem. */
+#define SSH_TC_PMC              0x04
+#define SSH_TC_FAN              0x05
+#define SSH_TC_PoM              0x06
+#define SSH_TC_DBG              0x07
+#define SSH_TC_KBD              0x08    /* Legacy keyboard (Laptop 1/2). */
+#define SSH_TC_FWU              0x09
+#define SSH_TC_UNI              0x0a
+#define SSH_TC_LPC              0x0b
+#define SSH_TC_TCL              0x0c
+#define SSH_TC_SFL              0x0d
+#define SSH_TC_KIP              0x0e
+#define SSH_TC_EXT              0x0f
+#define SSH_TC_BLD              0x10
+#define SSH_TC_BAS              0x11    /* Detachment system (Surface Book 2/3). */
+#define SSH_TC_SEN              0x12
+#define SSH_TC_SRQ              0x13
+#define SSH_TC_MCU              0x14
+#define SSH_TC_HID              0x15    /* Generic HID input subsystem. */
+#define SSH_TC_TCH              0x16
+#define SSH_TC_BKL              0x17
+#define SSH_TC_TAM              0x18
+#define SSH_TC_ACC              0x19
+#define SSH_TC_UFI              0x1a
+#define SSH_TC_USC              0x1b
+#define SSH_TC_PEN              0x1c
+#define SSH_TC_VID              0x1d
+#define SSH_TC_AUD              0x1e
+#define SSH_TC_SMC              0x1f
+#define SSH_TC_KPD              0x20
+#define SSH_TC_REG              0x21
+
+#define SSH_TID_PRIMARY         0x01
+#define SSH_TID_SECONDARY       0x02
+
+/* TC=0x01 */
+#define SSH_CID_SAM_ENABLE_EVENT    0x0B
+#define SSH_CID_SAM_DISABLE_EVENT   0x0C
+#define SSH_CID_SAM_VERSION         0x13
+#define SSH_CID_SAM_DISPLAY_OFF     0x15
+#define SSH_CID_SAM_DISPLAY_ON      0x16
+#define SSH_CID_SAM_D0_EXIT         0x33
+#define SSH_CID_SAM_D0_ENTRY        0x34
+/* TC=0x02 */
+#define SSH_CID_BAT_BST             0x03
 
 #define EVENT_FLAG_SEQUENCED    BIT(0)
 
@@ -60,7 +101,7 @@ struct PACKED SurfaceSerialMessage {
     UInt16 frame_crc;
 };
 
-struct PACKED SurfaceEventEnablePayload {
+struct PACKED SurfaceEventPayload {
     UInt8 target_category;
     UInt8 flags;
     UInt16 request_id;  /* the request id used for the event*/

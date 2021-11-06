@@ -22,7 +22,6 @@ OSDefineMetaClassAndStructors(VoodooUARTController, IOService);
 bool VoodooUARTController::init(OSDictionary* properties) {
     if (!super::init(properties))
         return false;
-    LOG("starting\n");
     memset(&bus, 0, sizeof(VoodooUARTBus));
     memset(&physical_device, 0, sizeof(VoodooUARTPhysicalDevice));
     physical_device.state = UART_IDLE;
@@ -183,7 +182,6 @@ bool VoodooUARTController::start(IOService* provider) {
     
     physical_device.device->retain();
     registerService();
-    LOG("started\n");
     return true;
 exit:
     releaseResources();

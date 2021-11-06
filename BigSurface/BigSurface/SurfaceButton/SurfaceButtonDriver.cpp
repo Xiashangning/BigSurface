@@ -153,7 +153,7 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         return false;
     }
     // Give the GPIO controller some time to load
-    IOSleep(500);
+    IOSleep(100);
     
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
