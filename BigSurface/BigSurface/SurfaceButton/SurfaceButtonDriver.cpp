@@ -39,9 +39,9 @@ IOReturn SurfaceButtonDriver::parseButtonResources(VoodooACPIResourcesParser* pa
     }
 
     // There are three GPIO buttons so the CRS function returns in total 6 resources, GpioInt & GpioIo for each
-    uint8_t const* crs = reinterpret_cast<uint8_t const*>(data->getBytesNoCopy());
+    UInt8 const* crs = reinterpret_cast<UInt8 const*>(data->getBytesNoCopy());
     unsigned int length = data->getLength();
-    uint32_t offset =  parser1->parseACPIResources(crs, 0, length);
+    UInt32 offset =  parser1->parseACPIResources(crs, 0, length);
     offset = parser2->parseACPIResources(crs, offset, length);
     parser3->parseACPIResources(crs, offset, length);
 

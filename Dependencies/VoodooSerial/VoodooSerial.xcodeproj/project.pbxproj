@@ -201,8 +201,8 @@
 		25C8D7E027359C6C00F58956 /* VoodooUART */ = {
 			isa = PBXGroup;
 			children = (
-				25C8D7E327359C6C00F58956 /* VoodooUARTController.cpp */,
 				25C8D7E227359C6C00F58956 /* VoodooUARTController.hpp */,
+				25C8D7E327359C6C00F58956 /* VoodooUARTController.cpp */,
 				25C8D7E127359C6C00F58956 /* VoodooUARTConstants.h */,
 			);
 			path = VoodooUART;

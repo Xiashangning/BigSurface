@@ -58,7 +58,12 @@
 #define SSH_CID_SAM_D0_EXIT         0x33
 #define SSH_CID_SAM_D0_ENTRY        0x34
 /* TC=0x02 */
+#define SSH_CID_BAT_STA             0x01
+#define SSH_CID_BAT_BIX             0x02
 #define SSH_CID_BAT_BST             0x03
+#define SSH_CID_BAT_PMAX            0x0B
+#define SSH_CID_BAT_PSOC            0x0C
+#define SSH_CID_BAT_PSR             0x0D
 
 #define EVENT_FLAG_SEQUENCED    BIT(0)
 
@@ -150,19 +155,11 @@ static inline UInt16 crc_ccitt_false_byte(UInt16 crc, const UInt8 c)
     return (crc << 8) ^ crc_ccitt_false_table[(crc >> 8) ^ c];
 }
 
-UInt16 crc_ccitt_false(UInt16 crc, UInt8 const* buffer, size_t len)
+inline UInt16 crc_ccitt_false(UInt16 crc, UInt8 const* buffer, size_t len)
 {
     while (len--)
         crc = crc_ccitt_false_byte(crc, *buffer++);
     return crc;
-}
-
-int find_sync_bytes(UInt8 *buffer, UInt16 len) {
-    for (int i=0; i<len-1; i++) {
-        if (buffer[i] == SYN_BYTE_1 && buffer[i+1] == SYN_BYTE_2)
-            return i;
-    }
-    return -1;
 }
 
 #endif /* SerialProtocol_h */

@@ -10,7 +10,7 @@
 #define super IOHIDDevice
 OSDefineMetaClassAndStructors(SurfaceButtonHIDDevice, super);
 
-const uint8_t virt_reportDescriptor[] = {
+const UInt8 virt_reportDescriptor[] = {
     0x05, 0x0c,       // Usage Page (Consumer)
     0x09, 0x01,       // Usage 1 (kHIDUsage_Csmr_ConsumerControl)
     0xa1, 0x01,       // Collection (Application)
@@ -91,11 +91,11 @@ IOReturn SurfaceButtonHIDDevice::newReportDescriptor(IOMemoryDescriptor **descri
 }
 
 IOReturn SurfaceButtonHIDDevice::getReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) {
-    uint8_t report_id = options & 0xff;
+    UInt8 report_id = options & 0xff;
     OSData *get_buffer = OSData::withCapacity(1);
 
     if (report_id == 0xbf) {
-        uint8_t buffer[] = {0x00, 0x01, 0x00, 0x00, 0x00, 0x20, 0x02, 0x00};
+        UInt8 buffer[] = {0x00, 0x01, 0x00, 0x00, 0x00, 0x20, 0x02, 0x00};
         get_buffer->appendBytes(buffer, sizeof(buffer));
     }
 

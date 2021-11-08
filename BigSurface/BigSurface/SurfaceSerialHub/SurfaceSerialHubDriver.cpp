@@ -30,6 +30,20 @@ void err_dump(const char *name, const char *str, UInt8 *buffer, UInt16 len) {
     }
 }
 
+int find_sync_bytes(UInt8 *buffer, UInt16 len) {
+    for (int i=0; i<len-1; i++) {
+        if (buffer[i] == SYN_BYTE_1 && buffer[i+1] == SYN_BYTE_2) {
+            // We try our best to determine if it is the real syn bytes... Let's hope we are not that unlucky
+            if (i < len-2 && buffer[i+2]!=FRAME_TYPE_NAK && buffer[i+2]!=FRAME_TYPE_ACK && buffer[i+2]!=FRAME_TYPE_DATA_SEQ && buffer[i+2]!=FRAME_TYPE_DATA_NSQ)
+                continue;
+            if (i < len-4 && buffer[i+2]==FRAME_TYPE_DATA_NSQ && buffer[i+3]<0x08 && buffer[i+4]==0x00) // minimum length required for data transfer is 0x08=sizeof(SurfaceSerialFrame)
+                continue;
+            return i;
+        }
+    }
+    return -1;
+}
+
 void SurfaceSerialHubDriver::dataReceived(UInt8 *buffer, UInt16 length) {
     memcpy(rx_buffer, buffer, length);
     rx_buffer_len = length;
@@ -330,10 +344,10 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
     }
     delete w;
     UInt16 len = rx_data_len;
-    if (*buffer_size < rx_data_len) {
-        IOLog("%s::Received data larger than expected!\n", getName());
+    if (*buffer_size < rx_data_len)
         len = *buffer_size;
-    }
+    if (*buffer_size != rx_data_len)
+        IOLog("%s::Warning, buffer size(%d) and rx_data_len(%d) mismatched!\n", getName(), *buffer_size, rx_data_len);
     memcpy(buffer, rx_data, len);
     return kIOReturnSuccess;
 }
@@ -390,7 +404,7 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
         return nullptr;
     }
         
-    IOLog("%s::Surface serial hub found!\n", getName());
+    IOLog("%s::Surface Serial Hub found!\n", getName());
 
     return this;
 }
@@ -432,6 +446,8 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     
     rx_buffer = new UInt8[fifo_size];
     rx_buffer_len = 0;
+    
+    memset(event_handler, 0, sizeof(event_handler));
     
     PMinit();
     acpi_device->joinPMtree(this);
@@ -481,13 +497,11 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
-
             IOLog("%s::Going to sleep\n", getName());
             awake = false;
         }
     } else {
         if (!awake) {
-
             IOLog("%s::Woke up\n", getName());
             awake = true;
         }
@@ -558,7 +572,7 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
         return kIOReturnNotFound;
     }
 
-    uint8_t const* crs = reinterpret_cast<uint8_t const*>(data->getBytesNoCopy());
+    UInt8 const* crs = reinterpret_cast<UInt8 const*>(data->getBytesNoCopy());
     unsigned int length = data->getLength();
     parser.parseACPIResources(crs, 0, length);
     

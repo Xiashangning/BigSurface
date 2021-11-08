@@ -505,10 +505,10 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
     }
     
     if (physical_device.state == UART_ACTIVE) {
-        uint64_t nsecs;
+        UInt64 nsecs;
         SUB_ABSOLUTETIME(&cur_time, &last_activate_time);
         absolutetime_to_nanoseconds(cur_time, &nsecs);
-        if (nsecs < 1500000000) { // < 1.5s
+        if (nsecs < 500000000) { // < 0.5s
             interrupt_simulator->setTimeoutMS(UART_ACTIVE_TIMEOUT);
         } else {
             LOG("Enter Idle state\n");

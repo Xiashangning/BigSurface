@@ -20,7 +20,7 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>Surface Type Cover Driver</key>
+		<key>Surface Type Cover</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -48,7 +48,7 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
-		<key>Surface Button Driver</key>
+		<key>Surface Button</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -61,7 +61,7 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
-		<key>Surface Ambient Light Sensor Driver</key>
+		<key>Surface Ambient Light Sensor</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -77,7 +77,7 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
 		</dict>
-		<key>Surface Serial Hub Driver</key>
+		<key>Surface Serial Hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -90,6 +90,28 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
+		<key>Surface Battery</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceBatteryDriver</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>SurfaceSerialHubDriver</string>
+		</dict>
+		<key>IOSMBusController</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SMCSMBusController</string>
+			<key>IOProviderClass</key>
+			<string>IOResources</string>
+			<key>IOResourceMatch</key>
+			<string>IOKit</string>
+		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2021 Xavier Xia. All rights reserved.</string>
@@ -97,6 +119,10 @@
 	<string>1.0.0</string>
 	<key>OSBundleLibraries</key>
 	<dict>
+		<key>as.vit9696.Lilu</key>
+		<string>1.2.0</string>
+		<key>as.vit9696.VirtualSMC</key>
+		<string>1.0.0</string>
 		<key>com.xavier.VoodooSerial</key>
 		<string>1.0</string>
 		<key>com.alexandred.VoodooI2CServices</key>
@@ -105,16 +131,22 @@
 		<string>1.2</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.4</string>
+		<key>com.apple.iokit.IOSMBusFamily</key>
+		<string>1.0.0</string>
 		<key>com.apple.iokit.IOHIDFamily</key>
 		<string>2.0</string>
 		<key>com.apple.kpi.bsd</key>
-		<string>8.0</string>
+		<string>10.0</string>
+		<key>com.apple.kpi.dsep</key>
+		<string>10.0.0</string>
 		<key>com.apple.kpi.iokit</key>
 		<string>14.0</string>
 		<key>com.apple.kpi.libkern</key>
 		<string>14.0</string>
 		<key>com.apple.kpi.mach</key>
 		<string>13.0</string>
+		<key>com.apple.kpi.unsupported</key>
+		<string>10.0.0</string>
 	</dict>
 	<key>OSBundleRequired</key>
 	<string>Root</string>

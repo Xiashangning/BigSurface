@@ -97,7 +97,7 @@ private:
     UInt16                  rx_buffer_len {0};
     UInt8*                  rx_data {nullptr};
     UInt16                  rx_data_len {0};
-    UInt8                   msg_cache[128];
+    UInt8                   msg_cache[256];
     unsigned int            _pos {0};
     int                     msg_len {-1};
     bool                    partial_syn {false};

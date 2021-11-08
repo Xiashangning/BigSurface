@@ -7,6 +7,7 @@
 //
 
 #include "SurfaceAmbientLightSensorDriver.hpp"
+#include <Headers/kern_version.hpp>
 
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceAmbientLightSensorDriver, IOService);
@@ -21,22 +22,29 @@ IOService* SurfaceAmbientLightSensorDriver::probe(IOService *provider, SInt32 *s
         return nullptr;
     }
     
-    OSDictionary* name_match = IOService::nameMatching("ACPI0008");
-    IOService* matched = waitForMatchingService(name_match, 500000000);
-    alsd_device = OSDynamicCast(IOACPIPlatformDevice, matched);
-    name_match->release();
-    OSSafeReleaseNULL(matched);
-    if (!alsd_device) {
-        IOLog("%s::ACPI0008 device not found\n", getName());
-        return nullptr;
-    }
-    
     api = OSDynamicCast(VoodooI2CDeviceNub, provider);
-    if (!api) {
-        IOLog("%s::Could not get VoodooI2C API instance\n", getName());
+    if (!api)
         return nullptr;
-    }
-    IOLog("%s::Microsoft Ambient Light Sensor device found!\n", getName());
+    
+    ALSSensor sensor {ALSSensor::Type::Unknown7, true, 6, false};
+    ALSSensor noSensor {ALSSensor::Type::NoSensor, false, 0, false};
+    SMCAmbientLightValue::Value emptyValue;
+
+    VirtualSMCAPI::addKey(KeyAL, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0, &forceBits, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyALI0, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
+        reinterpret_cast<const SMC_DATA *>(&sensor), sizeof(sensor), SmcKeyTypeAli, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
+    VirtualSMCAPI::addKey(KeyALI1, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
+        reinterpret_cast<const SMC_DATA *>(&noSensor), sizeof(noSensor), SmcKeyTypeAli, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
+    VirtualSMCAPI::addKey(KeyALRV, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(1, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
+    VirtualSMCAPI::addKey(KeyALV0, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
+        reinterpret_cast<const SMC_DATA *>(&emptyValue), sizeof(emptyValue), SmcKeyTypeAlv, new SMCAmbientLightValue(&currentLux, &forceBits),
+        SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyALV1, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
+        reinterpret_cast<const SMC_DATA *>(&emptyValue), sizeof(emptyValue), SmcKeyTypeAlv, nullptr,
+        SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyMSLD, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(0));
+    
+    IOLog("%s::Microsoft Ambient Light Sensor Device found!\n", getName());
     return this;
 }
 
@@ -61,36 +69,53 @@ bool SurfaceAmbientLightSensorDriver::start(IOService *provider) {
         goto exit;
     }
 
-    poller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceAmbientLightSensorDriver::pollALI));
-    if (!poller) {
-        IOLog("%s::Could not get timer event source\n", getName());
-        goto exit;
-    }
     if (initDevice() != kIOReturnSuccess) {
         IOLog("%s::Failed to init device\n", getName());
         goto exit;
     }
-    work_loop->addEventSource(poller);
-    poller->setTimeoutMS(POLLING_INTERVAL);
     
     PMinit();
     api->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
-    return true;
+    
+    vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
+    return vsmcNotifier != nullptr;
 exit:
     releaseResources();
     return false;
 }
 
 void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
-    IOLog("%s::stopped\n", getName());
+    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     writeRegister(APDS9960_ENABLE, 0x00);
     releaseResources();
     PMstop();
     OSSafeReleaseNULL(acpi_device);
     super::stop(provider);
+}
+
+bool SurfaceAmbientLightSensorDriver::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier) {
+    if (sensors && vsmc) {
+        auto self = static_cast<SurfaceAmbientLightSensorDriver *>(sensors);
+        auto ret = vsmc->callPlatformFunction(VirtualSMCAPI::SubmitPlugin, true, sensors, &self->vsmcPlugin, nullptr, nullptr);
+        if (ret == kIOReturnSuccess) {
+            IOLog("%s::Plugin submitted\n", self->getName());
+            
+            self->poller = IOTimerEventSource::timerEventSource(self, OSMemberFunctionCast(IOTimerEventSource::Action, self, &SurfaceAmbientLightSensorDriver::pollALI));
+            if (!self->poller) {
+                IOLog("%s::Could not get timer event source\n", self->getName());
+                return false;
+            }
+            self->work_loop->addEventSource(self->poller);
+            self->poller->setTimeoutMS(POLLING_INTERVAL);
+            return true;
+        } else {
+            IOLog("%s::Plugin submission failure %X\n", self->getName(), ret);
+        }
+    }
+    return false;
 }
 
 #define ENSURE(exp) ret=exp;\
@@ -142,7 +167,7 @@ IOReturn SurfaceAmbientLightSensorDriver::writeRegister(UInt8 reg, UInt8 cmd) {
 IOReturn SurfaceAmbientLightSensorDriver::configDevice(UInt8 func, bool enable) {
     UInt8 reg;
     if (readRegister(APDS9960_ENABLE, &reg, 1) != kIOReturnSuccess) {
-        IOLog("%s::read enable register failed!\n", getName());
+        IOLog("%s::Read enable register failed!\n", getName());
         return kIOReturnError;
     }
     if (!(reg & func)!=enable)
@@ -161,7 +186,10 @@ void SurfaceAmbientLightSensorDriver::pollALI(OSObject* owner, IOTimerEventSourc
         IOLog("%s::Read from ALS failed!\n", getName());
         goto exit;
     }
+    atomic_store_explicit(&currentLux, 300, memory_order_release);
     IOLog("%s::Value: ALI=%04x, r=%04x, g=%04x, b=%04x\n", getName(), color[0], color[1], color[2], color[3]);
+    
+//    VirtualSMCAPI::postInterrupt(SmcEventALSChange);
 exit:
     poller->setTimeoutMS(POLLING_INTERVAL);
 }
@@ -207,4 +235,9 @@ void SurfaceAmbientLightSensorDriver::releaseResources() {
         }
         api = nullptr;
     }
+}
+
+EXPORT extern "C" kern_return_t ADDPR(kern_stop)(kmod_info_t *, void *) {
+    // It is not safe to unload VirtualSMC plugins!
+    return KERN_FAILURE;
 }
