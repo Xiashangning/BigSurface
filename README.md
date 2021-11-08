@@ -16,8 +16,7 @@ You will need to add the kext into opencore's `config.plist` in the order specif
   
   > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
   > 
-  > **For macOS Monterey multitouch and gesture support,** you need to modify info.plist in BigSurface.kext. Under Root > IOKitPersonalities > Surface Type Cover Driver, change IOProbeScore from 300 to 9300. 
-  > 
+  > **For macOS Monterey multitouch and gesture support,** you need to modify info.plist in BigSurface.kext. Under Root > IOKitPersonalities > Surface Type Cover Driver, change IOProbeScore from 300 to 9300. Credit to **@fenglinnet** for this fix.
 - Battery status--Surface Serial Hub            **Most Important**
   > See https://github.com/linux-surface/surface-aggregator-module.
   > To obtain the battery readout, one needs to register the operation handler for _SAN device(called via _SAN.RQST) and send the request to SSH device.
