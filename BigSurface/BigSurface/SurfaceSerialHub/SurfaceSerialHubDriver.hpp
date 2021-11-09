@@ -30,13 +30,13 @@ public:
     CircleIDCounter(UInt16 _min, UInt16 _max){
         min = _min;
         max = _max;
-        id = min;
+        id = min-1;
     }
     
     UInt16 getID() {
-        UInt16 ret = id++;
-        if (id > max)
-            id = min;
+        UInt16 ret = ++id;
+        if (id == max)
+            id = min-1;
         return ret;
     }
 };

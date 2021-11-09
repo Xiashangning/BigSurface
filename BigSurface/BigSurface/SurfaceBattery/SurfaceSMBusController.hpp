@@ -37,7 +37,7 @@ class EXPORT SurfaceSMBusController : public IOSMBusController {
 	 *  Note: when it was 1000, after extending the code it failed to read all data in 10 seconds,
 	 *  so AppleSmartBatteryManager aborted polling.
 	 */
-	static constexpr UInt32 TimerTimeoutMs = 50;
+	static constexpr UInt32 TimerTimeoutMs = 100;
 
 	/**
 	 *  A workloop in charge of handling timer events with requests.
