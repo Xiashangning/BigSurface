@@ -1,6 +1,6 @@
 //
-//  ACPIBattery.cpp
-//  SMCBatteryManager
+//  SurfaceBattery.cpp
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -24,10 +24,7 @@ void SurfaceBattery::getStringFromArray(OSArray *array, UInt32 index, char *dst,
 	const char *src = nullptr;
 	auto object = array->getObject(index);
 	if (object) {
-		if (auto data = OSDynamicCast(OSData, object)) {
-			src = reinterpret_cast<const char *>(data->getBytesNoCopy());
-			dstSize = min(dstSize - 1, data->getLength());
-		} else if (auto string = OSDynamicCast(OSString, object)) {
+		if (auto string = OSDynamicCast(OSString, object)) {
 			src = string->getCStringNoCopy();
 			dstSize = min(dstSize - 1, string->getLength());
 		}
@@ -41,13 +38,13 @@ void SurfaceBattery::getStringFromArray(OSArray *array, UInt32 index, char *dst,
 	}
 }
 
-void SurfaceBattery::resetBattery() {
+void SurfaceBattery::reset() {
     IOSimpleLockLock(batteryInfoLock);
     *batteryInfo = BatteryInfo{};
     IOSimpleLockUnlock(batteryInfoLock);
 }
 
-void SurfaceBattery::updateBatteryInfoExtended(OSArray *bix) {
+void SurfaceBattery::updateInfoExtended(OSArray *bix) {
     BatteryInfo bi;
     bi.connected = true;
 
@@ -62,8 +59,10 @@ void SurfaceBattery::updateBatteryInfoExtended(OSArray *bix) {
     bi.cycle                        = getNumberFromArray(bix, BIXCycleCount);
     getStringFromArray(bix, BIXModelNumber, bi.deviceName, BatteryInfo::MaxStringLen);
     getStringFromArray(bix, BIXSerialNumber, bi.serial, BatteryInfo::MaxStringLen);
-    getStringFromArray(bix, BIXBatteryType, bi.batteryType, BatteryInfo::MaxStringLen);
-    getStringFromArray(bix, BIXOEMInformation, bi.manufacturer, BatteryInfo::MaxStringLen);
+//    getStringFromArray(bix, BIXBatteryType, bi.batteryType, BatteryInfo::MaxStringLen);
+//    getStringFromArray(bix, BIXOEMInformation, bi.manufacturer, BatteryInfo::MaxStringLen);
+    strncpy(bi.batteryType, "SurfaceBattery", BatteryInfo::MaxStringLen);
+    strncpy(bi.manufacturer, "XavierXia", BatteryInfo::MaxStringLen);
 
 	bi.validateData(id);
     
@@ -72,11 +71,12 @@ void SurfaceBattery::updateBatteryInfoExtended(OSArray *bix) {
     IOSimpleLockUnlock(batteryInfoLock);
 }
 
-bool SurfaceBattery::updateBatteryStatus(UInt32 *bst) {
+bool SurfaceBattery::updateStatus(UInt32 *bst) {
 	IOSimpleLockLock(batteryInfoLock);
 	auto st = batteryInfo->state;
 	IOSimpleLockUnlock(batteryInfoLock);
-
+    
+    UInt32 defaultRate = (5000*1000/st.designVoltage);
 	st.state = bst[BSTState];
 	st.presentRate = bst[BSTPresentRate];
 	st.remainingCapacity = bst[BSTRemainingCapacity];
@@ -92,32 +92,18 @@ bool SurfaceBattery::updateBatteryStatus(UInt32 *bst) {
 	if (st.remainingCapacity > st.lastFullChargeCapacity)
 		st.remainingCapacity = st.lastFullChargeCapacity;
 
-	// Average rate calculation
-    if (!st.presentRate || (st.presentRate == BatteryInfo::ValueUnknown)) {
-        auto delta = (st.remainingCapacity > st.lastRemainingCapacity ?
-                      st.remainingCapacity - st.lastRemainingCapacity :
-                      st.lastRemainingCapacity - st.remainingCapacity);
-        AbsoluteTime current_time, last_time;
+    if (!st.averageRate) {
+        st.averageRate = st.presentRate;
+    } else { // We take a 5 minutes window
+        AbsoluteTime cur_time;
         UInt64 nsecs;
-        clock_get_uptime(&current_time);
-        last_time = st.lastUpdateTime;
-        st.lastUpdateTime = current_time;
-        if (last_time) {
-            SUB_ABSOLUTETIME(&current_time, &last_time);
-            absolutetime_to_nanoseconds(current_time, &nsecs);
-            UInt32 interval = 3600 / (nsecs / 1000000000);
-            st.presentRate = delta * interval; // per hour
-        }
+        clock_get_uptime(&cur_time);
+        SUB_ABSOLUTETIME(&cur_time, &st.lastUpdateTime);
+        absolutetime_to_nanoseconds(cur_time, &nsecs);
+        UInt32 secs = (UInt32)(nsecs/1000000000);
+        st.averageRate = (5*60*st.averageRate + secs*st.presentRate)/(5*60+secs);
     }
-
-    if (st.presentRate && st.presentRate != BatteryInfo::ValueUnknown) {
-        if (!st.averageRate) {
-            st.averageRate = st.presentRate;
-        } else {
-            st.averageRate += st.presentRate;
-            st.averageRate >>= 1;
-        }
-    }
+    clock_get_uptime(&st.lastUpdateTime);
 
     UInt32 highAverageBound = st.presentRate * (100 + AverageBoundPercent) / 100;
     UInt32 lowAverageBound  = st.presentRate * (100 - AverageBoundPercent) / 100;
@@ -127,18 +113,8 @@ bool SurfaceBattery::updateBatteryStatus(UInt32 *bst) {
         st.averageRate = lowAverageBound;
 
 	// Remaining capacity
-	if (!st.remainingCapacity || st.remainingCapacity == BatteryInfo::ValueUnknown) {
-		IOLog("ACPIBattery::battery %d has no remaining capacity reported (%u)", id, st.remainingCapacity);
-		// Invalid or zero capacity is not allowed and will lead to boot failure, hack 1 here.
-		st.remainingCapacity = st.averageTimeToEmpty = st.runTimeToEmpty = 1;
-	} else {
-		st.averageTimeToEmpty = st.averageRate ? 60 * st.remainingCapacity / st.averageRate : 60 * st.remainingCapacity;
-		st.runTimeToEmpty = st.presentRate ? 60 * st.remainingCapacity / st.presentRate : 60 * st.remainingCapacity;
-	}
-
-	// Voltage
-	if (!st.presentVoltage || st.presentVoltage == BatteryInfo::ValueUnknown)
-		st.presentVoltage = st.designVoltage;
+	st.averageTimeToEmpty = st.averageRate ? 60 * st.remainingCapacity / st.averageRate : 60 * st.remainingCapacity / defaultRate;
+	st.runTimeToEmpty = st.presentRate ? 60 * st.remainingCapacity / st.presentRate : 60 * st.remainingCapacity / defaultRate;
 
 	// Check battery state
 	bool bogus = false;
@@ -164,14 +140,14 @@ bool SurfaceBattery::updateBatteryStatus(UInt32 *bst) {
 		case BSTCharging: {
 			st.calculatedACAdapterConnected = true;
 			st.batteryIsFull = false;
-			int diff = st.remainingCapacity < st.lastFullChargeCapacity ? st.lastFullChargeCapacity - st.remainingCapacity : 0;
-            st.timeToFull = st.averageRate ? 60 * diff / st.averageRate : 60 * diff;
+			int diff = st.lastFullChargeCapacity - st.remainingCapacity;
+            st.timeToFull = st.averageRate ? 60 * diff / st.averageRate : 60 * diff / defaultRate;
 			st.signedPresentRate = st.presentRate;
 			st.signedAverageRate = st.averageRate;
 			break;
 		}
 		default: {
-            IOLog("ACPIBattery::Bogus status data from battery %d (%x)", id, st.state);
+            IOLog("SurfaceBattery::Bogus status data from battery %d (%x)", id, st.state);
 			st.batteryIsFull = false;
 			bogus = true;
 			break;
@@ -183,7 +159,7 @@ bool SurfaceBattery::updateBatteryStatus(UInt32 *bst) {
 	// bool warning  = st.remainingCapacity <= st.designCapacityWarning || st.runTimeToEmpty < 10;
 	bool critical = st.remainingCapacity <= st.designCapacityLow || st.runTimeToEmpty < 5;
 	if (st.state & BSTCritical) {
-        IOLog("ACPIBattery::Battery %d is in critical state", id);
+        IOLog("SurfaceBattery::Battery %d is in critical state", id);
 		critical = true;
 	}
 

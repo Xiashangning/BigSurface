@@ -308,9 +308,11 @@ void VoodooUARTController::requestDisconnect(VoodooUARTClient *_client) {
 }
 
 IOReturn VoodooUARTController::transmitData(UInt8 *buffer, UInt16 length) {
-    if (!client || !ready)
-        return kIOReturnError;
     IOLockLock(lock);
+    if (!client || !ready){
+        IOLockUnlock(lock);
+        return kIOReturnError;
+    }
     IOReturn ret = command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &VoodooUARTController::transmitDataGated), buffer, &length);
     IOLockUnlock(lock);
     return ret;
@@ -511,7 +513,6 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
         if (nsecs < 500000000) { // < 0.5s
             interrupt_simulator->setTimeoutMS(UART_ACTIVE_TIMEOUT);
         } else {
-            LOG("Enter Idle state\n");
             physical_device.state=UART_IDLE;
         }
     }

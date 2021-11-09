@@ -1,6 +1,6 @@
 //
-//  ACPIACAdapter.cpp
-//  SMCBatteryManager
+//  SurfaceACAdapter.cpp
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //

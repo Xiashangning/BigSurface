@@ -96,8 +96,6 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
 			<string>SurfaceBatteryDriver</string>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
 			<key>IOProviderClass</key>
 			<string>SurfaceSerialHubDriver</string>
 		</dict>
@@ -106,11 +104,9 @@
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
-			<string>SMCSMBusController</string>
+			<string>SurfaceSMBusController</string>
 			<key>IOProviderClass</key>
-			<string>IOResources</string>
-			<key>IOResourceMatch</key>
-			<string>IOKit</string>
+			<string>SurfaceBatteryDriver</string>
 		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>

@@ -106,6 +106,8 @@ void SurfaceSerialHubDriver::_process(UInt8 *buffer, UInt16 len) {
 }
 
 void SurfaceSerialHubDriver::processReceivedData(OSObject* target, void* refCon, IOService* nubDevice, int source) {
+    if (!awake)
+        return;
     _process(rx_buffer, rx_buffer_len);
 }
 
@@ -437,11 +439,10 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     }
     
     interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedData));
-    if (!interrupt_source) {
+    if (!interrupt_source || (work_loop->addEventSource(interrupt_source)!=kIOReturnSuccess)) {
         IOLog("%s::Could not register interrupt!\n", getName());
         goto exit;
     }
-    work_loop->addEventSource(interrupt_source);
     interrupt_source->enable();
     
     rx_buffer = new UInt8[fifo_size];
@@ -450,7 +451,7 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     memset(event_handler, 0, sizeof(event_handler));
     
     PMinit();
-    acpi_device->joinPMtree(this);
+    uart_controller->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
     acpi_device->retain();
@@ -484,8 +485,16 @@ exit:
 
 void SurfaceSerialHubDriver::stop(IOService *provider) {
     IOLog("%s::stopped\n", getName());
-    if (uart_controller)
+    if (uart_controller) {
+        UInt8 ret;
+        if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+            IOLog("%s::Unexpected response from display-off notification\n", getName());
+        }
+        if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+            IOLog("%s::Unexpected response from d0-exit notification\n", getName());
+        }
         uart_controller->requestDisconnect(this);
+    }
     releaseResources();
     PMstop();
     OSSafeReleaseNULL(acpi_device);
@@ -497,13 +506,15 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
-            IOLog("%s::Going to sleep\n", getName());
+            interrupt_source->disable();
             awake = false;
+            IOLog("%s::Going to sleep\n", getName());
         }
     } else {
         if (!awake) {
-            IOLog("%s::Woke up\n", getName());
             awake = true;
+            interrupt_source->enable();
+            IOLog("%s::Woke up\n", getName());
         }
     }
     return kIOPMAckImplied;

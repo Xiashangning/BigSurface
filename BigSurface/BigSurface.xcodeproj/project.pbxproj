@@ -26,8 +26,8 @@
 		259731862738B01F00A7F7C1 /* SurfaceACAdapter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259731792738B01F00A7F7C1 /* SurfaceACAdapter.hpp */; };
 		259731882738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2597317B2738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp */; };
 		259731892738B01F00A7F7C1 /* BatteryManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2597317C2738B01F00A7F7C1 /* BatteryManager.hpp */; };
-		2597318C2738B2BA00A7F7C1 /* SMCSMBusController.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2597318A2738B2BA00A7F7C1 /* SMCSMBusController.hpp */; };
-		2597318D2738B2BA00A7F7C1 /* SMCSMBusController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2597318B2738B2BA00A7F7C1 /* SMCSMBusController.cpp */; };
+		2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2597318A2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp */; };
+		2597318D2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2597318B2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp */; };
 		25B97D89260B950E00657C76 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BE66D8F258AC5DC003CA4AD /* libkmod.a */; };
 		25B97E1A260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */; };
 		25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */; };
@@ -115,8 +115,8 @@
 		259731792738B01F00A7F7C1 /* SurfaceACAdapter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceACAdapter.hpp; sourceTree = "<group>"; };
 		2597317B2738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceBatteryDriver.cpp; sourceTree = "<group>"; };
 		2597317C2738B01F00A7F7C1 /* BatteryManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BatteryManager.hpp; sourceTree = "<group>"; };
-		2597318A2738B2BA00A7F7C1 /* SMCSMBusController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SMCSMBusController.hpp; sourceTree = "<group>"; };
-		2597318B2738B2BA00A7F7C1 /* SMCSMBusController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SMCSMBusController.cpp; sourceTree = "<group>"; };
+		2597318A2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceSMBusController.hpp; sourceTree = "<group>"; };
+		2597318B2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceSMBusController.cpp; sourceTree = "<group>"; };
 		25B97DA5260B950E00657C76 /* BigSurface.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BigSurface.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooGPIO.xcodeproj; path = VoodooGPIO/VoodooGPIO.xcodeproj; sourceTree = "<group>"; };
 		25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooI2CServices.xcodeproj; path = VoodooI2CServices/VoodooI2CServices.xcodeproj; sourceTree = "<group>"; };
@@ -230,8 +230,8 @@
 				259731782738B01F00A7F7C1 /* KeyImplementations.cpp */,
 				259731722738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp */,
 				2597317B2738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp */,
-				2597318A2738B2BA00A7F7C1 /* SMCSMBusController.hpp */,
-				2597318B2738B2BA00A7F7C1 /* SMCSMBusController.cpp */,
+				2597318A2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp */,
+				2597318B2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp */,
 			);
 			path = SurfaceBattery;
 			sourceTree = "<group>";
@@ -450,7 +450,7 @@
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				259731832738B01F00A7F7C1 /* SurfaceBattery.hpp in Headers */,
 				25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */,
-				2597318C2738B2BA00A7F7C1 /* SMCSMBusController.hpp in Headers */,
+				2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
 				2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
@@ -614,7 +614,7 @@
 				259731822738B01F00A7F7C1 /* SurfaceBattery.cpp in Sources */,
 				259731882738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp in Sources */,
 				259731852738B01F00A7F7C1 /* KeyImplementations.cpp in Sources */,
-				2597318D2738B2BA00A7F7C1 /* SMCSMBusController.cpp in Sources */,
+				2597318D2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				2597317E2738B01F00A7F7C1 /* SurfaceACAdapter.cpp in Sources */,
 				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,

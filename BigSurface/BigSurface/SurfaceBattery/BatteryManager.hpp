@@ -1,6 +1,6 @@
 //
-//  SMCBatteryManager.hpp
-//  SMCBatteryManager
+//  BatteryManager.hpp
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -51,7 +51,7 @@ public:
 	 */
 	void subscribe(PowerSourceInterestHandler h, void *t);
     
-    void informStatus();
+    void informStatusChanged();
 	
 	bool batteriesConnected();
 	
@@ -125,6 +125,10 @@ private:
     void updateBatteryInfoExtended(UInt8 index, UInt8 *buffer);
     
     void updateAdapterStatus(UInt8 index, UInt32 psr);
+    
+    bool needUpdateBIX(UInt8 index, bool connected);
+    
+    bool needUpdateBST(UInt8 index);
 };
 
 #endif /* BatteryManagerBase_hpp */

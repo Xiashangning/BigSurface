@@ -1,14 +1,13 @@
 //
-//  SMCSMBusController.hpp
-//  SMCBatteryManager
+//  SurfaceSMBusController.hpp
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
 
-#ifndef SMCSMBusController_hpp
-#define SMCSMBusController_hpp
+#ifndef SurfaceSMBusController_hpp
+#define SurfaceSMBusController_hpp
 
-//#include <Headers/kern_util.hpp>
 #include <IOKit/IOService.h>
 #include <IOKit/IOSMBusController.h>
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
@@ -16,8 +15,8 @@
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
 #include "BatteryManager.hpp"
 
-class EXPORT SMCSMBusController : public IOSMBusController {
-	OSDeclareDefaultStructors(SMCSMBusController)
+class EXPORT SurfaceSMBusController : public IOSMBusController {
+	OSDeclareDefaultStructors(SurfaceSMBusController)
 
 	/**
 	 *  This is here to avoid collisions in case of future expansion of IOSMBusController class.
@@ -68,26 +67,7 @@ class EXPORT SMCSMBusController : public IOSMBusController {
 		return (day & 0x1FU) | ((month & 0xFU) << 5U) | (((year - 1980U) & 0x7FU) << 9U);
 	}
 
-public:
-	/**
-	 *  Perform initialisation.
-	 *
-	 *  @param properties  matching properties.
-	 *
-	 *  @return true on success.
-	 */
-	bool init(OSDictionary *properties) override;
-
-	/**
-	 *  Decide on target compatibility.
-	 *
-	 *  @param provider  parent IOService object
-	 *  @param score     probing score
-	 *
-	 *  @return self if we could load anyhow.
-	 */
-	IOService *probe(IOService *provider, SInt32 *score) override;
-	
+public:	
 	/**
 	 *  Start the driver by setting up the workloop and preparing the matching.
 	 *
@@ -96,31 +76,15 @@ public:
 	 *  @return true on success
 	 */
 	bool start(IOService *provider) override;
-	
-	/**
-	 *  Dummy unload of the driver (currently no-op!).
-	 *
-	 *  @param provider  parent IOService object
-	 */
-	void stop(IOService *provider) override;
 
 	/**
-	 *  Handle external notification from ACPI battery instance
+	 *  Handle external notification from Surface battery instance
 	 *
-	 *  @param target  SMCSMBusController instance
+	 *  @param target  SurfaceSMBusController instance
 	 *
 	 *  @return kIOReturnSuccess
 	 */
 	static IOReturn handleACPINotification(void *target);
-	
-	/**
-	 *  Handle notification about going to sleep or waking up
-	 *
-	 *  @param state   Power state (0 - sleep, 1 - wake)
-	 *  @param device  SMCBatteryManager
-	 *  @return kIOPMAckImplied
-	 */
-	IOReturn setPowerState(unsigned long state, IOService * device) override;
 	
 protected:
 	/**
@@ -162,4 +126,4 @@ protected:
 	bool prevAdaptersConnected {false};
 };
 
-#endif /* SMCSMBusController_hpp */
+#endif /* SurfaceSMBusController_hpp */

@@ -1,6 +1,6 @@
 //
 //  SurfaceBatteryDriver.hpp
-//  SurfaceBatteryDriver
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -104,6 +104,8 @@ public:
 	bool start(IOService *provider) override;
 	
 	void stop(IOService *provider) override;
+    
+    IOReturn setPowerState(unsigned long whichState, IOService * device) override;
 	
 	static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
     
@@ -111,9 +113,11 @@ public:
     
 private:
     IOWorkLoop*             work_loop {nullptr};
+    IOTimerEventSource*     timer {nullptr};
     IOInterruptEventSource* interrupt_source {nullptr};
     SurfaceSerialHubDriver* ssh {nullptr};
     
+    bool awake {false};
 //    bool battery_full {false};
     SInt8 update_bst_idx {-1};
     SInt8 update_bix_idx {-1};

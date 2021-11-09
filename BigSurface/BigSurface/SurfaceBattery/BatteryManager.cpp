@@ -1,12 +1,11 @@
 //
-//  SMCBatteryManager.cpp
-//  SMCBatteryManager
+//  BatteryManager.cpp
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
 
 #include "BatteryManager.hpp"
-#include <Headers/kern_time.hpp>
 
 #define LOG(str, ...)    IOLog("%s::" str, getName(), ##__VA_ARGS__)
 
@@ -52,10 +51,36 @@ bool BatteryManager::updateBatteryStatus(UInt8 index, UInt8 *buffer) {
     bool is_full;
     
     IOLockLock(mainLock);
-    is_full = batteries[index].updateBatteryStatus(bst);
+    is_full = batteries[index].updateStatus(bst);
     IOLockUnlock(mainLock);
     
     return is_full;
+}
+
+bool BatteryManager::needUpdateBIX(UInt8 index, bool connected) {
+    bool ret;
+    
+    IOSimpleLockLock(stateLock);
+    ret = connected != state.btInfo[index].connected;
+    IOSimpleLockUnlock(stateLock);
+    
+    return ret;
+}
+
+bool BatteryManager::needUpdateBST(UInt8 index) {
+    bool ret = false;
+    
+    IOSimpleLockLock(stateLock);
+    AbsoluteTime cur_time;
+    UInt64 nsecs;
+    clock_get_uptime(&cur_time);
+    SUB_ABSOLUTETIME(&cur_time, &state.btInfo[index].state.lastUpdateTime);
+    IOSimpleLockUnlock(stateLock);
+    absolutetime_to_nanoseconds(cur_time, &nsecs);
+    if (nsecs > 1000000000) // > 1s
+        ret = true;
+    
+    return ret;
 }
 
 void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
@@ -64,7 +89,7 @@ void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
     
     if (!buffer) {
         IOLockLock(mainLock);
-        batteries[index].resetBattery();
+        batteries[index].reset();
         IOLockUnlock(mainLock);
     } else {
         UInt32 *temp = reinterpret_cast<UInt32*>(buffer+1);
@@ -102,7 +127,7 @@ void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
         }
         
         IOLockLock(mainLock);
-        batteries[index].updateBatteryInfoExtended(bix);
+        batteries[index].updateInfoExtended(bix);
         IOLockUnlock(mainLock);
         
         bix->release();
@@ -134,7 +159,7 @@ void BatteryManager::subscribe(PowerSourceInterestHandler h, void *t) {
 	atomic_store_explicit(&handler, h, memory_order_release);
 }
 
-void BatteryManager::informStatus() {
+void BatteryManager::informStatusChanged() {
 	auto h = atomic_load_explicit(&handler, memory_order_acquire);
 	if (h) h(atomic_load_explicit(&handlerTarget, memory_order_acquire));
 }

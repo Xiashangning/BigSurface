@@ -1,6 +1,6 @@
 //
 //  SurfaceBatteryDriver.cpp
-//  SurfaceBatteryDriver
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -11,17 +11,13 @@
 #include "SurfaceBatteryDriver.hpp"
 #include "KeyImplementations.hpp"
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
-#include <Headers/kern_version.hpp>
 
 #define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
 
 #define super SurfaceSerialHubClient
 OSDefineMetaClassAndStructors(SurfaceBatteryDriver, SurfaceSerialHubClient)
 
-_Atomic(bool) SURFACE_BAT_DRIVER_STARTED = false;
-
 void SurfaceBatteryDriver::eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) {
-    LOG("cid: %x, iid: %x, data_len: %d", cid, iid, length);
     if (cid == 0x15)
         update_bix_idx = iid;
     else if (cid == 0x16)
@@ -32,6 +28,8 @@ void SurfaceBatteryDriver::eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *
 }
 
 void SurfaceBatteryDriver::updateStatus(OSObject *target, void *refCon, IOService *nubDevice, int source) {
+    if (!awake)
+        return;
     bool battery_connection[BatteryManagerState::MaxBatteriesSupported] = {false};
     if (update_adp_idx != -1) {
         UInt32 psr;
@@ -50,29 +48,29 @@ void SurfaceBatteryDriver::updateStatus(OSObject *target, void *refCon, IOServic
         }
         battery_connection[i-1] = (sta & 0x10) ? true : false;
         if (!update_bix_idx || i == update_bix_idx) {
-            if (battery_connection[i-1]) {
+            if (!battery_connection[i-1])
+                BatteryManager::getShared()->updateBatteryInfoExtended(i-1, nullptr); // reset battery
+            else if (BatteryManager::getShared()->needUpdateBIX(i-1, battery_connection[i-1])) {
                 UInt8 bix[119];
                 if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BIX, nullptr, 0, true, bix, 119) != kIOReturnSuccess) {
                     LOG("Failed to get BIX for index %d!", i);
+                    continue;
                 } else {
                     BatteryManager::getShared()->updateBatteryInfoExtended(i-1, bix);
-                    LOG("Finished BIX update for index %d!", i);
                 }
-            } else {
-                BatteryManager::getShared()->updateBatteryInfoExtended(i-1, nullptr); // reset battery
             }
         }
-        if (battery_connection[i-1] && (!update_bst_idx || i == update_bst_idx)) {
+        if (battery_connection[i-1] && (!update_bst_idx || i == update_bst_idx) && BatteryManager::getShared()->needUpdateBST(i-1)) {
             UInt8 bst[16];
             if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BST, nullptr, 0, true, bst, 16) != kIOReturnSuccess) {
                 LOG("Failed to get BST for index %d!", i);
             } else {
                 BatteryManager::getShared()->updateBatteryStatus(i-1, bst);
-                LOG("Finished BST update for index %d!", i);
             }
         }
     }
     update_bix_idx = update_bst_idx = -1;
+    BatteryManager::getShared()->informStatusChanged();
 }
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
@@ -119,22 +117,28 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
         return false;
     }
     interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateStatus));
-    if (!interrupt_source) {
+    if (!interrupt_source || (work_loop->addEventSource(interrupt_source)!=kIOReturnSuccess)) {
         LOG("Could not register interrupt!");
         OSSafeReleaseNULL(work_loop);
         return false;
     }
-    work_loop->addEventSource(interrupt_source);
-    interrupt_source->enable();
-    
-    // register battery event
-    if (ssh->registerEvent(SSH_TC_BAT, 0x00, this) != kIOReturnSuccess) {
-        LOG("Battery event registration failed!");
+    timer = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
+        auto self = OSDynamicCast(SurfaceBatteryDriver, object);
+        if (self) {
+            self->update_bst_idx = 0;
+            self->updateStatus(nullptr, nullptr, self, 0);
+            sender->setTimeoutMS(30000);
+        }
+    });
+    if (!timer || (work_loop->addEventSource(timer)!=kIOReturnSuccess)) {
+        LOG("Could not create timer!");
+        work_loop->removeEventSource(interrupt_source);
+        OSSafeReleaseNULL(interrupt_source);
+        OSSafeReleaseNULL(work_loop);
         return false;
     }
-    // Update info on startup
-    update_bix_idx = update_bst_idx = update_adp_idx = 0;
-    interrupt_source->interruptOccurred(nullptr, this, 0);
+    timer->setTimeoutMS(5000);
+    timer->enable();
 
 	//WARNING: watch out, key addition is sorted here!
 	//FIXME: This needs to be implemented along with AC-W!
@@ -178,44 +182,46 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 	VirtualSMCAPI::addKey(KeyCHBV, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(8000, new CHBV));
 	VirtualSMCAPI::addKey(KeyCHLC, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(1, new CHLC));
 
-	if (getKernelVersion() >= KernelVersion::BigSur) {
-		for (size_t i = 0; i < batCount; i++) {
-			VirtualSMCAPI::addKey(KeyBC1V(i+1), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(defaultBatteryCellVoltage));
+    for (size_t i = 0; i < batCount; i++) {
+        VirtualSMCAPI::addKey(KeyBC1V(i+1), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(defaultBatteryCellVoltage));
 #if 0
-			VirtualSMCAPI::addKey(KeyD0IR(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
-			VirtualSMCAPI::addKey(KeyD0VM(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
-			VirtualSMCAPI::addKey(KeyD0VR(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
-			VirtualSMCAPI::addKey(KeyD0VX(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
+        VirtualSMCAPI::addKey(KeyD0IR(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
+        VirtualSMCAPI::addKey(KeyD0VM(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
+        VirtualSMCAPI::addKey(KeyD0VR(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
+        VirtualSMCAPI::addKey(KeyD0VX(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(5000));
 #endif
-		}
+    }
 
 #if 0
-		for (size_t i = 0; i < adaptCount; i++) {
-			VirtualSMCAPI::addKey(KeyD0PT(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(i));
-			VirtualSMCAPI::addKey(KeyD0BD(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint32(static_cast<UInt32>(i+1)));
-			VirtualSMCAPI::addKey(KeyD0ER(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0));
-			VirtualSMCAPI::addKey(KeyD0DE(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("trop"), 4, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0is(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("43210"), 5, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0if(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.1"), 3, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0ih(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.1"), 3, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0ii(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.0.1"), 5, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0im(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("resu"), 4, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0in(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("LPAA"), 4, SmcKeyTypeCh8s));
-			VirtualSMCAPI::addKey(KeyD0PI(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(0x87));
-			VirtualSMCAPI::addKey(KeyD0FC(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0));
-		}
+    for (size_t i = 0; i < adaptCount; i++) {
+        VirtualSMCAPI::addKey(KeyD0PT(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(i));
+        VirtualSMCAPI::addKey(KeyD0BD(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint32(static_cast<UInt32>(i+1)));
+        VirtualSMCAPI::addKey(KeyD0ER(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0));
+        VirtualSMCAPI::addKey(KeyD0DE(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("trop"), 4, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0is(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("43210"), 5, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0if(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.1"), 3, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0ih(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.1"), 3, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0ii(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("0.0.1"), 5, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0im(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("resu"), 4, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0in(i), vsmcPlugin.data, VirtualSMCAPI::valueWithData(reinterpret_cast<const SMC_DATA*>("LPAA"), 4, SmcKeyTypeCh8s));
+        VirtualSMCAPI::addKey(KeyD0PI(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(0x87));
+        VirtualSMCAPI::addKey(KeyD0FC(i), vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0));
+    }
 
-		VirtualSMCAPI::addKey(KeyBNCB, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(batCount));
-		VirtualSMCAPI::addKey(KeyAC_N, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(adaptCount-1));
-		VirtualSMCAPI::addKey(KeyAC_W, vsmcPlugin.data, VirtualSMCAPI::valueWithSint8(1, nullptr, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_FUNCTION));
-		VirtualSMCAPI::addKey(KeyCHII, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0xB58));
+    VirtualSMCAPI::addKey(KeyBNCB, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(batCount));
+    VirtualSMCAPI::addKey(KeyAC_N, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(adaptCount-1));
+    VirtualSMCAPI::addKey(KeyAC_W, vsmcPlugin.data, VirtualSMCAPI::valueWithSint8(1, nullptr, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_FUNCTION));
+    VirtualSMCAPI::addKey(KeyCHII, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(0xB58));
 #endif
-	}
 
 	qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
+    
+    PMinit();
+    ssh->joinPMtree(this);
+    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
 	vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
-	SURFACE_BAT_DRIVER_STARTED = (vsmcNotifier != nullptr);
+    registerService();
 	return vsmcNotifier != nullptr;
 }
 
@@ -224,17 +230,46 @@ bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, 
 		auto &plugin = static_cast<SurfaceBatteryDriver *>(sensors)->vsmcPlugin;
 		auto ret = vsmc->callPlatformFunction(VirtualSMCAPI::SubmitPlugin, true, sensors, &plugin, nullptr, nullptr);
 		if (ret == kIOReturnSuccess) {
-			IOLog("SMCBatteryManager::Plugin submitted\n");
+			IOLog("SurfaceBatteryDriver::Plugin submitted\n");
 			return true;
 		} else {
-            IOLog("SMCBatteryManager::Plugin submission failure %X\n", ret);
+            IOLog("SurfaceBatteryDriver::Plugin submission failure %X\n", ret);
 		}
 	}
 	return false;
 }
 
 void SurfaceBatteryDriver::stop(IOService *provider) {
-	PANIC("SMCBatteryManager", "called stop!!!");
+    PMstop();
+    super::stop(provider);
+//	PANIC("SurfaceBatteryDriver", "called stop!!!");
+}
+
+IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService *device) {
+    if (device != this)
+        return kIOReturnInvalid;
+    if (whichState == 0) {
+        if (awake) {
+            ssh->unregisterEvent(SSH_TC_BAT, 0x00, this);
+            interrupt_source->disable();
+            awake = false;
+            IOLog("%s::Going to sleep\n", getName());
+        }
+    } else {
+        if (!awake) {
+            awake = true;
+            interrupt_source->enable();
+            // register battery event
+            if (ssh->registerEvent(SSH_TC_BAT, 0x00, this) != kIOReturnSuccess) {
+                LOG("Battery event registration failed!");
+            }
+            // update info
+            update_bix_idx = update_bst_idx = update_adp_idx = 0;
+            interrupt_source->interruptOccurred(nullptr, this, 0);
+            IOLog("%s::Woke up\n", getName());
+        }
+    }
+    return kIOPMAckImplied;
 }
 
 EXPORT extern "C" kern_return_t ADDPR(kern_stop)(kmod_info_t *, void *) {

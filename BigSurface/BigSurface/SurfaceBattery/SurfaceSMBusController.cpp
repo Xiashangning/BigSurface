@@ -1,6 +1,6 @@
 //
 //  SMCSMBusController.cpp
-//  SMCBatteryManager
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -10,31 +10,12 @@
 #include <IOKit/IOCatalogue.h>
 #include <IOKit/IOTimerEventSource.h>
 
-#include "SMCSMBusController.hpp"
-
-extern _Atomic(bool) SURFACE_BAT_DRIVER_STARTED;
+#include "SurfaceSMBusController.hpp"
 
 #define super IOSMBusController
-OSDefineMetaClassAndStructors(SMCSMBusController, IOSMBusController)
+OSDefineMetaClassAndStructors(SurfaceSMBusController, IOSMBusController)
 
-bool SMCSMBusController::init(OSDictionary *properties) {
-	if (!super::init(properties))
-		return false;
-	return true;
-}
-
-IOService *SMCSMBusController::probe(IOService *provider, SInt32 *score) {
-	if (!super::probe(provider, score))
-        return nullptr;
-	return this;
-}
-
-bool SMCSMBusController::start(IOService *provider) {
-	if (!SURFACE_BAT_DRIVER_STARTED) {
-		IOLog("%s::SMCBatteryManager is not available now, will check during next start attempt\n", getName());
-		return false;
-	}
-	
+bool SurfaceSMBusController::start(IOService *provider) {
 	workLoop = IOWorkLoop::workLoop();
 	if (!workLoop) {
         IOLog("%s::workLoop allocation failed\n", getName());
@@ -60,12 +41,12 @@ bool SMCSMBusController::start(IOService *provider) {
 	registerService();
 
 	timer = IOTimerEventSource::timerEventSource(this,
-	[](OSObject *owner, IOTimerEventSource *) {
-		auto ctrl = OSDynamicCast(SMCSMBusController, owner);
-		if (ctrl) {
-			ctrl->handleBatteryCommandsEvent();
-		}
-	});
+        [](OSObject *owner, IOTimerEventSource *) {
+            auto ctrl = OSDynamicCast(SurfaceSMBusController, owner);
+            if (ctrl) {
+                ctrl->handleBatteryCommandsEvent();
+            }
+        });
 
 	if (timer) {
 		getWorkLoop()->addEventSource(timer);
@@ -76,33 +57,22 @@ bool SMCSMBusController::start(IOService *provider) {
 		OSSafeReleaseNULL(requestQueue);
 		return false;
 	}
-	
-	PMinit();
-	provider->joinPMtree(this);
-	registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
 	BatteryManager::getShared()->subscribe(handleACPINotification, this);
 	
 	return true;
 }
 
-void SMCSMBusController::stop(IOService *provider) {
-    IOLog("%s::stopped\n", getName());
-    super::stop(provider);
-}
-
-void SMCSMBusController::setReceiveData(IOSMBusTransaction *transaction, UInt16 valueToWrite) {
+void SurfaceSMBusController::setReceiveData(IOSMBusTransaction *transaction, UInt16 valueToWrite) {
 	transaction->receiveDataCount = sizeof(UInt16);
 	UInt16 *ptr = reinterpret_cast<UInt16*>(transaction->receiveData);
 	*ptr = valueToWrite;
 }
 
-IOSMBusStatus SMCSMBusController::startRequest(IOSMBusRequest *request) {
+IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
 	auto result = IOSMBusController::startRequest(request);
-	if (result != kIOSMBusStatusOK) {
-        IOLog("%s::parent startRequest failed with status = 0x%x\n", getName(), result);
-		return result;
-	}
+	if (result != kIOSMBusStatusOK)
+        return result;
 	
 	IOSMBusTransaction *transaction = request->transaction;
 
@@ -293,7 +263,6 @@ IOSMBusStatus SMCSMBusController::startRequest(IOSMBusRequest *request) {
 			transaction->protocol == kIOSMBusProtocolWriteWord &&
 			transaction->command == kBManufacturerAccessCmd) {
 			if (transaction->sendDataCount == 2 && (transaction->sendData[0] == kBExtendedPFStatusCmd || transaction->sendData[0] == kBExtendedOperationStatusCmd)) {
-                IOLog("%s::startRequest sendData contains kBExtendedPFStatusCmd or kBExtendedOperationStatusCmd\n", getName());
 				// Nothing can be done here since we don't write any values to hardware, we fake response for this command in handler for
 				// kIOSMBusProtocolReadWord/kBManufacturerAccessCmd. Anyway, AppleSmartBattery::transactionCompletion ignores this response.
 				// If we can see this log statement, it means that fields sendDataCount and sendData have a proper offset in IOSMBusTransaction
@@ -346,7 +315,7 @@ IOSMBusStatus SMCSMBusController::startRequest(IOSMBusRequest *request) {
 	return result;
 }
 
-void SMCSMBusController::handleBatteryCommandsEvent() {
+void SurfaceSMBusController::handleBatteryCommandsEvent() {
 	timer->setTimeoutMS(TimerTimeoutMs);
 
 	// requestQueue contains objects owned by two parties:
@@ -364,8 +333,8 @@ void SMCSMBusController::handleBatteryCommandsEvent() {
 	}
 }
 
-IOReturn SMCSMBusController::handleACPINotification(void *target) {
-	SMCSMBusController *self = static_cast<SMCSMBusController *>(target);
+IOReturn SurfaceSMBusController::handleACPINotification(void *target) {
+	SurfaceSMBusController *self = static_cast<SurfaceSMBusController *>(target);
 	if (self) {
 		auto &bmgr = *BatteryManager::getShared();
 		// TODO: when we have multiple batteries, handle insertion or removal of a single battery
@@ -380,13 +349,4 @@ IOReturn SMCSMBusController::handleACPINotification(void *target) {
 		return kIOReturnSuccess;
 	}
 	return kIOReturnBadArgument;
-}
-
-IOReturn SMCSMBusController::setPowerState(unsigned long state, IOService *device) {
-	if (state) {
-        IOLog("SMCSMBusController::we are waking up\n");
-	} else {
-        IOLog("SMCSMBusController::we are sleeping\n");
-	}
-	return kIOPMAckImplied;
 }

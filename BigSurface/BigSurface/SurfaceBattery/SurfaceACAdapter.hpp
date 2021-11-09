@@ -1,6 +1,6 @@
 //
 //  SurfaceACAdapter.hpp
-//  SMCBatteryManager
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //

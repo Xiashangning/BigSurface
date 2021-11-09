@@ -1,6 +1,6 @@
 //
 //  BatteryManagerState.h
-//  VirtualSMC
+//  SurfaceBattery
 //
 //  Copyright © 2018 usersse2. All rights reserved.
 //

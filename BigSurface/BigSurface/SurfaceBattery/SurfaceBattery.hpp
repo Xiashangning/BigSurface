@@ -1,6 +1,6 @@
 //
 //  SurfaceBattery.hpp
-//  SMCBatteryManager
+//  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.
 //
@@ -80,14 +80,14 @@ private:
     /**
      * Reset BatteryInfo
      */
-    void resetBattery();
+    void reset();
 
 	/**
 	 *  Obtain aggregated battery information from SAM
 	 *
 	 *  @param bix   _bix returned from SAM
 	 */
-	void updateBatteryInfoExtended(OSArray *bix);
+	void updateInfoExtended(OSArray *bix);
     
     /**
      *  Obtain aggregated battery status from SAM
@@ -96,7 +96,7 @@ private:
      *
      *  @return whether battery is full
      */
-    bool updateBatteryStatus(UInt32 *bst);
+    bool updateStatus(UInt32 *bst);
 
 	/**
 	 *  Current battery id
