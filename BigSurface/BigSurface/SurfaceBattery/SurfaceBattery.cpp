@@ -68,10 +68,13 @@ void SurfaceBattery::updateInfoExtended(OSArray *bix) {
     
     IOSimpleLockLock(batteryInfoLock);
     *batteryInfo = bi;
+    hasBIX = true;
     IOSimpleLockUnlock(batteryInfoLock);
 }
 
 bool SurfaceBattery::updateStatus(UInt32 *bst) {
+    if (!hasBIX)
+        return false;
 	IOSimpleLockLock(batteryInfoLock);
 	auto st = batteryInfo->state;
 	IOSimpleLockUnlock(batteryInfoLock);
@@ -105,12 +108,12 @@ bool SurfaceBattery::updateStatus(UInt32 *bst) {
     }
     clock_get_uptime(&st.lastUpdateTime);
 
-    UInt32 highAverageBound = st.presentRate * (100 + AverageBoundPercent) / 100;
-    UInt32 lowAverageBound  = st.presentRate * (100 - AverageBoundPercent) / 100;
-    if (st.averageRate > highAverageBound)
-        st.averageRate = highAverageBound;
-    if (st.averageRate < lowAverageBound)
-        st.averageRate = lowAverageBound;
+//    UInt32 highAverageBound = st.presentRate * (100 + AverageBoundPercent) / 100;
+//    UInt32 lowAverageBound  = st.presentRate * (100 - AverageBoundPercent) / 100;
+//    if (st.averageRate > highAverageBound)
+//        st.averageRate = highAverageBound;
+//    if (st.averageRate < lowAverageBound)
+//        st.averageRate = lowAverageBound;
 
 	// Remaining capacity
 	st.averageTimeToEmpty = st.averageRate ? 60 * st.remainingCapacity / st.averageRate : 60 * st.remainingCapacity / defaultRate;
@@ -174,6 +177,13 @@ bool SurfaceBattery::updateStatus(UInt32 *bst) {
 	IOSimpleLockUnlock(batteryInfoLock);
     
     return st.batteryIsFull;
+}
+
+void SurfaceBattery::updateTemperature(UInt16 temp) {
+    IOSimpleLockLock(batteryInfoLock);
+    batteryInfo->state.temperatureDecikelvin = temp;
+    batteryInfo->state.temperature = ((double) temp - 2731) / 10;
+    IOSimpleLockUnlock(batteryInfoLock);
 }
 
 UInt16 SurfaceBattery::calculateBatteryStatus() {

@@ -64,6 +64,19 @@
 #define SSH_CID_BAT_PMAX            0x0B
 #define SSH_CID_BAT_PSOC            0x0C
 #define SSH_CID_BAT_PSR             0x0D
+/* TC=0x03 */
+#define SSH_CID_TMP_SENSOR          0x01
+#define SSH_CID_TMP_GET_PERF        0x02
+#define SSH_CID_TMP_SET_PERF        0x03
+
+#define TEMP_SENSOR_MB1             0x01
+#define TEMP_SENSOR_MB2             0x02
+#define TEMP_SENSOR_MB3             0x03
+#define TEMP_SENSOR_MB4             0x04
+#define TEMP_SENSOR_BAT             0x05
+#define TEMP_SENSOR_GPU             0x06
+#define TEMP_SENSOR_SSD             0x07
+#define TEMP_SENSOR_SOC             0x08
 
 #define EVENT_FLAG_SEQUENCED    BIT(0)
 

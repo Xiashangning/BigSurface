@@ -124,6 +124,8 @@ private:
     
     void updateBatteryInfoExtended(UInt8 index, UInt8 *buffer);
     
+    void updateBatteryTemperature(UInt8 index, UInt16 temp);
+    
     void updateAdapterStatus(UInt8 index, UInt32 psr);
     
     bool needUpdateBIX(UInt8 index, bool connected);

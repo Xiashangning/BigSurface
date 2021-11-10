@@ -88,11 +88,11 @@ exit:
 }
 
 void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
-    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     writeRegister(APDS9960_ENABLE, 0x00);
     releaseResources();
     PMstop();
     OSSafeReleaseNULL(acpi_device);
+    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     super::stop(provider);
 }
 
@@ -138,12 +138,10 @@ IOReturn SurfaceAmbientLightSensorDriver::initDevice() {
     // set ADC integration time to 100 ms
     ENSURE(writeRegister(APDS9960_ATIME, TIME_TO_VALUE(100)))
     ENSURE(writeRegister(APDS9960_WTIME, TIME_TO_VALUE(100)))
-    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_4X))
-    IODelay(10);
-    ENSURE(configDevice(ENABLE_POWER, true))
+    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_16X))
     
     configDevice(ENABLE_ALS, true);
-    readRegister(APDS9960_CICLEAR, &id, 1);
+    readRegister(APDS9960_AICLEAR, &id, 1);
 
     return kIOReturnSuccess;
 }

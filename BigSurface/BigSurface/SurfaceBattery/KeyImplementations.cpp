@@ -236,3 +236,11 @@ SMC_RESULT TB0T::readAccess() {
 	IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
 	return SmcSuccess;
 }
+
+SMC_RESULT BC1V::readAccess() {
+    UInt16 *ptr = reinterpret_cast<UInt16 *>(data);
+    IOSimpleLockLock(BatteryManager::getShared()->stateLock);
+    *ptr = OSSwapHostToBigInt16(BatteryManager::getShared()->state.btInfo[index].state.presentVoltage);
+    IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
+    return SmcSuccess;
+}

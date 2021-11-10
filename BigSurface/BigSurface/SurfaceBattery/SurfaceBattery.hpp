@@ -73,6 +73,8 @@ public:
 	bool averageRateAvailable {false};
 
 private:
+    bool hasBIX {false};
+    
 	UInt32 getNumberFromArray(OSArray *array, UInt32 index);
 
 	void getStringFromArray(OSArray *array, UInt32 index, char *dst, UInt32 dstSize);
@@ -97,6 +99,8 @@ private:
      *  @return whether battery is full
      */
     bool updateStatus(UInt32 *bst);
+    
+    void updateTemperature(UInt16 temp);
 
 	/**
 	 *  Current battery id

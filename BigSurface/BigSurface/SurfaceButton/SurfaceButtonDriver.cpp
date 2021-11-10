@@ -16,7 +16,6 @@ VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
 
     // Wait for GPIO controller, up to 1 second
     OSDictionary* name_match = IOService::serviceMatching("VoodooGPIO");
-
     IOService* matched = waitForMatchingService(name_match, 1000000000);
     gpio_controller = OSDynamicCast(VoodooGPIO, matched);
     if (gpio_controller != NULL) {
@@ -85,19 +84,15 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
 }
 
 void SurfaceButtonDriver::powerInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
-    stopInterrupt(POWER_BUTTON_IDX);
     command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&POWER_BUTTON_IDX, (void *)1);
-    startInterrupt(POWER_BUTTON_IDX);
 }
 
 void SurfaceButtonDriver::volumeUpInterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount) {
     if (!awake)
         return;
-    stopInterrupt(VOLUME_UP_BUTTON_IDX);
     stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
     bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_UP_BUTTON_IDX]);
     command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&VOLUME_UP_BUTTON_IDX, (void *)button_status);
-    startInterrupt(VOLUME_UP_BUTTON_IDX);
     startInterrupt(VOLUME_DOWN_BUTTON_IDX);
 }
 
@@ -105,11 +100,9 @@ void SurfaceButtonDriver::volumeDownInterruptOccured(OSObject* owner, IOInterrup
     if (!awake)
         return;
     stopInterrupt(VOLUME_UP_BUTTON_IDX);
-    stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
     bool button_status = gpio_controller->getPinStatus(gpio_pin[VOLUME_DOWN_BUTTON_IDX]);
     command_gate->attemptAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceButtonDriver::response), (void *)&VOLUME_DOWN_BUTTON_IDX, (void *)button_status);
     startInterrupt(VOLUME_UP_BUTTON_IDX);
-    startInterrupt(VOLUME_DOWN_BUTTON_IDX);
 }
 
 IOReturn SurfaceButtonDriver::response(int* btn, void* status) {
@@ -160,13 +153,11 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         IOLog("%s Could not get work loop\n", getName());
         goto exit;
     }
-
     command_gate = IOCommandGate::commandGate(this);
     if (!command_gate || (work_loop->addEventSource(command_gate) != kIOReturnSuccess)) {
         IOLog("%s Could not open command gate\n", getName());
         goto exit;
     }
-    
     interrupt_source[POWER_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::powerInterruptOccured), this, POWER_BUTTON_IDX);
     interrupt_source[VOLUME_UP_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeUpInterruptOccured), this, VOLUME_UP_BUTTON_IDX);
     interrupt_source[VOLUME_DOWN_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeDownInterruptOccured), this, VOLUME_DOWN_BUTTON_IDX);
@@ -181,6 +172,12 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     startInterrupt(POWER_BUTTON_IDX);
     startInterrupt(VOLUME_UP_BUTTON_IDX);
     startInterrupt(VOLUME_DOWN_BUTTON_IDX);
+    
+    gpio_controller->setInterruptTypeForPin(0x14, 0x00000010);
+    gpio_controller->registerInterrupt(0x14, nullptr, [](OSObject *target, void *refCon,
+                                                         IOService *nub, int source){
+        IOLog("mydebug::0x14 occurred!!!!\n");
+    }, 0);
     
     PMinit();
     acpi_device->joinPMtree(this);

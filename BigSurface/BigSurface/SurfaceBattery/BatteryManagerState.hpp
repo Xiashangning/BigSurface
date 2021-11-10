@@ -65,7 +65,6 @@ struct BatteryInfo {
 		bool bogus {false};
 		bool critical {false};
 		bool batteryIsFull {true};
-		bool publishTemperatureKey {false};
         AbsoluteTime lastUpdateTime {0};
 	};
 

@@ -43,20 +43,6 @@ void BatteryInfo::validateData(SInt32 id) {
     IOLog("BatteryInfo::battery %d cycle count %u remaining capacity %u\n", id, cycle, state.lastFullChargeCapacity);
 }
 
-bool BatteryManager::updateBatteryStatus(UInt8 index, UInt8 *buffer) {
-    if (index >= batteriesCount)
-        return false;
-    
-    UInt32 *bst = reinterpret_cast<UInt32*>(buffer);
-    bool is_full;
-    
-    IOLockLock(mainLock);
-    is_full = batteries[index].updateStatus(bst);
-    IOLockUnlock(mainLock);
-    
-    return is_full;
-}
-
 bool BatteryManager::needUpdateBIX(UInt8 index, bool connected) {
     bool ret;
     
@@ -81,6 +67,20 @@ bool BatteryManager::needUpdateBST(UInt8 index) {
         ret = true;
     
     return ret;
+}
+
+bool BatteryManager::updateBatteryStatus(UInt8 index, UInt8 *buffer) {
+    if (index >= batteriesCount)
+        return false;
+    
+    UInt32 *bst = reinterpret_cast<UInt32*>(buffer);
+    bool is_full;
+    
+    IOLockLock(mainLock);
+    is_full = batteries[index].updateStatus(bst);
+    IOLockUnlock(mainLock);
+    
+    return is_full;
 }
 
 void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
@@ -134,6 +134,12 @@ void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
         for (int i=0; i<20; i++)
             arr[i]->release();
     }
+}
+
+void BatteryManager::updateBatteryTemperature(UInt8 index, UInt16 temp) {
+    IOLockLock(mainLock);
+    batteries[index].updateTemperature(temp);
+    IOLockUnlock(mainLock);
 }
 
 void BatteryManager::updateAdapterStatus(UInt8 index, UInt32 psr) {

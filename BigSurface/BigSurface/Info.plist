@@ -36,7 +36,7 @@
 			<key>IOClass</key>
 			<string>SurfaceTypeCoverDriver</string>
 			<key>IOProbeScore</key>
-			<integer>999</integer>
+			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>IOHIDInterface</string>
 			<key>ProcessBluetoothMouseStopsTrackpad</key>
@@ -98,8 +98,10 @@
 			<string>SurfaceBatteryDriver</string>
 			<key>IOProviderClass</key>
 			<string>SurfaceSerialHubDriver</string>
+			<key>PerformanceMode</key>
+			<integer>1</integer>
 		</dict>
-		<key>IOSMBusController</key>
+		<key>Battery SMBus Controller</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
