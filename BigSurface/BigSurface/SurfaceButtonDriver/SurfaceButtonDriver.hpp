@@ -2,7 +2,7 @@
 //  SurfaceButtons.hpp
 //  SurfaceButtons
 //
-//  Created by Xia on 22/03/2021.
+//  Created by Xavier on 22/03/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
@@ -13,17 +13,12 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOService.h>
 #include <IOKit/hid/IOHIDEventService.h>
-
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/helpers.hpp"
 #include "../../../Dependencies/VoodooI2CACPIResourcesParser/VoodooI2CACPIResourcesParser.hpp"
+#include "../../../Dependencies/helpers.hpp"
 #include "SurfaceButtonHIDDevice.hpp"
-
-#ifndef EXPORT
-#define EXPORT __attribute__((visibility("default")))
-#endif
 
 #define BTN_CNT 3
 

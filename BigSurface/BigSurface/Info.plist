@@ -423,7 +423,7 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CMultitouchInterface</string>
 		</dict>
-		<key>Surface Button Driver</key>
+		<key>Surface Button</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -438,7 +438,7 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
-		<key>Surface Type Cover Driver</key>
+		<key>Surface Type Cover</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -454,7 +454,7 @@
 			<key>IOClass</key>
 			<string>SurfaceTypeCoverDriver</string>
 			<key>IOProbeScore</key>
-			<integer>300</integer>
+			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>IOHIDInterface</string>
 			<key>ProcessBluetoothMouseStopsTrackpad</key>
@@ -493,6 +493,19 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CControllerNub</string>
 		</dict>
+		<key>VoodooI2CPCIController</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>VoodooI2CPCIController</string>
+			<key>IOPCIMatch</key>
+			<string>0x9d608086&amp;0xFFFCFFFF 0xa1608086&amp;0xFFFCFFFF 0x9de88086&amp;0xFFFCFFFF 0xa3688086&amp;0xFFFCFFFF</string>
+			<key>IOProbeScore</key>
+			<integer>9999</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
 		<key>VoodooI2CPCILakeController</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -513,6 +526,10 @@
 	<string>1.0.0</string>
 	<key>OSBundleLibraries</key>
 	<dict>
+		<key>as.vit9696.Lilu</key>
+		<string>1.2.0</string>
+		<key>as.vit9696.VirtualSMC</key>
+		<string>1.0.0</string>
 		<key>com.alexandred.VoodooI2CServices</key>
 		<string>1.0</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
@@ -521,8 +538,6 @@
 		<string>2.0</string>
 		<key>com.apple.iokit.IOPCIFamily</key>
 		<string>2.9</string>
-		<key>com.apple.iokit.IOSerialFamily</key>
-		<string>11.0</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>8.0</string>
 		<key>com.apple.kpi.iokit</key>
@@ -531,6 +546,8 @@
 		<string>14</string>
 		<key>com.apple.kpi.mach</key>
 		<string>13</string>
+		<key>com.apple.kpi.unsupported</key>
+		<string>10.0.0</string>
 		<key>org.coolstar.VoodooGPIO</key>
 		<string>1.1</string>
 	</dict>

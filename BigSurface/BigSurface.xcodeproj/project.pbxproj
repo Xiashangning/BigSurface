@@ -12,6 +12,8 @@
 		2524C0B526F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0B226F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp */; };
 		2524C0B626F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0B326F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp */; };
 		2524C0B726F3286D00CAAF12 /* linuxirq.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0B426F3286D00CAAF12 /* linuxirq.hpp */; };
+		256F9A0C273C2F5200656233 /* AmbientLightValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 256F9A0A273C2F5200656233 /* AmbientLightValue.cpp */; };
+		256F9A0D273C2F5200656233 /* AmbientLightValue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 256F9A0B273C2F5200656233 /* AmbientLightValue.hpp */; };
 		258836AB260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */; };
 		259040E926FC065400D605D0 /* SurfaceButtonHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */; };
 		259040EA26FC065400D605D0 /* SurfaceButtonHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */; };
@@ -108,6 +110,52 @@
 		2524C0B226F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CACPIResourcesParser.cpp; sourceTree = "<group>"; };
 		2524C0B326F3286D00CAAF12 /* VoodooI2CACPIResourcesParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CACPIResourcesParser.hpp; sourceTree = "<group>"; };
 		2524C0B426F3286D00CAAF12 /* linuxirq.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = linuxirq.hpp; sourceTree = "<group>"; };
+		256F9A0A273C2F5200656233 /* AmbientLightValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AmbientLightValue.cpp; sourceTree = "<group>"; };
+		256F9A0B273C2F5200656233 /* AmbientLightValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AmbientLightValue.hpp; sourceTree = "<group>"; };
+		257EBC5E273CA9CF0014FAF2 /* kern_smcinfo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_smcinfo.hpp; sourceTree = "<group>"; };
+		257EBC5F273CA9CF0014FAF2 /* kern_vsmcapi.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_vsmcapi.hpp; sourceTree = "<group>"; };
+		257EBC60273CA9CF0014FAF2 /* AppleSmc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleSmc.h; sourceTree = "<group>"; };
+		257EBC61273CA9CF0014FAF2 /* kern_keyvalue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_keyvalue.hpp; sourceTree = "<group>"; };
+		257EBC62273CA9CF0014FAF2 /* kern_value.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_value.hpp; sourceTree = "<group>"; };
+		257EBC63273CA9CF0014FAF2 /* AppleSmcBridge.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AppleSmcBridge.hpp; sourceTree = "<group>"; };
+		257EBC6C273CAA040014FAF2 /* kern_config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_config.hpp; sourceTree = "<group>"; };
+		257EBC6D273CAA040014FAF2 /* hde64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hde64.h; sourceTree = "<group>"; };
+		257EBC6E273CAA040014FAF2 /* kern_time.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_time.hpp; sourceTree = "<group>"; };
+		257EBC6F273CAA040014FAF2 /* kern_nvram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_nvram.hpp; sourceTree = "<group>"; };
+		257EBC70273CAA040014FAF2 /* kern_cpu.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_cpu.hpp; sourceTree = "<group>"; };
+		257EBC71273CAA040014FAF2 /* kern_devinfo.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_devinfo.hpp; sourceTree = "<group>"; };
+		257EBC72273CAA040014FAF2 /* kern_efi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_efi.hpp; sourceTree = "<group>"; };
+		257EBC73273CAA040014FAF2 /* kern_policy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_policy.hpp; sourceTree = "<group>"; };
+		257EBC74273CAA040014FAF2 /* kern_user.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_user.hpp; sourceTree = "<group>"; };
+		257EBC75273CAA040014FAF2 /* plugin_start.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = plugin_start.hpp; sourceTree = "<group>"; };
+		257EBC76273CAA040014FAF2 /* kern_iokit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_iokit.hpp; sourceTree = "<group>"; };
+		257EBC77273CAA040014FAF2 /* kern_crypto.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_crypto.hpp; sourceTree = "<group>"; };
+		257EBC78273CAA040014FAF2 /* kern_mach.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_mach.hpp; sourceTree = "<group>"; };
+		257EBC79273CAA040014FAF2 /* kern_version.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_version.hpp; sourceTree = "<group>"; };
+		257EBC7A273CAA040014FAF2 /* kern_compression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_compression.hpp; sourceTree = "<group>"; };
+		257EBC7B273CAA040014FAF2 /* kern_file.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_file.hpp; sourceTree = "<group>"; };
+		257EBC7C273CAA040014FAF2 /* kern_rtc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_rtc.hpp; sourceTree = "<group>"; };
+		257EBC7D273CAA040014FAF2 /* kern_disasm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_disasm.hpp; sourceTree = "<group>"; };
+		257EBC7F273CAA040014FAF2 /* capstone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = capstone.h; sourceTree = "<group>"; };
+		257EBC80273CAA040014FAF2 /* mips.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mips.h; sourceTree = "<group>"; };
+		257EBC81273CAA040014FAF2 /* sparc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sparc.h; sourceTree = "<group>"; };
+		257EBC82273CAA040014FAF2 /* systemz.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = systemz.h; sourceTree = "<group>"; };
+		257EBC83273CAA040014FAF2 /* arm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arm.h; sourceTree = "<group>"; };
+		257EBC84273CAA040014FAF2 /* x86.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = x86.h; sourceTree = "<group>"; };
+		257EBC85273CAA040014FAF2 /* ppc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ppc.h; sourceTree = "<group>"; };
+		257EBC86273CAA040014FAF2 /* arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arm64.h; sourceTree = "<group>"; };
+		257EBC87273CAA040014FAF2 /* xcore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xcore.h; sourceTree = "<group>"; };
+		257EBC88273CAA040014FAF2 /* platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
+		257EBC89273CAA040014FAF2 /* kern_patcher.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_patcher.hpp; sourceTree = "<group>"; };
+		257EBC8A273CAA040014FAF2 /* hde32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hde32.h; sourceTree = "<group>"; };
+		257EBC8B273CAA040014FAF2 /* kern_compat.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_compat.hpp; sourceTree = "<group>"; };
+		257EBC8C273CAA040014FAF2 /* kern_api.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_api.hpp; sourceTree = "<group>"; };
+		257EBC8D273CAA040014FAF2 /* kern_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_util.hpp; sourceTree = "<group>"; };
+		257EBC90273CAA040014FAF2 /* entry64.S */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = entry64.S; sourceTree = "<group>"; };
+		257EBC91273CAA040014FAF2 /* build.tool */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build.tool; sourceTree = "<group>"; };
+		257EBC92273CAA040014FAF2 /* entry32.S */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = entry32.S; sourceTree = "<group>"; };
+		257EBC93273CAA040014FAF2 /* wrappers.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = wrappers.inc; sourceTree = "<group>"; };
+		257EBC94273CAA040014FAF2 /* plugin_start.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
 		258836AA260C5F6E00BD1AAC /* VoodooI2CPCIController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VoodooI2CPCIController.cpp; path = VoodooI2CController/VoodooI2CPCIController.cpp; sourceTree = "<group>"; };
 		259040E726FC065400D605D0 /* SurfaceButtonHIDDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonHIDDevice.cpp; sourceTree = "<group>"; };
 		259040E826FC065400D605D0 /* SurfaceButtonHIDDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonHIDDevice.hpp; sourceTree = "<group>"; };
@@ -201,9 +249,104 @@
 			path = ../../../Dependencies/VoodooI2CACPIResourcesParser;
 			sourceTree = "<group>";
 		};
+		257EBC5D273CA9CF0014FAF2 /* VirtualSMCSDK */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC5E273CA9CF0014FAF2 /* kern_smcinfo.hpp */,
+				257EBC5F273CA9CF0014FAF2 /* kern_vsmcapi.hpp */,
+				257EBC60273CA9CF0014FAF2 /* AppleSmc.h */,
+				257EBC61273CA9CF0014FAF2 /* kern_keyvalue.hpp */,
+				257EBC62273CA9CF0014FAF2 /* kern_value.hpp */,
+				257EBC63273CA9CF0014FAF2 /* AppleSmcBridge.hpp */,
+			);
+			name = VirtualSMCSDK;
+			path = ../../../Dependencies/VirtualSMC.kext/Contents/Resources/VirtualSMCSDK;
+			sourceTree = "<group>";
+		};
+		257EBC6A273CA9E40014FAF2 /* LiluSDK */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC6B273CAA040014FAF2 /* Headers */,
+				257EBC8E273CAA040014FAF2 /* Library */,
+			);
+			name = LiluSDK;
+			sourceTree = "<group>";
+		};
+		257EBC6B273CAA040014FAF2 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC6C273CAA040014FAF2 /* kern_config.hpp */,
+				257EBC6D273CAA040014FAF2 /* hde64.h */,
+				257EBC6E273CAA040014FAF2 /* kern_time.hpp */,
+				257EBC6F273CAA040014FAF2 /* kern_nvram.hpp */,
+				257EBC70273CAA040014FAF2 /* kern_cpu.hpp */,
+				257EBC71273CAA040014FAF2 /* kern_devinfo.hpp */,
+				257EBC72273CAA040014FAF2 /* kern_efi.hpp */,
+				257EBC73273CAA040014FAF2 /* kern_policy.hpp */,
+				257EBC74273CAA040014FAF2 /* kern_user.hpp */,
+				257EBC75273CAA040014FAF2 /* plugin_start.hpp */,
+				257EBC76273CAA040014FAF2 /* kern_iokit.hpp */,
+				257EBC77273CAA040014FAF2 /* kern_crypto.hpp */,
+				257EBC78273CAA040014FAF2 /* kern_mach.hpp */,
+				257EBC79273CAA040014FAF2 /* kern_version.hpp */,
+				257EBC7A273CAA040014FAF2 /* kern_compression.hpp */,
+				257EBC7B273CAA040014FAF2 /* kern_file.hpp */,
+				257EBC7C273CAA040014FAF2 /* kern_rtc.hpp */,
+				257EBC7D273CAA040014FAF2 /* kern_disasm.hpp */,
+				257EBC7E273CAA040014FAF2 /* capstone */,
+				257EBC89273CAA040014FAF2 /* kern_patcher.hpp */,
+				257EBC8A273CAA040014FAF2 /* hde32.h */,
+				257EBC8B273CAA040014FAF2 /* kern_compat.hpp */,
+				257EBC8C273CAA040014FAF2 /* kern_api.hpp */,
+				257EBC8D273CAA040014FAF2 /* kern_util.hpp */,
+			);
+			name = Headers;
+			path = ../../../Dependencies/Lilu.kext/Contents/Resources/Headers;
+			sourceTree = "<group>";
+		};
+		257EBC7E273CAA040014FAF2 /* capstone */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC7F273CAA040014FAF2 /* capstone.h */,
+				257EBC80273CAA040014FAF2 /* mips.h */,
+				257EBC81273CAA040014FAF2 /* sparc.h */,
+				257EBC82273CAA040014FAF2 /* systemz.h */,
+				257EBC83273CAA040014FAF2 /* arm.h */,
+				257EBC84273CAA040014FAF2 /* x86.h */,
+				257EBC85273CAA040014FAF2 /* ppc.h */,
+				257EBC86273CAA040014FAF2 /* arm64.h */,
+				257EBC87273CAA040014FAF2 /* xcore.h */,
+				257EBC88273CAA040014FAF2 /* platform.h */,
+			);
+			path = capstone;
+			sourceTree = "<group>";
+		};
+		257EBC8E273CAA040014FAF2 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC8F273CAA040014FAF2 /* wrappers */,
+				257EBC94273CAA040014FAF2 /* plugin_start.cpp */,
+			);
+			name = Library;
+			path = ../../../Dependencies/Lilu.kext/Contents/Resources/Library;
+			sourceTree = "<group>";
+		};
+		257EBC8F273CAA040014FAF2 /* wrappers */ = {
+			isa = PBXGroup;
+			children = (
+				257EBC90273CAA040014FAF2 /* entry64.S */,
+				257EBC91273CAA040014FAF2 /* build.tool */,
+				257EBC92273CAA040014FAF2 /* entry32.S */,
+				257EBC93273CAA040014FAF2 /* wrappers.inc */,
+			);
+			path = wrappers;
+			sourceTree = "<group>";
+		};
 		25A668272728E34600F1F360 /* SurfaceAmbientLightSensor */ = {
 			isa = PBXGroup;
 			children = (
+				256F9A0A273C2F5200656233 /* AmbientLightValue.cpp */,
+				256F9A0B273C2F5200656233 /* AmbientLightValue.hpp */,
 				25A6682A2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.cpp */,
 				25A6682B2728E45200F1F360 /* SurfaceAmbientLightSensorDriver.hpp */,
 				25A331D42729A834007F144D /* APDS9960Constants.h */,
@@ -310,6 +453,8 @@
 		AC0955711F4ED49E0052E343 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				257EBC6A273CA9E40014FAF2 /* LiluSDK */,
+				257EBC5D273CA9CF0014FAF2 /* VirtualSMCSDK */,
 				2524C0B126F3286D00CAAF12 /* VoodooI2CACPIResourcesParser */,
 				25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */,
 				25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */,
@@ -423,6 +568,7 @@
 				25B97DF8260B97AD00657C76 /* VoodooI2CMultitouchInterface.hpp in Headers */,
 				25B97DFA260B97AD00657C76 /* VoodooI2CMultitouchEngine.hpp in Headers */,
 				25B97E24260BA01900657C76 /* VoodooI2CPCIController.hpp in Headers */,
+				256F9A0D273C2F5200656233 /* AmbientLightValue.hpp in Headers */,
 				25B97D9D260B950E00657C76 /* VoodooI2CController.hpp in Headers */,
 				25B97E1E260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp in Headers */,
 				25B97DCD260B973400657C76 /* helpers.hpp in Headers */,
@@ -577,6 +723,7 @@
 				25B97DCC260B973400657C76 /* helpers.cpp in Sources */,
 				25B97E19260B9F1100657C76 /* VoodooI2CHIDDevice.cpp in Sources */,
 				25B97E06260B97AD00657C76 /* VoodooI2CCSGestureEngine.cpp in Sources */,
+				256F9A0C273C2F5200656233 /* AmbientLightValue.cpp in Sources */,
 				25B97D7C260B950E00657C76 /* VoodooI2CController.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				25B97D82260B950E00657C76 /* VoodooI2CControllerDriver.cpp in Sources */,
@@ -620,6 +767,8 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
+					"$(PROJECT_DIR)/../Dependencies/VirtualSMC.kext/Contents/Resources/",
+					"$(PROJECT_DIR)/../Dependencies/Lilu.kext/Contents/Resources/",
 				);
 				INFOPLIST_FILE = BigSurface/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
@@ -654,6 +803,8 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
+					"$(PROJECT_DIR)/../Dependencies/VirtualSMC.kext/Contents/Resources/",
+					"$(PROJECT_DIR)/../Dependencies/Lilu.kext/Contents/Resources/",
 				);
 				INFOPLIST_FILE = BigSurface/Info.plist;
 				LIBRARY_SEARCH_PATHS = (

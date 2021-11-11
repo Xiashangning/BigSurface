@@ -9,7 +9,7 @@ class __attribute__((packed)) keys final {
 public:
     keys(void) : keys_{} {}
 
-    const uint8_t(&get_raw_value(void) const)[32] {
+    const UInt8(&get_raw_value(void) const)[32] {
         return keys_;
     }
 
@@ -26,7 +26,7 @@ public:
         memset(keys_, 0, sizeof(keys_));
     }
 
-    void insert(uint8_t key) {
+    void insert(UInt8 key) {
         if (!exists(key)) {
             for (auto&& k : keys_) {
                 if (k == 0) {
@@ -37,7 +37,7 @@ public:
         }
     }
 
-    void erase(uint8_t key) {
+    void erase(UInt8 key) {
         for (auto&& k : keys_) {
             if (k == key) {
                 k = 0;
@@ -45,7 +45,7 @@ public:
         }
     }
 
-    bool exists(uint8_t key) const {
+    bool exists(UInt8 key) const {
         for (const auto& k : keys_) {
             if (k == key) {
                 return true;
@@ -68,7 +68,7 @@ public:
     bool operator!=(const keys& other) const { return !(*this == other); }
 
 private:
-    uint8_t keys_[32];
+    UInt8 keys_[32];
 };
 
 class __attribute__((packed)) consumer_input final {
@@ -78,7 +78,7 @@ public:
     bool operator!=(const consumer_input& other) const { return !(*this == other); }
 
 private:
-    uint8_t report_id_ __attribute__((unused));
+    UInt8 report_id_ __attribute__((unused));
 
 public:
     keys keys;
@@ -91,7 +91,7 @@ public:
     bool operator!=(const apple_vendor_top_case_input& other) const { return !(*this == other); }
 
 private:
-    uint8_t report_id_ __attribute__((unused));
+    UInt8 report_id_ __attribute__((unused));
 
 public:
     keys keys;

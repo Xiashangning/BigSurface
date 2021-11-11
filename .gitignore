@@ -24,3 +24,5 @@ xcuserdata/
 *.xcscmblueprint
 
 .DS_Store
+Dependencies/Lilu.kext/
+Dependencies/VirtualSMC.kext/
