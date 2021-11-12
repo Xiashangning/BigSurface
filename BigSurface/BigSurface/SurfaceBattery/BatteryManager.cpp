@@ -253,8 +253,20 @@ void BatteryManager::createShared(UInt8 bat_cnt, UInt8 adp_cnt) {
         instance->batteries[i] = SurfaceBattery(i, instance->stateLock, &instance->state.btInfo[i]);
     instance->batteriesCount = bat_cnt;
     
-    for (UInt8 i=0; i<adp_cnt; i++)
-        instance->adapters[i] = SurfaceACAdapter(i, instance->stateLock, &instance->state.acInfo[i]);
+    auto dict = IOService::nameMatching("ACPI0003");
+    OSIterator *deviceIterator = nullptr;
+    if (dict) {
+        deviceIterator = IOService::getMatchingServices(dict);
+        dict->release();
+    }
+    if (deviceIterator) {
+        for (UInt8 i=0; i<adp_cnt; i++)
+            instance->adapters[i] = SurfaceACAdapter(OSDynamicCast(IOACPIPlatformDevice, deviceIterator->getNextObject()), i, instance->stateLock, &instance->state.acInfo[i]);
+        deviceIterator->release();
+    } else {
+        for (UInt8 i=0; i<adp_cnt; i++)
+            instance->adapters[i] = SurfaceACAdapter(nullptr, i, instance->stateLock, &instance->state.acInfo[i]);
+    }
     instance->adapterCount = adp_cnt;
 }
 

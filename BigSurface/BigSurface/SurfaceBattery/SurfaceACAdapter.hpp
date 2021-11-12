@@ -9,6 +9,7 @@
 #define SurfaceACAdapter_hpp
 
 #include <IOKit/IOService.h>
+#include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/IOReportTypes.h>
 #include "BatteryManagerState.hpp"
 
@@ -18,12 +19,17 @@ public:
 	/**
 	 *  Actual constructor representing a real device with its own index and shared info struct
 	 */
-	SurfaceACAdapter(SInt32 id, IOSimpleLock *lock, ACAdapterInfo *info) :
+	SurfaceACAdapter(IOACPIPlatformDevice *device, SInt32 id, IOSimpleLock *lock, ACAdapterInfo *info) : device(device),
 		id(id), adapterInfoLock(lock), adapterInfo(info) {}
 
 	bool updateStatus(bool connected);
     
 private:
+    /**
+     *  Current adapter device
+     */
+    IOACPIPlatformDevice *device {nullptr};
+    
 	/**
 	 *  Current adapter id
 	 */

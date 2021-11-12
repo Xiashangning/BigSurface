@@ -12,5 +12,15 @@ bool SurfaceACAdapter::updateStatus(bool connected) {
 	adapterInfo->connected = connected;
 	IOSimpleLockUnlock(adapterInfoLock);
     
+    if (device) {
+        OSObject *result;
+        OSObject *params[] = {
+            OSNumber::withNumber(connected, 32),
+        };
+        device->evaluateObject("XPSR", &result, params, 1);
+        OSSafeReleaseNULL(result);
+        params[0]->release();
+    }
+    
     return connected;
 }
