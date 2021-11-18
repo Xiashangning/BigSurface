@@ -142,9 +142,9 @@ void BatteryManager::updateBatteryTemperature(UInt8 index, UInt16 temp) {
     IOLockUnlock(mainLock);
 }
 
-void BatteryManager::updateAdapterStatus(UInt8 index, UInt32 psr) {
+bool BatteryManager::updateAdapterStatus(UInt8 index, UInt32 psr) {
     if (index >= adapterCount)
-        return;
+        return false;
     
     bool power_connected;
     
@@ -152,7 +152,7 @@ void BatteryManager::updateAdapterStatus(UInt8 index, UInt32 psr) {
     power_connected = adapters[index].updateStatus(psr!=0);
     IOLockUnlock(mainLock);
     
-    externalPowerNotify(power_connected);
+    return power_connected;
 }
 
 void BatteryManager::externalPowerNotify(bool status) {
@@ -249,12 +249,24 @@ void BatteryManager::createShared(UInt8 bat_cnt, UInt8 adp_cnt) {
         adp_cnt = BatteryManagerState::MaxAcAdaptersSupported;
     }
     
-    for (UInt8 i=0; i<bat_cnt; i++)
-        instance->batteries[i] = SurfaceBattery(i, instance->stateLock, &instance->state.btInfo[i]);
+    auto dict = IOService::nameMatching("PNP0C0A");
+    OSIterator *deviceIterator = nullptr;
+    if (dict) {
+        deviceIterator = IOService::getMatchingServices(dict);
+        dict->release();
+    }
+    if (deviceIterator) {
+        for (UInt8 i=0; i<bat_cnt; i++)
+            instance->batteries[i] = SurfaceBattery(OSDynamicCast(IOACPIPlatformDevice, deviceIterator->getNextObject()), i, instance->stateLock, &instance->state.btInfo[i]);
+        deviceIterator->release();
+    } else {
+        for (UInt8 i=0; i<bat_cnt; i++)
+            instance->batteries[i] = SurfaceBattery(nullptr, i, instance->stateLock, &instance->state.btInfo[i]);
+    }
     instance->batteriesCount = bat_cnt;
     
-    auto dict = IOService::nameMatching("ACPI0003");
-    OSIterator *deviceIterator = nullptr;
+    dict = IOService::nameMatching("ACPI0003");
+    deviceIterator = nullptr;
     if (dict) {
         deviceIterator = IOService::getMatchingServices(dict);
         dict->release();

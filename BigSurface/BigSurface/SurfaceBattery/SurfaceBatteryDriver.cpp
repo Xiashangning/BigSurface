@@ -30,17 +30,22 @@ void SurfaceBatteryDriver::eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *
 void SurfaceBatteryDriver::updateStatus(OSObject *target, void *refCon, IOService *nubDevice, int source) {
     if (!awake)
         return;
+    bool power_connected = false;
     bool bix_fail = false;
     bool battery_connection[BatteryManagerState::MaxBatteriesSupported] = {false};
-    if (update_adp_idx != -1) {
-        UInt32 psr;
-        if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, 0x01, SSH_CID_BAT_PSR, nullptr, 0, true, reinterpret_cast<UInt8*>(&psr), 4) != kIOReturnSuccess) {
-            LOG("Failed to get PSR!");
-        } else {
-            BatteryManager::getShared()->updateAdapterStatus(0, psr);
+    for (UInt8 i=1; i<=BatteryManager::getShared()->adapterCount; i++) {
+        if (!update_adp_idx || i == update_adp_idx) {
+            UInt32 psr;
+            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_PSR, nullptr, 0, true, reinterpret_cast<UInt8*>(&psr), 4) != kIOReturnSuccess) {
+                LOG("Failed to get PSR for index %d!", i);
+            } else {
+                power_connected |= BatteryManager::getShared()->updateAdapterStatus(i-1, psr);
+            }
         }
-        update_adp_idx = -1;
     }
+    update_adp_idx = -1;
+    BatteryManager::getShared()->externalPowerNotify(power_connected);
+    
     for (UInt8 i=1; i<=BatteryManager::getShared()->batteriesCount; i++) {
         UInt32 sta;
         if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_STA, nullptr, 0, true, reinterpret_cast<UInt8*>(&sta), 4) != kIOReturnSuccess) {
@@ -62,7 +67,7 @@ void SurfaceBatteryDriver::updateStatus(OSObject *target, void *refCon, IOServic
                 }
             }
         }
-        if (battery_connection[i-1] && (!update_bst_idx || i == update_bst_idx) && BatteryManager::getShared()->needUpdateBST(i-1)) {
+        if (!bix_fail && battery_connection[i-1] && (!update_bst_idx || i == update_bst_idx) && BatteryManager::getShared()->needUpdateBST(i-1)) {
             UInt8 bst[16];
             if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BST, nullptr, 0, true, bst, 16) != kIOReturnSuccess) {
                 LOG("Failed to get BST for index %d!", i);
@@ -107,7 +112,6 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 	if (!super::start(provider))
 		return false;
 
-    LOG("waiting");
 	// AppleSMC presence is a requirement, wait for it.
 	auto dict = IOService::nameMatching("AppleSMC");
 	if (!dict) {
@@ -121,7 +125,6 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 		return false;
 	}
 	applesmc->release();
-    LOG("starting");
     
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
@@ -294,9 +297,4 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
         }
     }
     return kIOPMAckImplied;
-}
-
-EXPORT extern "C" kern_return_t ADDPR(kern_stop)(kmod_info_t *, void *) {
-	// It is not safe to unload VirtualSMC plugins!
-	return KERN_FAILURE;
 }

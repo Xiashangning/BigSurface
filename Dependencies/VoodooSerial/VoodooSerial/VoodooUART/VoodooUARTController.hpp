@@ -88,11 +88,6 @@ class EXPORT VoodooUARTController : public IOService {
   OSDeclareDefaultStructors(VoodooUARTController);
 
  public:
-
-    UInt32 readRegister(int offset);
-
-    void writeRegister(UInt32 value, int offset);
-
     IOService* probe(IOService* provider, SInt32* score) override;
     
     bool start(IOService* provider) override;
@@ -140,9 +135,13 @@ class EXPORT VoodooUARTController : public IOService {
     VoodooUARTBus bus;
     bool write_complete {false};
     
-    void startUARTClock();
+    inline UInt32 readRegister(int offset);
+
+    inline void writeRegister(UInt32 value, int offset);
     
-    void stopUARTClock();
+    inline void startUARTClock();
+    
+    inline void stopUARTClock();
 
     void releaseResources();
     

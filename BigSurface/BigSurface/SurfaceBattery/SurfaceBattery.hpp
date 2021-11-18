@@ -10,6 +10,7 @@
 
 #include <IOKit/IOService.h>
 #include <IOKit/IOReportTypes.h>
+#include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/pwr_mgt/IOPMPowerSource.h>
 #include <IOKit/pwr_mgt/RootDomain.h>
 #include "BatteryManagerState.hpp"
@@ -57,8 +58,8 @@ public:
 	/**
 	 *  Actual constructor representing a real device with its own index and shared info struct
 	 */
-	SurfaceBattery(SInt32 id, IOSimpleLock *lock, BatteryInfo *info) :
-		id(id), batteryInfoLock(lock), batteryInfo(info) {}
+	SurfaceBattery(IOACPIPlatformDevice *device, SInt32 id, IOSimpleLock *lock, BatteryInfo *info) :
+        device(device), id(id), batteryInfoLock(lock), batteryInfo(info) {}
 	
 	/**
 	 * Calculate value for B0St SMC key and corresponding SMBus command
@@ -73,6 +74,11 @@ public:
 	bool averageRateAvailable {false};
 
 private:
+    /**
+     *  Current battery device
+     */
+    IOACPIPlatformDevice *device {nullptr};
+    
     bool hasBIX {false};
     
 	UInt32 getNumberFromArray(OSArray *array, UInt32 index);

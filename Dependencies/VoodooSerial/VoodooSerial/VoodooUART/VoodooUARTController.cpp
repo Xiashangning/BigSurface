@@ -9,8 +9,6 @@
 #include "VoodooUARTController.hpp"
 
 #define LOG(str, ...) IOLog("%s::%s " str, getName(), physical_device.name, ##__VA_ARGS__)
-// Log only if current thread is interruptible, otherwise we will get a panic.
-#define TryLog(args...) do { if (ml_get_interrupts_enabled()) LOG(args); } while (0)
 
 #define CONFIGURED(a) a?"YES":"NO"
 
@@ -103,11 +101,11 @@ IOService* VoodooUARTController::probe(IOService* provider, SInt32* score) {
     return this;
 }
 
-void VoodooUARTController::startUARTClock() {
+inline void VoodooUARTController::startUARTClock() {
     writeRegister(UART_UPDATE_CLK | CALC_CLK(8, 15) | UART_ENABLE_CLK, LPSS_PRIV + LPSS_UART_CLK);
 }
 
-void VoodooUARTController::stopUARTClock() {
+inline void VoodooUARTController::stopUARTClock() {
     writeRegister(0, LPSS_PRIV + LPSS_UART_CLK);
 }
 
@@ -121,13 +119,11 @@ bool VoodooUARTController::start(IOService* provider) {
         LOG("Could not allocate lock\n");
         goto exit;
     }
-    
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
         LOG("Could not get work loop\n");
         goto exit;
     }
-
     command_gate = IOCommandGate::commandGate(this);
     if (!command_gate || (work_loop->addEventSource(command_gate) != kIOReturnSuccess)) {
         LOG("Could not open command gate\n");
@@ -138,7 +134,6 @@ bool VoodooUARTController::start(IOService* provider) {
         LOG("Could not open provider\n");
         goto exit;
     }
-
     if (configureDevice() != kIOReturnSuccess) {
         LOG("Configure Device Failed!\n");
         goto exit;
@@ -166,7 +161,6 @@ bool VoodooUARTController::start(IOService* provider) {
 //    LOG("    ENCODED_PARMS       : %s\n", CONFIGURED(reg&UART_CPR_ENCODED_PARMS));
 //    LOG("    DMA_EXTRA           : %s\n", CONFIGURED(reg&UART_CPR_DMA_EXTRA));
 //    LOG("    FIFO_SIZE           : %d\n", fifo_size);
-    
     is_polling = true;
     interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
     if (!interrupt_simulator) {
@@ -204,28 +198,20 @@ void VoodooUARTController::toggleInterruptType(UInt32 type, bool enable) {
     writeRegister(ier, DW_UART_IER);
 }
 
-UInt32 VoodooUARTController::readRegister(int offset) {
+inline UInt32 VoodooUARTController::readRegister(int offset) {
     if (physical_device.mmap != 0) {
          IOVirtualAddress address = physical_device.mmap->getVirtualAddress();
          if (address != 0)
              return *(const volatile UInt32 *)(address + offset);
-         else
-             TryLog("readRegister at offset 0x%x failed to get a virtual address\n", offset);
-     } else {
-         TryLog("readRegister at offset 0x%x failed since mamory was not mapped\n", offset);
      }
      return 0;
 }
 
-void VoodooUARTController::writeRegister(UInt32 value, int offset) {
+inline void VoodooUARTController::writeRegister(UInt32 value, int offset) {
     if (physical_device.mmap != 0) {
         IOVirtualAddress address = physical_device.mmap->getVirtualAddress();
         if (address != 0)
             *(volatile UInt32 *)(address + offset) = value;
-        else
-            TryLog("writeRegister at 0x%x failed to get a virtual address\n", offset);
-    } else {
-        TryLog("writeRegister at 0x%x failed since mamory was not mapped\n", offset);
     }
 }
 

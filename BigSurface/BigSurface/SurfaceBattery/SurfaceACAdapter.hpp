@@ -19,8 +19,8 @@ public:
 	/**
 	 *  Actual constructor representing a real device with its own index and shared info struct
 	 */
-	SurfaceACAdapter(IOACPIPlatformDevice *device, SInt32 id, IOSimpleLock *lock, ACAdapterInfo *info) : device(device),
-		id(id), adapterInfoLock(lock), adapterInfo(info) {}
+	SurfaceACAdapter(IOACPIPlatformDevice *device, SInt32 id, IOSimpleLock *lock, ACAdapterInfo *info) :
+        device(device), id(id), adapterInfoLock(lock), adapterInfo(info) {}
 
 	bool updateStatus(bool connected);
     

@@ -22,8 +22,6 @@
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 #include "../SurfaceSerialHub/SerialProtocol.h"
 
-#define PRODUCT_NAME SurfaceBatteryDriver
-
 class EXPORT SurfaceBatteryDriver : public SurfaceSerialHubClient {
 	OSDeclareDefaultStructors(SurfaceBatteryDriver)
 

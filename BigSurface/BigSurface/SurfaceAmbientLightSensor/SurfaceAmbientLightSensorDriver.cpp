@@ -92,7 +92,7 @@ void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
     releaseResources();
     PMstop();
     OSSafeReleaseNULL(acpi_device);
-    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
+//    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     super::stop(provider);
 }
 
@@ -233,9 +233,4 @@ void SurfaceAmbientLightSensorDriver::releaseResources() {
         }
         api = nullptr;
     }
-}
-
-EXPORT extern "C" kern_return_t ADDPR(kern_stop)(kmod_info_t *, void *) {
-    // It is not safe to unload VirtualSMC plugins!
-    return KERN_FAILURE;
 }
