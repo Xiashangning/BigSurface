@@ -98,6 +98,8 @@ enum {
 
 #define TIME_TO_VALUE(ms)    (256 - (ms / 2.78))
 
+#define CONFIG1_DEFAULT         0x60
+
 /* LED Drive values */
 #define LED_DRIVE_100MA         0
 #define LED_DRIVE_50MA          1

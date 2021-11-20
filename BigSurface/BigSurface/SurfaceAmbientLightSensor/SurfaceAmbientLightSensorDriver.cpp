@@ -37,7 +37,7 @@ IOService* SurfaceAmbientLightSensorDriver::probe(IOService *provider, SInt32 *s
         reinterpret_cast<const SMC_DATA *>(&noSensor), sizeof(noSensor), SmcKeyTypeAli, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
     VirtualSMCAPI::addKey(KeyALRV, vsmcPlugin.data, VirtualSMCAPI::valueWithUint16(1, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
     VirtualSMCAPI::addKey(KeyALV0, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
-        reinterpret_cast<const SMC_DATA *>(&emptyValue), sizeof(emptyValue), SmcKeyTypeAlv, new SMCAmbientLightValue(&currentLux, &forceBits),
+        reinterpret_cast<const SMC_DATA *>(&emptyValue), sizeof(emptyValue), SmcKeyTypeAlv, new SMCAmbientLightValue(&current_lux, &forceBits),
         SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     VirtualSMCAPI::addKey(KeyALV1, vsmcPlugin.data, VirtualSMCAPI::valueWithData(
         reinterpret_cast<const SMC_DATA *>(&emptyValue), sizeof(emptyValue), SmcKeyTypeAlv, nullptr,
@@ -49,6 +49,7 @@ IOService* SurfaceAmbientLightSensorDriver::probe(IOService *provider, SInt32 *s
 }
 
 bool SurfaceAmbientLightSensorDriver::start(IOService *provider) {
+    OSNumber *base;
     if (!super::start(provider))
         return false;
 
@@ -72,6 +73,12 @@ bool SurfaceAmbientLightSensorDriver::start(IOService *provider) {
     if (initDevice() != kIOReturnSuccess) {
         IOLog("%s::Failed to init device\n", getName());
         goto exit;
+    }
+    base = OSDynamicCast(OSNumber, getProperty("BaseALIValue"));
+    if (!base) {
+        IOLog("%s::Failed to obtain base ALI setting from property! Using default 100 instead!\n", getName());
+    } else {
+        base_ali = base->unsigned16BitValue();
     }
     
     PMinit();
@@ -131,17 +138,18 @@ IOReturn SurfaceAmbientLightSensorDriver::initDevice() {
     IOLog("%s::Device id is %x\n", getName(), id);
     
     ENSURE(writeRegister(APDS9960_ENABLE, 0x00))
-    ENSURE(writeRegister(APDS9960_WTIME, 0xFF))
-
-    ENSURE(configDevice(ENABLE_POWER, true))
+    // set short wait time to 712ms maximum
+    ENSURE(writeRegister(APDS9960_WTIME, TIME_TO_VALUE(712)))
     ENSURE(configDevice(ENABLE_WAIT, true))
     // set ADC integration time to 100 ms
-    ENSURE(writeRegister(APDS9960_ATIME, TIME_TO_VALUE(100)))
-    ENSURE(writeRegister(APDS9960_WTIME, TIME_TO_VALUE(100)))
-    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_16X))
-    
-    configDevice(ENABLE_ALS, true);
-    readRegister(APDS9960_AICLEAR, &id, 1);
+    ENSURE(writeRegister(APDS9960_ATIME, TIME_TO_VALUE(200)))
+    ENSURE(writeRegister(APDS9960_CONFIG1, CONFIG1_DEFAULT))
+    ENSURE(writeRegister(APDS9960_CONTROL, ALS_GAIN_1X))
+    // these values come from Windows and is NECESSARY
+    ENSURE(writeRegister(APDS9960_CONFIG2, 0x03))
+    ENSURE(writeRegister(APDS9960_CONFIG3, 0x14))
+    ENSURE(configDevice(ENABLE_POWER, true))
+    ENSURE(configDevice(ENABLE_ALS, true));
 
     return kIOReturnSuccess;
 }
@@ -179,18 +187,13 @@ IOReturn SurfaceAmbientLightSensorDriver::configDevice(UInt8 func, bool enable) 
 
 void SurfaceAmbientLightSensorDriver::pollALI(OSObject* owner, IOTimerEventSource *timer) {
     UInt16 color[4];
-    IOReturn ret1 = readRegister(APDS9960_CDATAL, reinterpret_cast<UInt8 *>(color), sizeof(color));
-    if (ret1 != kIOReturnSuccess) {
+    if (readRegister(APDS9960_CDATAL, reinterpret_cast<UInt8 *>(color), sizeof(color)) != kIOReturnSuccess) {
         IOLog("%s::Read from ALS failed!\n", getName());
         goto exit;
     }
-    if (color[0] > 20) {
-        atomic_store_explicit(&currentLux, color[20], memory_order_release);
-        VirtualSMCAPI::postInterrupt(SmcEventALSChange);
-    } else {
-        atomic_store_explicit(&currentLux, 300, memory_order_release); // readout incorrect when cold boot
-    }
-    IOLog("%s::Value: ALI=%04x, r=%04x, g=%04x, b=%04x\n", getName(), color[0], color[1], color[2], color[3]);
+    atomic_store_explicit(&current_lux, color[0]+base_ali, memory_order_release);
+    VirtualSMCAPI::postInterrupt(SmcEventALSChange);
+    IOLog("%s::Value: ALI=%04d, r=0x%04x, g=0x%04x, b=0x%04x\n", getName(), color[0]+base_ali, color[1], color[2], color[3]);
 exit:
     poller->setTimeoutMS(POLLING_INTERVAL);
 }
@@ -236,9 +239,4 @@ void SurfaceAmbientLightSensorDriver::releaseResources() {
         }
         api = nullptr;
     }
-}
-
-EXPORT extern "C" kern_return_t ADDPR(kern_stop)(kmod_info_t *, void *) {
-    // It is not safe to unload VirtualSMC plugins!
-    return KERN_FAILURE;
 }
