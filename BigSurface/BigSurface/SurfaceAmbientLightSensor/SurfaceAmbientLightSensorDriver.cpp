@@ -99,7 +99,6 @@ void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
     releaseResources();
     PMstop();
     OSSafeReleaseNULL(acpi_device);
-    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     super::stop(provider);
 }
 
