@@ -183,14 +183,13 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     acpi_device->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
-    button_device = new SurfaceButtonHIDDevice;
+    button_device = OSTypeAlloc(SurfaceButtonHIDDevice);
     if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
         IOLog("%s::Failed to init Surface Button HID Device!", getName());
         goto exit;
     }
     
     IOLog("%s::started\n", getName());
-    acpi_device->retain();
     button_device->retain();
     return true;
 exit:
@@ -200,9 +199,8 @@ exit:
 
 void SurfaceButtonDriver::stop(IOService *provider) {
     IOLog("%s::stopped\n", getName());
-    releaseResources();
     PMstop();
-    OSSafeReleaseNULL(acpi_device);
+    releaseResources();
     super::stop(provider);
 }
 

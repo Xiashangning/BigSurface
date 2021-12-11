@@ -118,7 +118,7 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 		LOG("Failed to create applesmc matching dictionary");
 		return false;
 	}
-	auto applesmc = IOService::waitForMatchingService(dict);
+	auto applesmc = IOService::waitForMatchingService(dict, 5000000000);
 	dict->release();
 	if (!applesmc) {
 		LOG("Timeout in waiting for AppleSMC");
@@ -222,6 +222,7 @@ bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, 
 }
 
 void SurfaceBatteryDriver::stop(IOService *provider) {
+    PMstop();
     if (timer) {
         timer->disable();
         work_loop->removeEventSource(timer);
@@ -233,7 +234,7 @@ void SurfaceBatteryDriver::stop(IOService *provider) {
         OSSafeReleaseNULL(interrupt_source);
     }
     OSSafeReleaseNULL(work_loop);
-    PMstop();
+    
     super::stop(provider);
 //	PANIC("SurfaceBatteryDriver", "called stop!!!");
 }

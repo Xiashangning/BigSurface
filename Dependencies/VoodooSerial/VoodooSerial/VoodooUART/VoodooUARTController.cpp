@@ -184,8 +184,8 @@ exit:
 
 void VoodooUARTController::stop(IOService *provider) {
     stopCommunication();
-    releaseResources();
     PMstop();
+    releaseResources();
     super::stop(provider);
 }
 

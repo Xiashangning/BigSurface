@@ -76,6 +76,8 @@
 			<integer>400</integer>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
+			<key>BaseALIValue</key>
+			<integer>100</integer>
 		</dict>
 		<key>Surface Serial Hub</key>
 		<dict>

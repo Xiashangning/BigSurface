@@ -25,7 +25,7 @@
 #include "AmbientLightValue.hpp"
 #include "APDS9960Constants.h"
 
-#define POLLING_INTERVAL 5000
+#define POLLING_INTERVAL 1000
 
 class EXPORT SurfaceAmbientLightSensorDriver : public IOService {
     OSDeclareDefaultStructors(SurfaceAmbientLightSensorDriver);
@@ -51,7 +51,8 @@ private:
     
     bool awake {true};
     
-    _Atomic(UInt32) currentLux;
+    _Atomic(UInt32) current_lux;
+    UInt16 base_ali {100};
     IONotifier *vsmcNotifier {nullptr};
     static constexpr SMC_KEY KeyAL   = SMC_MAKE_IDENTIFIER('A','L','!',' ');
     static constexpr SMC_KEY KeyALI0 = SMC_MAKE_IDENTIFIER('A','L','I','0');

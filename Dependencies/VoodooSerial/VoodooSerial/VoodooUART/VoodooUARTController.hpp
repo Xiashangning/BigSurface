@@ -88,13 +88,15 @@ class EXPORT VoodooUARTController : public IOService {
   OSDeclareDefaultStructors(VoodooUARTController);
 
  public:
+    bool init(OSDictionary* properties) override;
+    
     IOService* probe(IOService* provider, SInt32* score) override;
     
     bool start(IOService* provider) override;
 
     void stop(IOService* provider) override;
-
-    bool init(OSDictionary* properties) override;
+    
+    IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
     IOReturn requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity);
 
@@ -144,8 +146,6 @@ class EXPORT VoodooUARTController : public IOService {
     inline void stopUARTClock();
 
     void releaseResources();
-    
-    IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
     IOReturn transmitDataGated(UInt8* buffer, UInt16* length);
     

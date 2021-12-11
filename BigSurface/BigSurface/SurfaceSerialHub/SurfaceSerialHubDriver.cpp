@@ -453,8 +453,6 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     PMinit();
     uart_controller->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
-    
-    acpi_device->retain();
 
     if (uart_controller->requestConnect(this, baudrate, data_bits, stop_bits, parity) != kIOReturnSuccess) {
         IOLog("%s::UARTController already occupied!\n", getName());
@@ -495,9 +493,8 @@ void SurfaceSerialHubDriver::stop(IOService *provider) {
         }
         uart_controller->requestDisconnect(this);
     }
-    releaseResources();
     PMstop();
-    OSSafeReleaseNULL(acpi_device);
+    releaseResources();
     super::stop(provider);
 }
 
