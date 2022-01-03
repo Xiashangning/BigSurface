@@ -8,8 +8,7 @@ PS : If you have a better name, please let me know.
 
 ## How to install
 
-You will need to first DELETE all the original VoodooI2C series Kext, and then add the kext into opencore's `config.plist` in the order specified as below
-<img width="407" alt="截屏2021-06-29 下午8 26 08" src="https://user-images.githubusercontent.com/18528518/123798086-6feaca00-d919-11eb-9e87-2fb3d6268cfe.png">
+You will need to first DELETE all the original VoodooI2C series Kext, and then add the kext into opencore's `config.plist` in the order specified as below<img width="932" alt="截屏2022-01-03 下午5 43 49" src="https://user-images.githubusercontent.com/18528518/147917419-bf24e033-d4f4-43b0-b5f0-561b75c34e7c.png">
 ## What works
 - Surface Type Cover
   > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
