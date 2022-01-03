@@ -4,39 +4,52 @@ Big Sur + Surface -> Big Surface (LOL)
 
 PS : If you have a better name, please let me know.
 
-**A proposition for a fully intergrated kext for all Surface Pro related hardwares**
+**A proposition for a fully intergrated kext for all Surface related hardwares**
 
 ## How to install
 
-You will need to add the kext into opencore's `config.plist` in the order specified as below
+You will need to first DELETE all the original VoodooI2C series Kext, and then add the kext into opencore's `config.plist` in the order specified as below
 <img width="407" alt="截屏2021-06-29 下午8 26 08" src="https://user-images.githubusercontent.com/18528518/123798086-6feaca00-d919-11eb-9e87-2fb3d6268cfe.png">
-
-## TODO
-- Surface Type Cover                            **Done**
-  
+## What works
+- Surface Type Cover
   > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
-- Battery status--Surface Serial Hub            **Most Important**
-  > See https://github.com/linux-surface/surface-aggregator-module.
-  > To obtain the battery readout, one needs to register the operation handler for _SAN device(called via _SAN.RQST) and send the request to SSH device.
-  > SSH is a UART controller, **the low level uart operation(tx, rx)** is needed to be completed. Thus an expert in UART development is needed.
-  > Other than that, the rest of the code is not hard to port, mainly how to encode and decode the request packages. 
-  >
-  > The Surface Laptop and Surface Book things can be deleted.
-- Performance mode
-  
-  > Depends on Surface Serial Hub driver
 - Buttons
-  
-  > Done, but power button fails to function after wake up.
+  > Problem remains to be solved: Power Button fails after wake from sleep (with deep idle enabled). Might need to investigate into Linux code to see if there are resetting codes when wakeup
 - Ambient Light Sensor
   > ACPI device name: ACSD, attached under I2C4
-  > The Linux source code is attached in the folder, just one source file, should be 'easy' to port.(Maybe we don't need gesture and proximity)
-  > Driver should attach to VoodooI2CDeviceNub and use it to perform I2C IO.
-  > See VoodooI2CSynaptics for code reference.
-- Cameras
+  > 
+  > You can set baseline of ALI in info.plist, the calculation is `base_ali+ALI value from the sensor`
+- Battery status--Surface Serial Hub **Finally works**
+  > I have implemented the UART driver as well as MS's SAM module driver. Now it seems to be working fine and so far no problems are found during the test on serval SP7 devices. 
+  > 
+  > (Other devices **should work** but need some modifications, **post an issue** and I will try my best to help you get it working)
+- Performance mode
+  > Right now it is set by `PerformanceMode` in `SurfaceBattery` (default), changing it to other values is not observed to have any effects. If you find any difference (fan speed or battery life, please let me know)
+  > 
+  > It can only be set by changing the plist or using `ioio`
+  > We need a userspace software to control it if it actually has something useful.
+  
+Possible values are:
+
+      State              Value
+      
+    Recommended          0x01
+    
+    Battery Saver        0x02 (Only in battery mode)
+    
+    Better Performance   0x03
+    
+    Best Performance     0x04
+    
+## TODO
+- Cameras                            Impossible so far
   > ACPI devices: CAMR,CAMF,CAM3(infrared camera)
+  > 
   > Corresponding device id: OV8865,OV5693,OV7251
-  > Not so important, they use I2C to transfert data. Linux code available.
+  > 
+  > Even Linux failed to drive the cameras on SP7 (IPU4), SP6 and before (IPU3) might be possible but I do not have the device.
 - Touch Screen
   > Device id: 0x34E4
-  > Linux uses `mei` to communicate with the touch screen(ipts), don't know the equivalant thing on macOS nor how to communicate with it.
+
+## Surface Laptop's keyboard & touchpad
+Theoretically works but you need to implement it yourself, check out my battery codes and consult to https://github.com/linux-surface/surface-aggregator-module/blob/master/doc/requests.txt for necessary events registration. In brief, you need to create a virtual keyboard & touchpad IOSerive, register it under `SurfaceSerialHub` and process the returning data(should be in HID format so the only thing needed is to send the data to macOS)
