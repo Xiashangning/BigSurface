@@ -20,6 +20,70 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
+		<key>Battery SMBus Controller</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSMBusController</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceBatteryDriver</string>
+		</dict>
+		<key>Surface Ambient Light Sensor</key>
+		<dict>
+			<key>BaseALIValue</key>
+			<integer>100</integer>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceAmbientLightSensorDriver</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>name</key>
+				<string>MSHW0184</string>
+			</dict>
+			<key>IOProviderClass</key>
+			<string>VoodooI2CDeviceNub</string>
+		</dict>
+		<key>Surface Battery</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceBatteryDriver</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceSerialHubDriver</string>
+			<key>PerformanceMode</key>
+			<integer>1</integer>
+		</dict>
+		<key>Surface Button</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceButtonDriver</string>
+			<key>IONameMatch</key>
+			<string>MSHW0040</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
+		<key>Surface Serial Hub</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSerialHubDriver</string>
+			<key>IONameMatch</key>
+			<string>MSHW0084</string>
+			<key>IOProbeScore</key>
+			<integer>600</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
 		<key>Surface Type Cover</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -48,70 +112,6 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
-		<key>Surface Button</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceButtonDriver</string>
-			<key>IONameMatch</key>
-			<string>MSHW0040</string>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
-		</dict>
-		<key>Surface Ambient Light Sensor</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceAmbientLightSensorDriver</string>
-			<key>IOPropertyMatch</key>
-			<dict>
-				<key>name</key>
-				<string>MSHW0184</string>
-			</dict>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
-			<key>IOProviderClass</key>
-			<string>VoodooI2CDeviceNub</string>
-			<key>BaseALIValue</key>
-			<integer>100</integer>
-		</dict>
-		<key>Surface Serial Hub</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSerialHubDriver</string>
-			<key>IONameMatch</key>
-			<string>MSHW0084</string>
-			<key>IOProbeScore</key>
-			<integer>600</integer>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
-		</dict>
-		<key>Surface Battery</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceBatteryDriver</string>
-			<key>IOProviderClass</key>
-			<string>SurfaceSerialHubDriver</string>
-			<key>PerformanceMode</key>
-			<integer>1</integer>
-		</dict>
-		<key>Battery SMBus Controller</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSMBusController</string>
-			<key>IOProviderClass</key>
-			<string>SurfaceBatteryDriver</string>
-		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2021 Xavier Xia. All rights reserved.</string>
@@ -123,18 +123,14 @@
 		<string>1.2.0</string>
 		<key>as.vit9696.VirtualSMC</key>
 		<string>1.0.0</string>
-		<key>com.xavier.VoodooSerial</key>
-		<string>1.0</string>
 		<key>com.alexandred.VoodooI2CServices</key>
 		<string>1.0</string>
-		<key>org.coolstar.VoodooGPIO</key>
-		<string>1.2</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.4</string>
-		<key>com.apple.iokit.IOSMBusFamily</key>
-		<string>1.0.0</string>
 		<key>com.apple.iokit.IOHIDFamily</key>
 		<string>2.0</string>
+		<key>com.apple.iokit.IOSMBusFamily</key>
+		<string>1.0.0</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>10.0</string>
 		<key>com.apple.kpi.dsep</key>
@@ -147,6 +143,10 @@
 		<string>13.0</string>
 		<key>com.apple.kpi.unsupported</key>
 		<string>10.0.0</string>
+		<key>com.xavier.VoodooSerial</key>
+		<string>1.0</string>
+		<key>org.coolstar.VoodooGPIO</key>
+		<string>1.2</string>
 	</dict>
 	<key>OSBundleRequired</key>
 	<string>Root</string>
