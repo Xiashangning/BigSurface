@@ -23,7 +23,7 @@ You will need to first DELETE all the original VoodooI2C series Kext, and then a
   > 
   > (Other devices **should work** but need some modifications, **post an issue** and I will try my best to help you get it working)
 - Performance mode
-  > Right now it is set by `PerformanceMode` in `SurfaceBattery` (default), changing it to other values is not observed to have any effects. If you find any difference (fan speed or battery life, please let me know)
+  > Right now it is set by `PerformanceMode` in `SurfaceBattery` (default 0x01), changing it to other values is not observed to have any effects. If you find any difference (fan speed or battery life), please let me know
   > 
   > It can only be set by changing the plist or using `ioio`
   > We need a userspace software to control it if it actually has something useful.
