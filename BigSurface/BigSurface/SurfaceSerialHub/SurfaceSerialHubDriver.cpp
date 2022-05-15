@@ -15,6 +15,8 @@ OSDefineMetaClassAndAbstractStructors(SurfaceSerialHubClient, IOService);
 #define super VoodooUARTClient
 OSDefineMetaClassAndStructors(SurfaceSerialHubDriver, VoodooUARTClient);
 
+#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+
 void err_dump(const char *name, const char *str, UInt8 *buffer, UInt16 len) {
     IOLog("%s::%s\n", name, str);
     if (len == 0)
@@ -113,34 +115,37 @@ void SurfaceSerialHubDriver::processReceivedData(OSObject* target, void* refCon,
 
 #define ERR_DUMP_MSG(str) err_dump(getName(), str, msg_cache, _pos)
 
-IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
+IOReturn SurfaceSerialHubDriver::processMessage() {
     if (_pos < 10) {
+        sendNAK();
         ERR_DUMP_MSG("Message received incomplete! Protential data loss!");
         return kIOReturnError;
     }
     SurfaceSerialMessage *msg = reinterpret_cast<SurfaceSerialMessage *>(msg_cache);
     SurfaceSerialCommand *command;
     UInt16 payload_crc, crc;
-    WaitingRequest t1 = {false, 0, waiting_requests};
-    WaitingRequest *waiting_pos = &t1;
-    PendingCommand t2 = {nullptr, 0, nullptr, 0, pending_commands};
-    PendingCommand *pending_pos = &t2;
+    WaitingRequest *waiting_pos = &waiting_requests;
+    PendingCommand *pending_pos = &pending_commands;
     bool found = false;
     if (msg->syn != SYN_BYTES) {
+        sendNAK();
         ERR_DUMP_MSG("syn btyes error!");
         return kIOReturnError;
     }
     if (msg->frame_crc != crc_ccitt_false(CRC_INITIAL, msg_cache+2, sizeof(SurfaceSerialFrame))) {
+        sendNAK();
         ERR_DUMP_MSG("frame crc error!");
         return kIOReturnError;
     }
     if (_pos != msg->frame.length+10) {
+        sendNAK();
         ERR_DUMP_MSG("data length error!");
         return kIOReturnError;
     }
     switch (msg->frame.type) {
         case FRAME_TYPE_ACK:
             if (msg_cache[8]!=0xFF || msg_cache[9]!=0xFF) {
+                sendNAK();
                 ERR_DUMP_MSG("payload crc for ACK should be 0xFFFF!");
                 return kIOReturnError;
             }
@@ -155,16 +160,25 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
                     delete[] cmd->buffer;
                     
                     pending_pos->next = cmd->next;
-                    pending_commands = t2.next;
+                    if (!pending_pos->next)
+                        last_pending = pending_pos;
                     delete cmd;
                     break;
                 }
                 pending_pos = pending_pos->next;
             }
             if (!found)
-                IOLog("%s::Warning, no pending command found for seq_id %d\n", getName(), msg->frame.seq_id);
+                LOG("Warning, no pending command found for seq_id %d", msg->frame.seq_id);
             break;
         case FRAME_TYPE_NAK:
+            LOG("Warning, NAK received! Resending all pending messages!");
+            while (pending_pos->next) {
+                PendingCommand *cmd = pending_pos->next;
+                cmd->trial_count = 0;
+                cmd->timer->cancelTimeout();
+                cmd->timer->setTimeoutMS(1);
+                pending_pos = pending_pos->next;
+            }
             break;
         case FRAME_TYPE_DATA_SEQ:
             sendACK(msg->frame.seq_id);
@@ -175,22 +189,25 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
             payload_crc = crc_ccitt_false(CRC_INITIAL, msg_cache+sizeof(SurfaceSerialMessage), msg->frame.length);
             crc = *(reinterpret_cast<UInt16 *>(rx_data+rx_data_len));
             if (crc != payload_crc) {
+                sendNAK();
                 ERR_DUMP_MSG("payload crc error!");
                 return kIOReturnError;
             }
             if (command->request_id >= REQID_MIN) {
                 while (waiting_pos->next) {
-                    if (waiting_pos->next->req_id == command->request_id) {
+                    WaitingRequest *req = waiting_pos->next;
+                    if (req->req_id == command->request_id) {
                         found = true;
-                        command_gate->commandWakeup(&waiting_pos->next->waiting);
-                        waiting_pos->next = waiting_pos->next->next;
-                        waiting_requests = t1.next;
+                        command_gate->commandWakeup(&req->waiting);
+                        waiting_pos->next = req->next;
+                        if (!waiting_pos->next)
+                            last_waiting = waiting_pos;
                         break;
                     }
                     waiting_pos = waiting_pos->next;
                 }
                 if (!found)
-                    IOLog("%s::Warning, received data with unknown req_id %d\n", getName(), command->request_id);
+                    ERR_DUMP_MSG("Warning, received data with unknown req_id");
             } else {
                 if (event_handler[command->request_id]) {
                     event_handler[command->request_id]->eventReceived(command->target_category, command->instance_id, command->command_id, rx_data, rx_data_len);
@@ -200,6 +217,7 @@ IOReturn SurfaceSerialHubDriver::processMessage() { // error send NAK
             }
             break;
         default:
+            sendNAK();
             ERR_DUMP_MSG("Unknown message type!");
             return kIOReturnError;
     }
@@ -214,6 +232,19 @@ IOReturn SurfaceSerialHubDriver::sendACK(UInt8 seq_id) {
     msg->frame.type = FRAME_TYPE_ACK;
     msg->frame.length = 0;
     msg->frame.seq_id = seq_id;
+    msg->frame_crc = crc_ccitt_false(CRC_INITIAL, buffer+2, sizeof(SurfaceSerialFrame));
+    buffer[8] = 0xFF;
+    buffer[9] = 0xFF;
+    return uart_controller->transmitData(buffer, 10);
+}
+
+IOReturn SurfaceSerialHubDriver::sendNAK() {
+    UInt8 buffer[10];
+    SurfaceSerialMessage *msg = reinterpret_cast<SurfaceSerialMessage *>(buffer);
+    msg->syn = SYN_BYTES;
+    msg->frame.type = FRAME_TYPE_NAK;
+    msg->frame.length = 0;
+    msg->frame.seq_id = 0;
     msg->frame_crc = crc_ccitt_false(CRC_INITIAL, buffer+2, sizeof(SurfaceSerialFrame));
     buffer[8] = 0xFF;
     buffer[9] = 0xFF;
@@ -246,7 +277,7 @@ UInt16 SurfaceSerialHubDriver::sendCommand(UInt8 tc, UInt8 tid, UInt8 iid, UInt8
     *(reinterpret_cast<UInt16 *>(tx_buffer+DATA_OFFSET+size)) = crc_ccitt_false(CRC_INITIAL, tx_buffer+sizeof(SurfaceSerialMessage), sizeof(SurfaceSerialCommand)+size);
     
     if (command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceSerialHubDriver::sendCommandGated), tx_buffer, &len, &seq) != kIOReturnSuccess) {
-        IOLog("%s::Sending command failed!\n", getName());
+        LOG("Sending command failed!");
         return 0;
     }
     
@@ -259,13 +290,14 @@ IOReturn SurfaceSerialHubDriver::sendCommandGated(UInt8 *tx_buffer, UInt16 *len,
     cmd->len = *len;
     cmd->trial_count = 0;
     cmd->timer = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceSerialHubDriver::commandTimeout));
+    cmd->next = nullptr;
     if (!cmd->timer) {
-        IOLog("%s::Could not create timer for sending command!\n", getName());
+        LOG("Could not create timer for sending command!");
         delete cmd;
         return kIOReturnError;
     }
-    cmd->next = pending_commands;
-    pending_commands = cmd;
+    last_pending->next = cmd;
+    last_pending = cmd;
     
     work_loop->addEventSource(cmd->timer);
     cmd->timer->enable();
@@ -274,8 +306,7 @@ IOReturn SurfaceSerialHubDriver::sendCommandGated(UInt8 *tx_buffer, UInt16 *len,
 }
 
 void SurfaceSerialHubDriver::commandTimeout(OSObject* owner, IOTimerEventSource* timer) {
-    PendingCommand temp = {nullptr, 0, nullptr, 0, pending_commands};
-    PendingCommand *pos = &temp;
+    PendingCommand *pos = &pending_commands;
     bool found = false;
     while (pos->next) {
         if (pos->next->timer == timer) {
@@ -283,18 +314,21 @@ void SurfaceSerialHubDriver::commandTimeout(OSObject* owner, IOTimerEventSource*
             PendingCommand *cmd = pos->next;
             SurfaceSerialMessage *msg = reinterpret_cast<SurfaceSerialMessage *>(cmd->buffer);
             if (cmd->trial_count >= 3) {
-                IOLog("%s::receive no ACK for command %d\n", getName(), msg->frame.seq_id);
+                LOG("receive no ACK for command %d", msg->frame.seq_id);
                 cmd->timer->disable();
                 work_loop->removeEventSource(cmd->timer);
                 OSSafeReleaseNULL(cmd->timer);
                 delete[] cmd->buffer;
                 pos->next = cmd->next;
-                pending_commands = temp.next;
+                if (!pos->next)
+                    last_pending = pos;
                 delete cmd;
             } else {
-                cmd->trial_count++;
+                if (cmd->trial_count++ > 0) {
+                    LOG("Resending command! trial count: %d", cmd->trial_count);
+                }
                 if (uart_controller->transmitData(cmd->buffer, cmd->len) != kIOReturnSuccess) {
-                    IOLog("%s::Sending command failed! Retrying\n", getName());
+                    LOG("Sending command failed! Retrying");
                 }
                 cmd->timer->setTimeoutMS(ACK_TIMEOUT);
             }
@@ -303,7 +337,7 @@ void SurfaceSerialHubDriver::commandTimeout(OSObject* owner, IOTimerEventSource*
         pos = pos->next;
     }
     if (!found)
-        IOLog("%s::warning, timeout occurred but find no timer\n", getName());
+        LOG("warning, timeout occurred but find no timer");
 }
 
 IOReturn SurfaceSerialHubDriver::getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 size, bool seq, UInt8 *buffer, UInt16 buffer_size) {
@@ -321,25 +355,26 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
     WaitingRequest *w = new WaitingRequest;
     w->waiting = false;
     w->req_id = *req_id;
-    w->next = waiting_requests;
-    waiting_requests = w;
+    w->next = nullptr;
+    last_waiting->next = w;
+    last_waiting = w;
     
     nanoseconds_to_absolutetime(500000000, &abstime); // 500ms
     clock_absolutetime_interval_to_deadline(abstime, &deadline);
     sleep = command_gate->commandSleep(&w->waiting, deadline, THREAD_INTERRUPTIBLE);
     
     if (sleep == THREAD_TIMED_OUT) {
-        IOLog("%s::Timeout waiting for response\n", getName());
-        WaitingRequest temp = {false, 0, waiting_requests};
-        WaitingRequest *list_pos = &temp;
-        while (list_pos->next) {
-            if (list_pos->next == w) {
-                IOLog("%s::Droping waiting request anyway\n", getName());
-                list_pos->next = list_pos->next->next;
-                waiting_requests = temp.next;
+        LOG("Timeout waiting for response");
+        WaitingRequest *pos = &waiting_requests;
+        while (pos->next) {
+            if (pos->next == w) {
+                LOG("Droping waiting request anyway");
+                pos->next = pos->next->next;
+                if (!pos->next)
+                    last_waiting = pos;
                 break;
             }
-            list_pos = list_pos->next;
+            pos = pos->next;
         }
         delete w;
         return kIOReturnTimeout;
@@ -349,7 +384,7 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
     if (*buffer_size < rx_data_len)
         len = *buffer_size;
     if (*buffer_size != rx_data_len)
-        IOLog("%s::Warning, buffer size(%d) and rx_data_len(%d) mismatched!\n", getName(), *buffer_size, rx_data_len);
+        LOG("Warning, buffer size(%d) and rx_data_len(%d) mismatched!", *buffer_size, rx_data_len);
     memcpy(buffer, rx_data, len);
     return kIOReturnSuccess;
 }
@@ -358,7 +393,7 @@ IOReturn SurfaceSerialHubDriver::registerEvent(UInt8 tc, UInt8 iid, SurfaceSeria
     if (!client)
         return kIOReturnError;
     if (event_handler[tc]) {
-        IOLog("%s::Already has an event handler registered!\n", getName());
+        LOG("Already has an event handler registered!");
         return kIOReturnNoResources;
     }
     SurfaceEventPayload payload;
@@ -368,7 +403,7 @@ IOReturn SurfaceSerialHubDriver::registerEvent(UInt8 tc, UInt8 iid, SurfaceSeria
     payload.request_id = tc;
     payload.flags = EVENT_FLAG_SEQUENCED;
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_ENABLE_EVENT, reinterpret_cast<UInt8 *>(&payload), sizeof(SurfaceEventPayload), true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-        IOLog("%s::Unexpected response from event-enable request\n", getName());
+        LOG("Unexpected response from event-enable request");
         return kIOReturnError;
     }
     event_handler[tc] = client;
@@ -384,13 +419,26 @@ void SurfaceSerialHubDriver::unregisterEvent(UInt8 tc, UInt8 iid, SurfaceSerialH
         payload.request_id = tc;
         payload.flags = EVENT_FLAG_SEQUENCED;
         if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISABLE_EVENT, reinterpret_cast<UInt8 *>(&payload), sizeof(SurfaceEventPayload), true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-            IOLog("%s::Unexpected response from event-disable request\n", getName());
+            LOG("Unexpected response from event-disable request");
             return;
         }
         event_handler[tc] = nullptr;
     } else {
-        IOLog("%s::Event not registered yet!\n", getName());
+        LOG("Event not registered yet!");
     }
+}
+
+bool SurfaceSerialHubDriver::init(OSDictionary *properties) {
+    if (!super::init(properties))
+        return false;
+    
+    pending_commands = {nullptr, 0, nullptr, 0, nullptr};
+    waiting_requests = {false, 0, nullptr};
+    last_pending = &pending_commands;
+    last_waiting = &waiting_requests;
+    memset(event_handler, 0, sizeof(event_handler));
+    memset(msg_cache, 0, sizeof(msg_cache));
+    return true;
 }
 
 IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
@@ -402,11 +450,11 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
         return nullptr;
     
     if (getDeviceResources() != kIOReturnSuccess) {
-        IOLog("%s::Could not parse ACPI resources!\n", getName());
+        LOG("Could not parse ACPI resources!");
         return nullptr;
     }
         
-    IOLog("%s::Surface Serial Hub found!\n", getName());
+    LOG("Surface Serial Hub found!");
 
     return this;
 }
@@ -420,7 +468,7 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     
     uart_controller = getUARTController();
     if (!uart_controller) {
-        IOLog("%s::Could not find UART controller, exiting\n", getName());
+        LOG("Could not find UART controller, exiting");
         return false;
     }
     // Give the UART controller some time to load
@@ -428,19 +476,19 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
-        IOLog("%s::Could not get work loop\n", getName());
+        LOG("Could not get work loop");
         goto exit;
     }
 
     command_gate = IOCommandGate::commandGate(this);
     if (!command_gate || (work_loop->addEventSource(command_gate) != kIOReturnSuccess)) {
-        IOLog("%s::Could not open command gate\n", getName());
+        LOG("Could not open command gate");
         goto exit;
     }
     
     interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedData));
     if (!interrupt_source || (work_loop->addEventSource(interrupt_source)!=kIOReturnSuccess)) {
-        IOLog("%s::Could not register interrupt!\n", getName());
+        LOG("Could not register interrupt!");
         goto exit;
     }
     interrupt_source->enable();
@@ -448,29 +496,27 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     rx_buffer = new UInt8[fifo_size];
     rx_buffer_len = 0;
     
-    memset(event_handler, 0, sizeof(event_handler));
-    
     PMinit();
     uart_controller->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
     if (uart_controller->requestConnect(this, baudrate, data_bits, stop_bits, parity) != kIOReturnSuccess) {
-        IOLog("%s::UARTController already occupied!\n", getName());
+        LOG("UARTController already occupied!");
         goto exit;
     }
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_VERSION, nullptr, 0, true, sam_version, 4) != kIOReturnSuccess) {
-        IOLog("%s::Failed to get SAM version from UART!\n", getName());
+        LOG("Failed to get SAM version from UART!");
         goto exit;
     }
     version = *(reinterpret_cast<UInt32 *>(sam_version));
-    IOLog("%s::SAM version %u.%u.%u\n", getName(), (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
+    LOG("SAM version %u.%u.%u", (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
     
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-        IOLog("%s::Unexpected response from D0-entry notification\n", getName());
+        LOG("Unexpected response from D0-entry notification");
         goto exit;
     }
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-        IOLog("%s::Unexpected response from display-on notification\n", getName());
+        LOG("Unexpected response from display-on notification");
         goto exit;
     }
     
@@ -482,14 +528,14 @@ exit:
 }
 
 void SurfaceSerialHubDriver::stop(IOService *provider) {
-    IOLog("%s::stopped\n", getName());
+    LOG("stopped");
     if (uart_controller) {
         UInt8 ret;
         if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-            IOLog("%s::Unexpected response from display-off notification\n", getName());
+            LOG("Unexpected response from display-off notification");
         }
         if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-            IOLog("%s::Unexpected response from d0-exit notification\n", getName());
+            LOG("Unexpected response from d0-exit notification");
         }
         uart_controller->requestDisconnect(this);
     }
@@ -498,39 +544,45 @@ void SurfaceSerialHubDriver::stop(IOService *provider) {
     super::stop(provider);
 }
 
+void SurfaceSerialHubDriver::free() {
+    super::free();
+}
+
 IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOService *whatDevice) {
     if (whatDevice != this)
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
-            interrupt_source->disable();
             awake = false;
-            IOLog("%s::Going to sleep\n", getName());
+            interrupt_source->disable();
+            LOG("Going to sleep");
         }
     } else {
         if (!awake) {
             awake = true;
             interrupt_source->enable();
-            IOLog("%s::Woke up\n", getName());
+            LOG("Woke up");
         }
     }
     return kIOPMAckImplied;
 }
 
 void SurfaceSerialHubDriver::releaseResources() {
-    if (waiting_requests) {
-        IOLog("%s::There are still commands waiting for response!\n", getName());
-        while (waiting_requests) {
-            WaitingRequest *t = waiting_requests;
-            waiting_requests = waiting_requests->next;
+    WaitingRequest *waiting_pos = waiting_requests.next;
+    if (waiting_pos) {
+        LOG("There are still commands waiting for response!");
+        while (waiting_pos) {
+            WaitingRequest *t = waiting_pos;
+            waiting_pos = waiting_pos->next;
             delete t;
         }
     }
-    if (pending_commands){
-        IOLog("%s::There are still pending commands!\n", getName());
-        while (pending_commands) {
-            PendingCommand *t = pending_commands;
-            pending_commands = pending_commands->next;
+    PendingCommand *pending_pos = pending_commands.next;
+    if (pending_pos){
+        LOG("There are still pending commands!");
+        while (pending_pos) {
+            PendingCommand *t = pending_pos;
+            pending_pos = pending_pos->next;
             delete[] t->buffer;
             t->timer->disable();
             work_loop->removeEventSource(t->timer);
@@ -546,7 +598,6 @@ void SurfaceSerialHubDriver::releaseResources() {
         OSSafeReleaseNULL(interrupt_source);
     }
     if (command_gate) {
-        command_gate->disable();
         work_loop->removeEventSource(command_gate);
         OSSafeReleaseNULL(command_gate);
     }
@@ -562,7 +613,7 @@ VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
     uart = OSDynamicCast(VoodooUARTController, matched);
 
     if (uart) {
-        IOLog("%s::Got UART Controller! %s\n", getName(), uart->getName());
+        LOG("Got UART Controller! %s", uart->getName());
     }
     name_match->release();
     OSSafeReleaseNULL(matched);
@@ -575,7 +626,7 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
     OSData *data = nullptr;
     if (acpi_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
         !(data = OSDynamicCast(OSData, result))) {
-        IOLog("%s::Could not find or evaluate _CRS method\n", getName());
+        LOG("Could not find or evaluate _CRS method");
         OSSafeReleaseNULL(result);
         return kIOReturnNotFound;
     }
@@ -587,23 +638,23 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
     OSSafeReleaseNULL(data);
     
     if (parser.found_uart) {
-        IOLog("%s::Found valid UART Bus!\n", getName());
-//        IOLog("%s::resource_consumer %d\n", getName(), parser.uart_info.resource_consumer);
-//        IOLog("%s::device_initiated %d\n", getName(), parser.uart_info.device_initiated);
-//        IOLog("%s::flow_control %d\n", getName(), parser.uart_info.flow_control);
-//        IOLog("%s::stop_bits %d\n", getName(), parser.uart_info.stop_bits);
-//        IOLog("%s::data_bits %d\n", getName(), parser.uart_info.data_bits);
-//        IOLog("%s::big_endian %d\n", getName(), parser.uart_info.big_endian);
-//        IOLog("%s::baudrate %u\n", getName(), parser.uart_info.baudrate);
-//        IOLog("%s::rx_fifo %d\n", getName(), parser.uart_info.rx_fifo);
-//        IOLog("%s::tx_fifo %d\n", getName(), parser.uart_info.tx_fifo);
-//        IOLog("%s::parity %d\n", getName(), parser.uart_info.parity);
-//        IOLog("%s::dtd_enabled %d\n", getName(), parser.uart_info.dtd_enabled);
-//        IOLog("%s::ri_enabled %d\n", getName(), parser.uart_info.ri_enabled);
-//        IOLog("%s::dsr_enabled %d\n", getName(), parser.uart_info.dsr_enabled);
-//        IOLog("%s::dtr_enabled %d\n", getName(), parser.uart_info.dtr_enabled);
-//        IOLog("%s::cts_enabled %d\n", getName(), parser.uart_info.cts_enabled);
-//        IOLog("%s::rts_enabled %d\n", getName(), parser.uart_info.rts_enabled);
+        LOG("Found valid UART Bus!");
+//        LOG("resource_consumer %d", parser.uart_info.resource_consumer);
+//        LOG("device_initiated %d", parser.uart_info.device_initiated);
+//        LOG("flow_control %d", parser.uart_info.flow_control);
+//        LOG("stop_bits %d", parser.uart_info.stop_bits);
+//        LOG("data_bits %d", parser.uart_info.data_bits);
+//        LOG("big_endian %d", parser.uart_info.big_endian);
+//        LOG("baudrate %u", parser.uart_info.baudrate);
+//        LOG("rx_fifo %d", parser.uart_info.rx_fifo);
+//        LOG("tx_fifo %d", parser.uart_info.tx_fifo);
+//        LOG("parity %d", parser.uart_info.parity);
+//        LOG("dtd_enabled %d", parser.uart_info.dtd_enabled);
+//        LOG("ri_enabled %d", parser.uart_info.ri_enabled);
+//        LOG("dsr_enabled %d", parser.uart_info.dsr_enabled);
+//        LOG("dtr_enabled %d", parser.uart_info.dtr_enabled);
+//        LOG("cts_enabled %d", parser.uart_info.cts_enabled);
+//        LOG("rts_enabled %d", parser.uart_info.rts_enabled);
         
         baudrate = parser.uart_info.baudrate;
         data_bits = parser.uart_info.data_bits;

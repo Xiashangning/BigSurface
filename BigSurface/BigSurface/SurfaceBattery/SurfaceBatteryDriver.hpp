@@ -22,6 +22,11 @@
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 #include "../SurfaceSerialHub/SerialProtocol.h"
 
+#define BST_UPDATE_FAIL     500
+#define BST_UPDATE_QUICK    1000
+#define BST_UPDATE_NORMAL   30000
+#define BST_UPDATE_QUICK_CNT    5
+
 class EXPORT SurfaceBatteryDriver : public SurfaceSerialHubClient {
 	OSDeclareDefaultStructors(SurfaceBatteryDriver)
 
@@ -97,16 +102,21 @@ public:
 private:
     IOWorkLoop*             work_loop {nullptr};
     IOTimerEventSource*     timer {nullptr};
-    IOInterruptEventSource* interrupt_source {nullptr};
+    IOInterruptEventSource* update_bix {nullptr};
+    IOInterruptEventSource* update_bst {nullptr};
     SurfaceSerialHubDriver* ssh {nullptr};
     
     bool awake {false};
-//    bool battery_full {false};
-    SInt8 update_bst_idx {-1};
-    SInt8 update_bix_idx {-1};
-    SInt8 update_adp_idx {-1};
+    bool power_connected {false};
+    bool bix_fail {false};
+    int quick_cnt {0};
     
-    void updateStatus(OSObject* target, void* refCon, IOService* nubDevice, int source);
+    void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int iid);
+    void updateBatteryStatus(OSObject* target, void* refCon, IOService* nubDevice, int iid);
+    
+    void pollBatteryStatus(OSObject* target, IOTimerEventSource* sender);
+    
+    void releaseResources();
 };
 
 #endif /* SurfaceBatteryDriver_hpp */

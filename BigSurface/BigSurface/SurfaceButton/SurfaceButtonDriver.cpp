@@ -114,7 +114,7 @@ IOReturn SurfaceButtonDriver::response(int* btn, void* status) {
         btn_status[number] = !btn_status[number]; // mannually maintain the power button status(pin status always return true)
     else
         btn_status[number] = pressed;
-    IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
+//    IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[number], btn_status[number]?"pressed":"released");
     return button_device->simulateKeyboardEvent(BTN_CMD_PAGE[number], BTN_CMD[number], btn_status[number]);
 }
 
@@ -173,12 +173,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     startInterrupt(VOLUME_UP_BUTTON_IDX);
     startInterrupt(VOLUME_DOWN_BUTTON_IDX);
     
-    gpio_controller->setInterruptTypeForPin(0x14, 0x00000010);
-    gpio_controller->registerInterrupt(0x14, nullptr, [](OSObject *target, void *refCon,
-                                                         IOService *nub, int source){
-        IOLog("mydebug::0x14 occurred!!!!\n");
-    }, 0);
-    
     PMinit();
     acpi_device->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
@@ -189,7 +183,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         goto exit;
     }
     
-    IOLog("%s::started\n", getName());
     button_device->retain();
     return true;
 exit:
@@ -281,7 +274,6 @@ void SurfaceButtonDriver::releaseResources() {
         OSSafeReleaseNULL(interrupt_source[VOLUME_DOWN_BUTTON_IDX]);
     }
     if (command_gate) {
-        command_gate->disable();
         work_loop->removeEventSource(command_gate);
         OSSafeReleaseNULL(command_gate);
     }

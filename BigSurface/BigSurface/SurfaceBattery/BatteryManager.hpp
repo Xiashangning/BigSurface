@@ -75,6 +75,8 @@ public:
 	 *  @return calculated value
 	 */
 	UInt16 calculateBatteryStatus(UInt8 index);
+    
+    AbsoluteTime lastAccess {0};
 
 private:
 	/**
@@ -128,9 +130,7 @@ private:
     
     bool updateAdapterStatus(UInt8 index, UInt32 psr);
     
-    bool needUpdateBIX(UInt8 index, bool connected);
-    
-    bool needUpdateBST(UInt8 index);
+    bool needUpdateBIX(UInt8 index);
 };
 
 #endif /* BatteryManagerBase_hpp */

@@ -41,12 +41,14 @@ void SurfaceBattery::getStringFromArray(OSArray *array, UInt32 index, char *dst,
 void SurfaceBattery::reset() {
     IOSimpleLockLock(batteryInfoLock);
     *batteryInfo = BatteryInfo{};
+    hasBIX = false;
     IOSimpleLockUnlock(batteryInfoLock);
 }
 
 void SurfaceBattery::updateInfoExtended(OSArray *bix) {
     BatteryInfo bi;
     bi.connected = true;
+    clock_get_uptime(&bi.lastBIXUpdateTime);
 
     if (getNumberFromArray(bix, BIXPowerUnit) == 0)
         bi.state.powerUnitIsWatt = true;
@@ -97,23 +99,16 @@ bool SurfaceBattery::updateStatus(UInt32 *bst) {
 
     if (!st.averageRate) {
         st.averageRate = st.presentRate;
-    } else { // We take a 5 minutes window
+    } else { // We will take a 1 minutes window
         AbsoluteTime cur_time;
         UInt64 nsecs;
         clock_get_uptime(&cur_time);
         SUB_ABSOLUTETIME(&cur_time, &st.lastUpdateTime);
         absolutetime_to_nanoseconds(cur_time, &nsecs);
-        UInt32 secs = (UInt32)(nsecs/1000000000);
-        st.averageRate = (5*60*st.averageRate + secs*st.presentRate)/(5*60+secs);
+        UInt32 msecs = (UInt32)(nsecs/1000000);
+        st.averageRate = (60000*st.averageRate + msecs*st.presentRate)/(60000+msecs);
     }
     clock_get_uptime(&st.lastUpdateTime);
-
-//    UInt32 highAverageBound = st.presentRate * (100 + AverageBoundPercent) / 100;
-//    UInt32 lowAverageBound  = st.presentRate * (100 - AverageBoundPercent) / 100;
-//    if (st.averageRate > highAverageBound)
-//        st.averageRate = highAverageBound;
-//    if (st.averageRate < lowAverageBound)
-//        st.averageRate = lowAverageBound;
 
 	// Remaining capacity
 	st.averageTimeToEmpty = st.averageRate ? 60 * st.remainingCapacity / st.averageRate : 60 * st.remainingCapacity / defaultRate;

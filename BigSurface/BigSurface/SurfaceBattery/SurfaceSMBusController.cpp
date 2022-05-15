@@ -311,6 +311,10 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
         IOLog("%s::startRequest failed to append a request\n", getName());
 		return kIOSMBusStatusUnknownFailure;
 	}
+    
+    IOSimpleLockLock(BatteryManager::getShared()->stateLock);
+    clock_get_uptime(&BatteryManager::getShared()->lastAccess);
+    IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
 
 	return result;
 }

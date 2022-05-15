@@ -76,11 +76,15 @@ public:
     
     void unregisterEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
     
+    bool init(OSDictionary* properties) override;
+    
     IOService* probe(IOService* provider, SInt32* score) override;
 
     bool start(IOService* provider) override;
 
     void stop(IOService* provider) override;
+    
+    void free() override;
     
     IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
     
@@ -101,9 +105,11 @@ private:
     unsigned int            _pos {0};
     int                     msg_len {-1};
     bool                    partial_syn {false};
-    PendingCommand*         pending_commands {nullptr};
-    WaitingRequest*         waiting_requests {nullptr};
-    SurfaceSerialHubClient* event_handler[33] {nullptr};
+    PendingCommand          pending_commands;
+    PendingCommand*         last_pending;
+    WaitingRequest          waiting_requests;
+    WaitingRequest*         last_waiting;
+    SurfaceSerialHubClient* event_handler[REQID_MIN];
     CircleIDCounter         seq_counter {CircleIDCounter(0x00, 0xff)};
     CircleIDCounter         req_counter {CircleIDCounter(REQID_MIN, 0xffff)};
     UInt32                  baudrate {0};
@@ -113,6 +119,8 @@ private:
     UInt16                  fifo_size {0};
     
     IOReturn sendACK(UInt8 seq_id);
+    
+    IOReturn sendNAK();
     
     IOReturn processMessage();
     

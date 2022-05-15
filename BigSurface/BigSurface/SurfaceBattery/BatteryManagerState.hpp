@@ -95,6 +95,7 @@ struct BatteryInfo {
 	char batteryType[MaxStringLen] {};
 	char manufacturer[MaxStringLen] {};
 	bool connected {false};
+    AbsoluteTime lastBIXUpdateTime {0};
 	BatteryManufacturerData batteryManufacturerData {};
 
 	/**

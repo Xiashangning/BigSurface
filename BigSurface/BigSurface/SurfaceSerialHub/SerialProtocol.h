@@ -64,6 +64,10 @@
 #define SSH_CID_BAT_PMAX            0x0B
 #define SSH_CID_BAT_PSOC            0x0C
 #define SSH_CID_BAT_PSR             0x0D
+#define SSH_EVENT_CID_BAT_BIX       0x15
+#define SSH_EVENT_CID_BAT_BST       0x16
+#define SSH_EVENT_CID_BAT_PSR       0x17
+
 /* TC=0x03 */
 #define SSH_CID_TMP_SENSOR          0x01
 #define SSH_CID_TMP_GET_PERF        0x02

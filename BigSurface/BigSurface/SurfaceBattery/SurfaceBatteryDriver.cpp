@@ -18,76 +18,123 @@
 OSDefineMetaClassAndStructors(SurfaceBatteryDriver, SurfaceSerialHubClient)
 
 void SurfaceBatteryDriver::eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) {
-    if (cid == 0x15)
-        update_bix_idx = iid;
-    else if (cid == 0x16)
-        update_bst_idx = iid;
-    else if (cid == 0x17)
-        update_adp_idx = iid;
-    interrupt_source->interruptOccurred(nullptr, this, 0);
+    if (cid == SSH_EVENT_CID_BAT_BIX)
+        update_bix->interruptOccurred(nullptr, this, iid);
+    else if (cid == SSH_EVENT_CID_BAT_BST) {
+        if (!quick_cnt)
+            quick_cnt = BST_UPDATE_QUICK_CNT + 1;
+        update_bst->interruptOccurred(nullptr, this, iid);
+    }
+    // we don't need to deal with EVENT_PSR here because PSR always comes with BST changes
 }
 
-void SurfaceBatteryDriver::updateStatus(OSObject *target, void *refCon, IOService *nubDevice, int source) {
+void SurfaceBatteryDriver::updateBatteryInformation(OSObject *target, void *refCon, IOService *nubDevice, int iid) {
     if (!awake)
         return;
-    bool power_connected = false;
-    bool bix_fail = false;
+    
     bool battery_connection[BatteryManagerState::MaxBatteriesSupported] = {false};
-    for (UInt8 i=1; i<=BatteryManager::getShared()->adapterCount; i++) {
-        if (!update_adp_idx || i == update_adp_idx) {
-            UInt32 psr;
-            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_PSR, nullptr, 0, true, reinterpret_cast<UInt8*>(&psr), 4) != kIOReturnSuccess) {
-                LOG("Failed to get PSR for index %d!", i);
-            } else {
-                power_connected |= BatteryManager::getShared()->updateAdapterStatus(i-1, psr);
+    bool fail_this_time = false;
+    
+    for (UInt8 i=1; i<=BatteryManager::getShared()->batteriesCount; i++) {
+        if (!iid || i == iid) {
+            UInt32 sta;
+            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_STA, nullptr, 0, true, reinterpret_cast<UInt8*>(&sta), 4) != kIOReturnSuccess) {
+                LOG("Failed to get STA for index %d!", i);
+                continue;
+            }
+            battery_connection[i-1] = (sta & 0x10) ? true : false;
+            if (!battery_connection[i-1])
+                BatteryManager::getShared()->updateBatteryInfoExtended(i-1, nullptr); // reset battery
+            else if (BatteryManager::getShared()->needUpdateBIX(i-1)) {
+                UInt8 bix[119];
+                if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BIX, nullptr, 0, true, bix, 119) != kIOReturnSuccess) {
+                    LOG("Failed to get BIX for battery %d!", i);
+                    fail_this_time = true;
+                    continue;
+                } else
+                    BatteryManager::getShared()->updateBatteryInfoExtended(i-1, bix);
             }
         }
     }
-    update_adp_idx = -1;
-    BatteryManager::getShared()->externalPowerNotify(power_connected);
     
-    for (UInt8 i=1; i<=BatteryManager::getShared()->batteriesCount; i++) {
-        UInt32 sta;
-        if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_STA, nullptr, 0, true, reinterpret_cast<UInt8*>(&sta), 4) != kIOReturnSuccess) {
-            LOG("Failed to get STA for index %d!", i);
-            continue;
+    if (fail_this_time)
+        bix_fail = true;
+    else
+        bix_fail = false;
+}
+
+void SurfaceBatteryDriver::updateBatteryStatus(OSObject *target, void *refCon, IOService *nubDevice, int iid) {
+    if (!awake)
+        return;
+    
+    timer->cancelTimeout();
+    bool fail = false;
+    
+    if (bix_fail)
+        updateBatteryInformation(this, nullptr, this, 0);
+    
+    power_connected = false;
+    for (UInt8 i=1; i<=BatteryManager::getShared()->adapterCount; i++) {
+        if (!iid || i == iid) {
+            UInt32 psr;
+            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_PSR, nullptr, 0, true, reinterpret_cast<UInt8*>(&psr), 4) != kIOReturnSuccess)
+                LOG("Failed to get PSR for index %d!", i);
+            else
+                power_connected |= BatteryManager::getShared()->updateAdapterStatus(i-1, psr);
         }
-        battery_connection[i-1] = (sta & 0x10) ? true : false;
-        if (!update_bix_idx || i == update_bix_idx) {
-            if (!battery_connection[i-1])
-                BatteryManager::getShared()->updateBatteryInfoExtended(i-1, nullptr); // reset battery
-            else if (BatteryManager::getShared()->needUpdateBIX(i-1, battery_connection[i-1])) {
-                UInt8 bix[119];
-                if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BIX, nullptr, 0, true, bix, 119) != kIOReturnSuccess) {
-                    LOG("Failed to get BIX for index %d!", i);
-                    bix_fail = true;
+    }
+
+    for (UInt8 i=1; i<=BatteryManager::getShared()->batteriesCount; i++) {
+        if (!iid || i == iid) {
+            UInt32 sta;
+            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_STA, nullptr, 0, true, reinterpret_cast<UInt8*>(&sta), 4) != kIOReturnSuccess) {
+                LOG("Failed to get STA for index %d!", i);
+                continue;
+            }
+            bool battery_connected = (sta & 0x10) ? true : false;
+            if (battery_connected) {
+                UInt8 bst[16];
+                if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BST, nullptr, 0, true, bst, 16) != kIOReturnSuccess) {
+                    LOG("Failed to get BST for battery %d!", i);
+                    fail = true;
                     continue;
-                } else {
-                    BatteryManager::getShared()->updateBatteryInfoExtended(i-1, bix);
+                } else
+                    BatteryManager::getShared()->updateBatteryStatus(i-1, bst);
+                
+                if (i == 1) {   // temp for primary battery
+                    UInt16 temp;
+                    if (ssh->getResponse(SSH_TC_TMP, SSH_TID_PRIMARY, TEMP_SENSOR_BAT, SSH_CID_TMP_SENSOR, nullptr, 0, true, reinterpret_cast<UInt8*>(&temp), 2) != kIOReturnSuccess)
+                        LOG("Failed to get battery temperature!");
+                    else
+                        BatteryManager::getShared()->updateBatteryTemperature(0, temp);
                 }
             }
         }
-        if (!bix_fail && battery_connection[i-1] && (!update_bst_idx || i == update_bst_idx) && BatteryManager::getShared()->needUpdateBST(i-1)) {
-            UInt8 bst[16];
-            if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BST, nullptr, 0, true, bst, 16) != kIOReturnSuccess) {
-                LOG("Failed to get BST for index %d!", i);
-            } else {
-                BatteryManager::getShared()->updateBatteryStatus(i-1, bst);
-            }
-        }
     }
-    if (update_bst_idx != -1) {
-        UInt16 temp;
-        if (ssh->getResponse(SSH_TC_TMP, SSH_TID_PRIMARY, TEMP_SENSOR_BAT, SSH_CID_TMP_SENSOR, nullptr, 0, true, reinterpret_cast<UInt8*>(&temp), 2) != kIOReturnSuccess) {
-            LOG("Failed to get battery temperature!");
-        } else {
-            BatteryManager::getShared()->updateBatteryTemperature(0, temp);
-        }
-    }
-    if (!bix_fail)
-        update_bix_idx = -1;
-    update_bst_idx = -1;
+    
+    BatteryManager::getShared()->externalPowerNotify(false);
     BatteryManager::getShared()->informStatusChanged();
+    
+    if (fail) {
+        timer->setTimeoutMS(BST_UPDATE_FAIL);
+    } else if (--quick_cnt) {
+        timer->setTimeoutMS(BST_UPDATE_QUICK);
+    } else {    // sync normal update interval
+        AbsoluteTime cur_time;
+        UInt64 nsecs;
+        clock_get_uptime(&cur_time);
+        SUB_ABSOLUTETIME(&cur_time, &BatteryManager::getShared()->lastAccess);
+        absolutetime_to_nanoseconds(cur_time, &nsecs);
+        UInt8 timerDelta = nsecs / (1000000 * BST_UPDATE_QUICK);
+        if (timerDelta < BST_UPDATE_NORMAL/BST_UPDATE_QUICK - 5)
+            timer->setTimeoutMS(BST_UPDATE_NORMAL - (2 + timerDelta) * BST_UPDATE_QUICK);
+        else
+            timer->setTimeoutMS(BST_UPDATE_NORMAL);
+    }
+}
+
+void SurfaceBatteryDriver::pollBatteryStatus(OSObject *target, IOTimerEventSource *sender) {
+    updateBatteryStatus(this, nullptr, this, 0);
 }
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
@@ -98,7 +145,15 @@ IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
     if (!ssh)
         return nullptr;
     
-    BatteryManager::createShared(1, 1);
+    OSNumber *bat_cnt_prop = OSDynamicCast(OSNumber, getProperty("BatteryCount"));
+    UInt32 bat_cnt = 1;
+    if (bat_cnt_prop) {
+        bat_cnt = bat_cnt_prop->unsigned32BitValue();
+    } else {
+        LOG("Fall back to default: battery count = 1");
+    }
+    
+    BatteryManager::createShared(bat_cnt, 1);
 
 	//TODO: implement the keys below as well
 	// IB0R: sp4s or sp5s
@@ -131,30 +186,24 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
         LOG("Could not get work loop!");
         return false;
     }
-    interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateStatus));
-    if (!interrupt_source || (work_loop->addEventSource(interrupt_source)!=kIOReturnSuccess)) {
-        LOG("Could not register interrupt!");
-        OSSafeReleaseNULL(work_loop);
-        return false;
-    }
-    timer = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-        auto self = OSDynamicCast(SurfaceBatteryDriver, object);
-        if (self) {
-            self->update_bst_idx = 0;
-            self->updateStatus(nullptr, nullptr, self, 0);
-            sender->setTimeoutMS(30000);
-        }
-    });
-    if (!timer || (work_loop->addEventSource(timer)!=kIOReturnSuccess)) {
+    
+    timer = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceBatteryDriver::pollBatteryStatus));
+    if (!timer || (work_loop->addEventSource(timer) != kIOReturnSuccess)) {
         LOG("Could not create timer!");
-        work_loop->removeEventSource(interrupt_source);
-        OSSafeReleaseNULL(interrupt_source);
-        OSSafeReleaseNULL(work_loop);
+        releaseResources();
         return false;
     }
-    timer->setTimeoutMS(5000);
-    timer->enable();
-
+    
+    update_bix = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryInformation));
+    update_bst = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryStatus));
+    if (!update_bix || !update_bst ||
+        work_loop->addEventSource(update_bix) != kIOReturnSuccess ||
+        work_loop->addEventSource(update_bst) != kIOReturnSuccess) {
+        LOG("Could not register interrupt!");
+        releaseResources();
+        return false;
+    }
+    
 	//WARNING: watch out, key addition is sorted here!
 	const auto adaptCount = BatteryManager::getShared()->adapterCount;
 	if (adaptCount > 0) {
@@ -203,8 +252,14 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
 
 	vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
+    if (!vsmcNotifier) {
+        PMstop();
+        releaseResources();
+        return false;
+    }
+    
     registerService();
-	return vsmcNotifier != nullptr;
+	return true;
 }
 
 bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier) {
@@ -221,20 +276,28 @@ bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, 
 	return false;
 }
 
-void SurfaceBatteryDriver::stop(IOService *provider) {
-    PMstop();
+void SurfaceBatteryDriver::releaseResources() {
     if (timer) {
         timer->disable();
         work_loop->removeEventSource(timer);
         OSSafeReleaseNULL(timer);
     }
-    if (interrupt_source) {
-        interrupt_source->disable();
-        work_loop->removeEventSource(interrupt_source);
-        OSSafeReleaseNULL(interrupt_source);
+    if (update_bix) {
+        update_bix->disable();
+        work_loop->removeEventSource(update_bix);
+        OSSafeReleaseNULL(update_bix);
+    }
+    if (update_bst) {
+        update_bst->disable();
+        work_loop->removeEventSource(update_bst);
+        OSSafeReleaseNULL(update_bst);
     }
     OSSafeReleaseNULL(work_loop);
-    
+}
+
+void SurfaceBatteryDriver::stop(IOService *provider) {
+    PMstop();
+    releaseResources();
     super::stop(provider);
 //	PANIC("SurfaceBatteryDriver", "called stop!!!");
 }
@@ -251,9 +314,9 @@ IOReturn SurfaceBatteryDriver::setProperties(OSObject *props) {
                 OSNumber *mode = OSDynamicCast(OSNumber, dict->getObject(key));
                 if (mode) {
                     UInt32 m = mode->unsigned32BitValue();
-                    IOLog("%s::Set performance mode to %d\n", getName(), m);
+                    LOG("Set performance mode to %d", m);
                     if (!ssh->sendCommand(SSH_TC_TMP, SSH_TID_PRIMARY, 0, SSH_CID_TMP_SET_PERF, reinterpret_cast<UInt8*>(&m), 4, true)) {
-                        IOLog("%s::Set performance failed!\n", getName());
+                        LOG("Set performance failed!");
                     }
                 }
             }
@@ -268,30 +331,35 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
-            ssh->unregisterEvent(SSH_TC_BAT, 0x00, this);
-            interrupt_source->disable();
             awake = false;
+            timer->cancelTimeout();
+            timer->disable();
+            ssh->unregisterEvent(SSH_TC_BAT, 0x00, this);
+            update_bix->disable();
+            update_bst->disable();
             IOLog("%s::Going to sleep\n", getName());
         }
     } else {
         if (!awake) {
             awake = true;
-            interrupt_source->enable();
+            timer->setTimeoutMS(5000);
+            timer->enable();
+            update_bix->enable();
+            update_bst->enable();
             // register battery event
             if (ssh->registerEvent(SSH_TC_BAT, 0x00, this) != kIOReturnSuccess) {
                 LOG("Battery event registration failed!");
             }
-            // update info
-            update_bix_idx = update_bst_idx = update_adp_idx = 0;
-            interrupt_source->interruptOccurred(nullptr, this, 0);
+            bix_fail = true;
+            updateBatteryStatus(this, nullptr, this, 0);
             
             // set performance mode
             OSNumber *mode = OSDynamicCast(OSNumber, getProperty("PerformanceMode"));
             if (mode) {
                 UInt32 m = mode->unsigned32BitValue();
-                IOLog("%s::Set performance mode to %d\n", getName(), m);
+                LOG("Set performance mode to %d", m);
                 if (!ssh->sendCommand(SSH_TC_TMP, SSH_TID_PRIMARY, 0, SSH_CID_TMP_SET_PERF, reinterpret_cast<UInt8*>(&m), 4, true)) {
-                    IOLog("%s::Set performance failed!\n", getName());
+                    LOG("Set performance failed!");
                 }
             }
             IOLog("%s::Woke up\n", getName());

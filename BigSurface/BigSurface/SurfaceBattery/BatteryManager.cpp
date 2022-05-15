@@ -43,28 +43,21 @@ void BatteryInfo::validateData(SInt32 id) {
     IOLog("BatteryInfo::battery %d cycle count %u remaining capacity %u\n", id, cycle, state.lastFullChargeCapacity);
 }
 
-bool BatteryManager::needUpdateBIX(UInt8 index, bool connected) {
+bool BatteryManager::needUpdateBIX(UInt8 index) {
     bool ret;
     
     IOSimpleLockLock(stateLock);
-    ret = connected != state.btInfo[index].connected;
+    ret = !state.btInfo[index].connected;
+    if (!ret) {
+        AbsoluteTime cur_time;
+        UInt64 nsecs;
+        clock_get_uptime(&cur_time);
+        SUB_ABSOLUTETIME(&cur_time, &state.btInfo[index].lastBIXUpdateTime);
+        absolutetime_to_nanoseconds(cur_time, &nsecs);
+        if (nsecs > 60000000000) // > 60s
+            ret = true;
+    }
     IOSimpleLockUnlock(stateLock);
-    
-    return ret;
-}
-
-bool BatteryManager::needUpdateBST(UInt8 index) {
-    bool ret = false;
-    
-    IOSimpleLockLock(stateLock);
-    AbsoluteTime cur_time;
-    UInt64 nsecs;
-    clock_get_uptime(&cur_time);
-    SUB_ABSOLUTETIME(&cur_time, &state.btInfo[index].state.lastUpdateTime);
-    IOSimpleLockUnlock(stateLock);
-    absolutetime_to_nanoseconds(cur_time, &nsecs);
-    if (nsecs > 1000000000) // > 1s
-        ret = true;
     
     return ret;
 }

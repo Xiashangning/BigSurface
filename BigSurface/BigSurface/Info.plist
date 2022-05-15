@@ -42,7 +42,7 @@
 			<key>IOPropertyMatch</key>
 			<dict>
 				<key>name</key>
-				<string>MSHW0184</string>
+				<string>#MSHW0184</string>
 			</dict>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
@@ -56,6 +56,8 @@
 			<key>IOProviderClass</key>
 			<string>SurfaceSerialHubDriver</string>
 			<key>PerformanceMode</key>
+			<integer>1</integer>
+			<key>BatteryCount</key>
 			<integer>1</integer>
 		</dict>
 		<key>Surface Button</key>
