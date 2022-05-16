@@ -52,7 +52,7 @@ struct BatteryInfo {
 		SInt32 signedAverageRateHW {0};
 		UInt32 timeToFull {0};
 		UInt32 timeToFullHW {0};
-		UInt8 chargeLevel {0};
+		UInt8  chargeLevel {0};
 		UInt32 designCapacityWarning {0};
 		UInt32 designCapacityLow {0};
 		UInt16 temperatureDecikelvin {2931};

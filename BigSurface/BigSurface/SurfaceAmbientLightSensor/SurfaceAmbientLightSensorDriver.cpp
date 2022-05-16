@@ -97,8 +97,8 @@ void SurfaceAmbientLightSensorDriver::stop(IOService* provider) {
     writeRegister(APDS9960_ENABLE, 0x00);
     PMstop();
     releaseResources();
-//    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
     super::stop(provider);
+//    PANIC("SurfaceAmbientLightSensorDriver", "called stop!!!");
 }
 
 bool SurfaceAmbientLightSensorDriver::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier) {

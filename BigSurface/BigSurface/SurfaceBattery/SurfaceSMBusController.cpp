@@ -134,10 +134,14 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
 				case kBReadCellVoltage1Cmd:
 				case kBReadCellVoltage2Cmd:
 				case kBReadCellVoltage3Cmd:
-				case kBReadCellVoltage4Cmd: {
-					setReceiveData(transaction, defaultBatteryCellVoltage);
-					break;
-				}
+				case kBReadCellVoltage4Cmd:
+                case kBVoltageCmd: {
+                    IOSimpleLockLock(BatteryManager::getShared()->stateLock);
+                    auto value = BatteryManager::getShared()->state.btInfo[0].state.presentVoltage;
+                    IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
+                    setReceiveData(transaction, value);
+                    break;
+                }
 				case kBCurrentCmd: {
 					IOSimpleLockLock(BatteryManager::getShared()->stateLock);
 					auto value = BatteryManager::getShared()->state.btInfo[0].state.signedPresentRate;
@@ -165,13 +169,6 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
 				case kBAverageTimeToEmptyCmd: {
 					IOSimpleLockLock(BatteryManager::getShared()->stateLock);
 					auto value = BatteryManager::getShared()->state.btInfo[0].state.averageTimeToEmpty;
-					IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
-					setReceiveData(transaction, value);
-					break;
-				}
-				case kBVoltageCmd: {
-					IOSimpleLockLock(BatteryManager::getShared()->stateLock);
-					auto value = BatteryManager::getShared()->state.btInfo[0].state.presentVoltage;
 					IOSimpleLockUnlock(BatteryManager::getShared()->stateLock);
 					setReceiveData(transaction, value);
 					break;

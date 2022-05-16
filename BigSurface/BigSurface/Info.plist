@@ -53,8 +53,12 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
 			<string>SurfaceBatteryDriver</string>
+			<key>IOMatchCategory</key>
+			<string>SurfaceBatteryDriver</string>
 			<key>IOProviderClass</key>
-			<string>SurfaceSerialHubDriver</string>
+			<string>IOResources</string>
+			<key>IOResourceMatch</key>
+			<string>IOKit</string>
 			<key>PerformanceMode</key>
 			<integer>1</integer>
 			<key>BatteryCount</key>

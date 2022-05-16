@@ -206,8 +206,9 @@ IOReturn SurfaceSerialHubDriver::processMessage() {
                     }
                     waiting_pos = waiting_pos->next;
                 }
-                if (!found)
-                    ERR_DUMP_MSG("Warning, received data with unknown req_id");
+                // it seems that new version of SAM regularly sends some unknown events
+//                if (!found)
+//                    LOG("Warning, received data with unknown tc %x, req_id %x", command->target_category, command->request_id);
             } else {
                 if (event_handler[command->request_id]) {
                     event_handler[command->request_id]->eventReceived(command->target_category, command->instance_id, command->command_id, rx_data, rx_data_len);
@@ -460,8 +461,6 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
 }
 
 bool SurfaceSerialHubDriver::start(IOService *provider) {
-    UInt8 sam_version[4];
-    UInt8 ret;
     UInt32 version;
     if (!super::start(provider))
         return false;
@@ -491,34 +490,23 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
         LOG("Could not register interrupt!");
         goto exit;
     }
-    interrupt_source->enable();
     
     rx_buffer = new UInt8[fifo_size];
     rx_buffer_len = 0;
     
-    PMinit();
-    uart_controller->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
-
     if (uart_controller->requestConnect(this, baudrate, data_bits, stop_bits, parity) != kIOReturnSuccess) {
         LOG("UARTController already occupied!");
         goto exit;
     }
-    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_VERSION, nullptr, 0, true, sam_version, 4) != kIOReturnSuccess) {
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_VERSION, nullptr, 0, true, reinterpret_cast<UInt8 *>(&version), 4) != kIOReturnSuccess) {
         LOG("Failed to get SAM version from UART!");
         goto exit;
     }
-    version = *(reinterpret_cast<UInt32 *>(sam_version));
     LOG("SAM version %u.%u.%u", (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
     
-    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-        LOG("Unexpected response from D0-entry notification");
-        goto exit;
-    }
-    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-        LOG("Unexpected response from display-on notification");
-        goto exit;
-    }
+    PMinit();
+    uart_controller->joinPMtree(this);
+    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
     return true;
@@ -528,17 +516,15 @@ exit:
 }
 
 void SurfaceSerialHubDriver::stop(IOService *provider) {
-    LOG("stopped");
-    if (uart_controller) {
-        UInt8 ret;
-        if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-            LOG("Unexpected response from display-off notification");
-        }
-        if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
-            LOG("Unexpected response from d0-exit notification");
-        }
-        uart_controller->requestDisconnect(this);
+    UInt8 ret;
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+        LOG("Unexpected response from display-off notification");
     }
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+        LOG("Unexpected response from d0-exit notification");
+    }
+    uart_controller->requestDisconnect(this);
+    
     PMstop();
     releaseResources();
     super::stop(provider);
@@ -553,6 +539,13 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
         return kIOReturnInvalid;
     if (whichState == 0) {
         if (awake) {
+            UInt8 ret;
+            if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+                LOG("Unexpected response from display-off notification");
+            }
+            if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+                LOG("Unexpected response from d0-exit notification");
+            }
             awake = false;
             interrupt_source->disable();
             LOG("Going to sleep");
@@ -561,6 +554,13 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
         if (!awake) {
             awake = true;
             interrupt_source->enable();
+            UInt8 ret;
+            if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+                LOG("Unexpected response from D0-entry notification");
+            }
+            if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+                LOG("Unexpected response from display-on notification");
+            }
             LOG("Woke up");
         }
     }
@@ -608,14 +608,14 @@ VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
     VoodooUARTController* uart = nullptr;
 
     // Wait for UART controller, up to 2 second
-    OSDictionary* name_match = IOService::serviceMatching("VoodooUARTController");
+    OSDictionary* name_match = serviceMatching("VoodooUARTController");
     IOService* matched = waitForMatchingService(name_match, 2000000000);
     uart = OSDynamicCast(VoodooUARTController, matched);
 
     if (uart) {
         LOG("Got UART Controller! %s", uart->getName());
     }
-    name_match->release();
+    OSSafeReleaseNULL(name_match);
     OSSafeReleaseNULL(matched);
     return uart;
 }

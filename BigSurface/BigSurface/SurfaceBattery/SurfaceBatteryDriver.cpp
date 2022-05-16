@@ -33,7 +33,6 @@ void SurfaceBatteryDriver::updateBatteryInformation(OSObject *target, void *refC
         return;
     
     bool battery_connection[BatteryManagerState::MaxBatteriesSupported] = {false};
-    bool fail_this_time = false;
     
     for (UInt8 i=1; i<=BatteryManager::getShared()->batteriesCount; i++) {
         if (!iid || i == iid) {
@@ -49,18 +48,13 @@ void SurfaceBatteryDriver::updateBatteryInformation(OSObject *target, void *refC
                 UInt8 bix[119];
                 if (ssh->getResponse(SSH_TC_BAT, SSH_TID_PRIMARY, i, SSH_CID_BAT_BIX, nullptr, 0, true, bix, 119) != kIOReturnSuccess) {
                     LOG("Failed to get BIX for battery %d!", i);
-                    fail_this_time = true;
+                    bix_fail = true;
                     continue;
                 } else
                     BatteryManager::getShared()->updateBatteryInfoExtended(i-1, bix);
             }
         }
     }
-    
-    if (fail_this_time)
-        bix_fail = true;
-    else
-        bix_fail = false;
 }
 
 void SurfaceBatteryDriver::updateBatteryStatus(OSObject *target, void *refCon, IOService *nubDevice, int iid) {
@@ -116,7 +110,7 @@ void SurfaceBatteryDriver::updateBatteryStatus(OSObject *target, void *refCon, I
     BatteryManager::getShared()->informStatusChanged();
     
     if (fail) {
-        timer->setTimeoutMS(BST_UPDATE_FAIL);
+        timer->setTimeoutMS(BST_UPDATE_QUICK);
     } else if (--quick_cnt) {
         timer->setTimeoutMS(BST_UPDATE_QUICK);
     } else {    // sync normal update interval
@@ -139,10 +133,6 @@ void SurfaceBatteryDriver::pollBatteryStatus(OSObject *target, IOTimerEventSourc
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
 	if (!super::probe(provider, score))
-        return nullptr;
-    
-    ssh = OSDynamicCast(SurfaceSerialHubDriver, provider);
-    if (!ssh)
         return nullptr;
     
     OSNumber *bat_cnt_prop = OSDynamicCast(OSNumber, getProperty("BatteryCount"));
@@ -168,18 +158,22 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 		return false;
 
 	// AppleSMC presence is a requirement, wait for it.
-	auto dict = IOService::nameMatching("AppleSMC");
-	if (!dict) {
-		LOG("Failed to create applesmc matching dictionary");
-		return false;
-	}
-	auto applesmc = IOService::waitForMatchingService(dict, 5000000000);
-	dict->release();
+	auto dict = nameMatching("AppleSMC");
+	auto applesmc = waitForMatchingService(dict, 5000000000);
 	if (!applesmc) {
 		LOG("Timeout in waiting for AppleSMC");
 		return false;
 	}
-	applesmc->release();
+    OSSafeReleaseNULL(dict);
+    OSSafeReleaseNULL(applesmc);
+    
+    ssh = getSurfaceSerialHub();
+    if (!ssh) {
+        LOG("Could not find Surface Serial Hub, exiting");
+        return false;
+    }
+    // Give the Surface Serial Hub some time to load
+    IOSleep(500);
     
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
@@ -278,6 +272,7 @@ bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, 
 
 void SurfaceBatteryDriver::releaseResources() {
     if (timer) {
+        timer->cancelTimeout();
         timer->disable();
         work_loop->removeEventSource(timer);
         OSSafeReleaseNULL(timer);
@@ -299,7 +294,22 @@ void SurfaceBatteryDriver::stop(IOService *provider) {
     PMstop();
     releaseResources();
     super::stop(provider);
-//	PANIC("SurfaceBatteryDriver", "called stop!!!");
+}
+
+SurfaceSerialHubDriver* SurfaceBatteryDriver::getSurfaceSerialHub() {
+    SurfaceSerialHubDriver* ssh_driver = nullptr;
+
+    // Wait for Surface Serial Hub, up to 2 second
+    OSDictionary* name_match = serviceMatching("SurfaceSerialHubDriver");
+    IOService* matched = waitForMatchingService(name_match, 2000000000);
+    ssh_driver = OSDynamicCast(SurfaceSerialHubDriver, matched);
+
+    if (ssh_driver) {
+        LOG("Got Surface Serial Hub! %s", ssh_driver->getName());
+    }
+    OSSafeReleaseNULL(name_match);
+    OSSafeReleaseNULL(matched);
+    return ssh_driver;
 }
 
 IOReturn SurfaceBatteryDriver::setProperties(OSObject *props) {
@@ -342,8 +352,8 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
     } else {
         if (!awake) {
             awake = true;
-            timer->setTimeoutMS(5000);
             timer->enable();
+            timer->setTimeoutMS(5000);
             update_bix->enable();
             update_bst->enable();
             // register battery event

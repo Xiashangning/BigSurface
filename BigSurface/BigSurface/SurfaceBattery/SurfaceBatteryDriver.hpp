@@ -22,10 +22,9 @@
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 #include "../SurfaceSerialHub/SerialProtocol.h"
 
-#define BST_UPDATE_FAIL     500
-#define BST_UPDATE_QUICK    1000
+#define BST_UPDATE_QUICK    500
 #define BST_UPDATE_NORMAL   30000
-#define BST_UPDATE_QUICK_CNT    5
+#define BST_UPDATE_QUICK_CNT    10
 
 class EXPORT SurfaceBatteryDriver : public SurfaceSerialHubClient {
 	OSDeclareDefaultStructors(SurfaceBatteryDriver)
@@ -110,10 +109,10 @@ private:
     bool power_connected {false};
     bool bix_fail {false};
     int quick_cnt {0};
-    
+
+    SurfaceSerialHubDriver* getSurfaceSerialHub();
     void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int iid);
     void updateBatteryStatus(OSObject* target, void* refCon, IOService* nubDevice, int iid);
-    
     void pollBatteryStatus(OSObject* target, IOTimerEventSource* sender);
     
     void releaseResources();
