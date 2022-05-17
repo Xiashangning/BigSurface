@@ -19,7 +19,7 @@
 
 #define REQID_MIN 34
 
-#define ACK_TIMEOUT 200
+#define ACK_TIMEOUT 100
 
 class CircleIDCounter {
 private:
@@ -59,7 +59,7 @@ class EXPORT SurfaceSerialHubClient : public IOService {
     OSDeclareAbstractStructors(SurfaceSerialHubClient);
     
 public:
-    virtual void eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) = 0;
+    virtual void eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) = 0;
 };
 
 class EXPORT SurfaceSerialHubDriver : public VoodooUARTClient {
@@ -68,9 +68,9 @@ class EXPORT SurfaceSerialHubDriver : public VoodooUARTClient {
 public:
     void dataReceived(UInt8 *buffer, UInt16 length) override;
     
-    UInt16 sendCommand(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 size, bool seq);
+    UInt16 sendCommand(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq);
 
-    IOReturn getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 size, bool seq, UInt8 *buffer, UInt16 buffer_size);
+    IOReturn getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq, UInt8 *buffer, UInt16 buffer_len);
 
     IOReturn registerEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
     
@@ -132,7 +132,7 @@ private:
     
     void commandTimeout(OSObject* owner, IOTimerEventSource* timer);
     
-    IOReturn waitResponse(UInt16 *req_id, UInt8 *buffer, UInt16 *buffer_size);
+    IOReturn waitResponse(UInt16 *req_id, UInt8 *buffer, UInt16 *buffer_len);
     
     IOReturn getDeviceResources();
     

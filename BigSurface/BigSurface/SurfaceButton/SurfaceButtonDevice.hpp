@@ -1,6 +1,6 @@
 //
-//  VirtualAppleKeyboard.hpp
-//  VirtualAppleKeyboard
+//  SurfaceButtonDevice.hpp
+//  SurfaceButton
 //
 //  Copyright © 2018-2020 Le Bao Hiep. All rights reserved.
 //
@@ -9,8 +9,8 @@
 
 #include "HIDReport.hpp"
 
-class SurfaceButtonHIDDevice final : public IOHIDDevice {
-    OSDeclareDefaultStructors(SurfaceButtonHIDDevice);
+class SurfaceButtonDevice final : public IOHIDDevice {
+    OSDeclareDefaultStructors(SurfaceButtonDevice);
 private:
     consumer_input csmrreport;
 
@@ -20,8 +20,6 @@ public:
     bool handleStart(IOService *provider) override;
 
     IOReturn newReportDescriptor(IOMemoryDescriptor **descriptor) const override;
-
-    IOReturn getReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) override;
 
     OSString *newManufacturerString() const override;
     OSString *newProductString() const override;

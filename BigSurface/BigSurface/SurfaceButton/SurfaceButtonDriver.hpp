@@ -1,6 +1,6 @@
 //
-//  SurfaceButtons.hpp
-//  SurfaceButtons
+//  SurfaceButtonDriver.hpp
+//  SurfaceButton
 //
 //  Created by Xavier on 22/03/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -18,7 +18,7 @@
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
-#include "SurfaceButtonHIDDevice.hpp"
+#include "SurfaceButtonDevice.hpp"
 
 #define BTN_CNT 3
 
@@ -45,7 +45,7 @@ private:
     bool is_interrupt_started[BTN_CNT] = {false, false, false};
     
     IOACPIPlatformDevice* acpi_device {nullptr};
-    SurfaceButtonHIDDevice* button_device {nullptr};
+    SurfaceButtonDevice* button_device {nullptr};
     
     void startInterrupt(int source);
     

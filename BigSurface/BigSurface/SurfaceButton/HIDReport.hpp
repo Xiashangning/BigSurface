@@ -1,6 +1,6 @@
 //
 //  HIDReport.hpp
-//  VirtualAppleKeyboard
+//  SurfaceButtonDriver
 //
 //  Copyright © 2019 Le Bao Hiep. All rights reserved.
 //
@@ -76,19 +76,6 @@ public:
     consumer_input(void) : report_id_(2) {}
     bool operator==(const consumer_input& other) const { return (memcmp(this, &other, sizeof(*this)) == 0); }
     bool operator!=(const consumer_input& other) const { return !(*this == other); }
-
-private:
-    UInt8 report_id_ __attribute__((unused));
-
-public:
-    keys keys;
-};
-
-class __attribute__((packed)) apple_vendor_top_case_input final {
-public:
-    apple_vendor_top_case_input(void) : report_id_(3) {}
-    bool operator==(const apple_vendor_top_case_input& other) const { return (memcmp(this, &other, sizeof(*this)) == 0); }
-    bool operator!=(const apple_vendor_top_case_input& other) const { return !(*this == other); }
 
 private:
     UInt8 report_id_ __attribute__((unused));

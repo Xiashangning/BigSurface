@@ -22,9 +22,12 @@
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 #include "../SurfaceSerialHub/SerialProtocol.h"
 
-#define BST_UPDATE_QUICK    500
+#define BST_UPDATE_QUICK    1000
 #define BST_UPDATE_NORMAL   30000
-#define BST_UPDATE_QUICK_CNT    10
+#define BST_UPDATE_QUICK_CNT    5
+
+#define BIX_LENGTH          119
+#define BST_LENGTH          16
 
 class EXPORT SurfaceBatteryDriver : public SurfaceSerialHubClient {
 	OSDeclareDefaultStructors(SurfaceBatteryDriver)
@@ -96,7 +99,7 @@ public:
 	
 	static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
     
-    void eventReceived(UInt8 tc, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) override;
+    void eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) override;
     
 private:
     IOWorkLoop*             work_loop {nullptr};
@@ -105,14 +108,14 @@ private:
     IOInterruptEventSource* update_bst {nullptr};
     SurfaceSerialHubDriver* ssh {nullptr};
     
-    bool awake {false};
-    bool power_connected {false};
-    bool bix_fail {false};
-    int quick_cnt {0};
+    bool    awake {false};
+    bool    power_connected {false};
+    bool    bix_fail {false};
+    int     quick_cnt {0};
 
     SurfaceSerialHubDriver* getSurfaceSerialHub();
-    void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int iid);
-    void updateBatteryStatus(OSObject* target, void* refCon, IOService* nubDevice, int iid);
+    void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int count);
+    void updateBatteryStatus(OSObject* target, void* refCon, IOService* nubDevice, int count);
     void pollBatteryStatus(OSObject* target, IOTimerEventSource* sender);
     
     void releaseResources();

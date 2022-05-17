@@ -1,6 +1,6 @@
 //
-//  SurfaceButtons.hpp
-//  SurfaceButtons
+//  SurfaceButtonDriver.hpp
+//  SurfaceButton
 //
 //  Created by Xavier on 22/03/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -177,7 +177,7 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     acpi_device->joinPMtree(this);
     registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
-    button_device = OSTypeAlloc(SurfaceButtonHIDDevice);
+    button_device = OSTypeAlloc(SurfaceButtonDevice);
     if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
         IOLog("%s::Failed to init Surface Button HID Device!", getName());
         goto exit;
