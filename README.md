@@ -13,11 +13,11 @@ You will need to first DELETE all the original VoodooI2C series Kext, and then a
 - Surface Type Cover
   > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
 - Buttons
-  > Problem remains to be solved: Power Button fails after wake from sleep (with deep idle enabled). Might need to investigate into Linux code to see if there are resetting codes when wakeup
 - Ambient Light Sensor
   > ACPI device name: ACSD, attached under I2C4
   > 
   > You can set baseline of ALI in info.plist, the calculation is `base_ali+ALI value from the sensor`
+  > Currently disabled by default (in Info.plist nameMatch)
 - Battery status--Surface Serial Hub **Finally works**
   > I have implemented the UART driver as well as MS's SAM module driver. Now it seems to be working fine and so far no problems are found during the test on serval SP7 devices. 
   > 

@@ -112,6 +112,8 @@ private:
     bool    power_connected {false};
     bool    bix_fail {false};
     int     quick_cnt {0};
+    bool    sync {false};
+    AbsoluteTime last_update {0};
 
     SurfaceSerialHubDriver* getSurfaceSerialHub();
     void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int count);

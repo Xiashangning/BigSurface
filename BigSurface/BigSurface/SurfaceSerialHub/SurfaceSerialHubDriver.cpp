@@ -612,9 +612,9 @@ void SurfaceSerialHubDriver::releaseResources() {
 VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
     VoodooUARTController* uart = nullptr;
 
-    // Wait for UART controller, up to 2 second
+    // Wait for UART controller, up to 5 second (sometimes it takes really a long time for UART to load)
     OSDictionary* name_match = serviceMatching("VoodooUARTController");
-    IOService* matched = waitForMatchingService(name_match, 2000000000);
+    IOService* matched = waitForMatchingService(name_match, 5000000000);
     uart = OSDynamicCast(VoodooUARTController, matched);
 
     if (uart) {
