@@ -1,6 +1,6 @@
 //
 //  SurfaceAmbientLightSensorDriver.cpp
-//  BigSurface
+//  SurfaceAmbientLightSensor
 //
 //  Created by Xia on 2021/10/27.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -109,11 +109,11 @@ bool SurfaceAmbientLightSensorDriver::vsmcNotificationHandler(void *sensors, voi
             IOLog("%s::Plugin submitted\n", self->getName());
             
             self->poller = IOTimerEventSource::timerEventSource(self, OSMemberFunctionCast(IOTimerEventSource::Action, self, &SurfaceAmbientLightSensorDriver::pollALI));
-            if (!self->poller) {
-                IOLog("%s::Could not get timer event source\n", self->getName());
+            if (!self->poller || self->work_loop->addEventSource(self->poller)) {
+                IOLog("%s::Could not create timer event source\n", self->getName());
+                OSSafeReleaseNULL(self->poller);
                 return false;
             }
-            self->work_loop->addEventSource(self->poller);
             self->poller->setTimeoutMS(POLLING_INTERVAL);
             return true;
         } else {

@@ -1,6 +1,6 @@
 //
 //  SurfaceTypeCoverDriver.hpp
-//  BigSurface
+//  SurfaceTypeCover
 //
 //  Created by Xavier on 21/04/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -13,30 +13,23 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOService.h>
 #include <IOKit/IOBufferMemoryDescriptor.h>
-#include <kern/clock.h>
 
-#include "VoodooI2CMultitouchHIDEventDriver.hpp"
+#include "VoodooI2CPrecisionTouchpadHIDEventDriver.hpp"
 
-#define kHIDUsage_Dig_Surface_Switch 0x57
-#define kHIDUsage_Dig_Button_Switch 0x58
+#define KEYBOARD_REPORT_SIZE            4
+#define KEYBOARD_REPORT_CAPSLOCK_INDEX  2
+#define KEYBOARD_CAPSLOCK_ON            0x02
+#define KEYBOARD_CAPSLOCK_OFF           0x00
 
-#define INPUT_MODE_MOUSE 0x00
-#define INPUT_MODE_TOUCHPAD 0x03
-
-typedef struct __attribute__((__packed__)) {
-    UInt8 value;
-    UInt8 reserved;
-} SurfaceTypeCoverDriverFeatureReport;
-
-/* Merged code for Surface Type Cover
- * Thanks VoodooI2C/VoodooI2CHID for most part of the code
+/*
+ * Merged code for Surface Type Cover
+ * Support keyboard & touchpad at the same time
  */
 
-class EXPORT SurfaceTypeCoverDriver : public VoodooI2CMultitouchHIDEventDriver {
-  OSDeclareDefaultStructors(SurfaceTypeCoverDriver);
+class EXPORT SurfaceTypeCoverDriver : public VoodooI2CPrecisionTouchpadHIDEventDriver {
+    OSDeclareDefaultStructors(SurfaceTypeCoverDriver);
 
  public:
-    
     struct {
             OSArray *           elements;
             UInt8               bootMouseData[4];
@@ -54,9 +47,6 @@ class EXPORT SurfaceTypeCoverDriver : public VoodooI2CMultitouchHIDEventDriver {
     /* @inherit */
     
     IOReturn parseElements() override;
-
-    /* @inherit */
-    IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
     /* Called during the interrupt routine to interate over keyboard events
      * @timestamp The timestamp of the interrupt report
@@ -77,15 +67,6 @@ class EXPORT SurfaceTypeCoverDriver : public VoodooI2CMultitouchHIDEventDriver {
     bool parseKeyboardElement(IOHIDElement* element);
     
     void setKeyboardProperties();
-    
-    void stop(IOService* provider) override;
-
- protected:
- private:
-    bool ready = false;
-
-    /* Sends a report to the device to instruct it to enter Touchpad mode */
-    void enterPrecisionTouchpadMode();
 };
 
 

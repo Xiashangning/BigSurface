@@ -1,5 +1,5 @@
 //
-//  SMCSMBusController.cpp
+//  SurfaceSMBusController.cpp
 //  SurfaceBattery
 //
 //  Copyright © 2018 usrsse2. All rights reserved.

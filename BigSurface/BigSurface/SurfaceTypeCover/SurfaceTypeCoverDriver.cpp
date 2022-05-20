@@ -1,6 +1,6 @@
 //
 //  SurfaceTypeCoverDriver.hpp
-//  BigSurface
+//  SurfaceTypeCover
 //
 //  Created by Xavier on 21/04/2021.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -10,27 +10,13 @@
 
 #include <IOKit/hid/AppleHIDUsageTables.h>
 
-#define SET_NUMBER(key, num) do { \
-    tmpNumber = OSNumber::withNumber(num, 32); \
-    if (tmpNumber) { \
-        kbEnableEventProps->setObject(key, tmpNumber); \
-        tmpNumber->release(); \
-    } \
-}while (0);
-
 // constants for processing the special key input event
 #define kHIDIncrVolume  0x01
 #define kHIDDecrVolume  0x02
 #define kHIDMute        0x04
 
-#define super VoodooI2CMultitouchHIDEventDriver
-OSDefineMetaClassAndStructors(SurfaceTypeCoverDriver, VoodooI2CMultitouchHIDEventDriver);
-
-void SurfaceTypeCoverDriver::enterPrecisionTouchpadMode() {
-    digitiser.input_mode->setValue(INPUT_MODE_TOUCHPAD);
-
-    ready = true;
-}
+#define super VoodooI2CPrecisionTouchpadHIDEventDriver
+OSDefineMetaClassAndStructors(SurfaceTypeCoverDriver, VoodooI2CPrecisionTouchpadHIDEventDriver);
 
 void SurfaceTypeCoverDriver::handleInterruptReport(AbsoluteTime timestamp, IOMemoryDescriptor *report, IOHIDReportType report_type, UInt32 report_id) {
     if (!ready)
@@ -42,12 +28,12 @@ void SurfaceTypeCoverDriver::handleInterruptReport(AbsoluteTime timestamp, IOMem
 }
 
 void SurfaceTypeCoverDriver::handleKeyboardReport(AbsoluteTime timeStamp, UInt32 reportID) {
-    UInt32      volumeHandled   = 0;
-    UInt32      volumeState     = 0;
-    UInt32      index, count;
+    UInt32 volumeHandled = 0;
+    UInt32 volumeState = 0;
+    UInt32 index, count;
     
     if(!keyboard.elements)
-        goto exit;
+        return;
     
     for (index=0, count=keyboard.elements->getCount(); index<count; index++) {
         IOHIDElement* element = nullptr;
@@ -73,6 +59,15 @@ void SurfaceTypeCoverDriver::handleKeyboardReport(AbsoluteTime timeStamp, UInt32
         
         usagePage   = element->getUsagePage();
         usage       = element->getUsage();
+        
+        if (usagePage == kHIDPage_KeyboardOrKeypad && usage == kHIDUsage_KeyboardCapsLock) {
+//            UInt8 buffer[2];
+//            buffer[0] = 0x01;
+//            buffer[1] = value ? KEYBOARD_CAPSLOCK_ON : KEYBOARD_CAPSLOCK_OFF;
+//            IOMemoryDescriptor *report = IOBufferMemoryDescriptor::withBytes(buffer, 2, kIODirectionNone);
+//            hid_interface->setReport(report, kIOHIDReportTypeOutput, 1);
+//            OSSafeReleaseNULL(report);
+        }
         
         if (usagePage == kHIDPage_Consumer) {
             bool suppress = true;
@@ -116,23 +111,13 @@ void SurfaceTypeCoverDriver::handleKeyboardReport(AbsoluteTime timeStamp, UInt32
         if (volumeHandled & kHIDMute)
             dispatchKeyboardEvent(timeStamp, kHIDPage_Consumer, kHIDUsage_Csmr_Mute, ((volumeState & kHIDMute) != 0));
     }
-    
-exit:
-    return;
 }
 
 bool SurfaceTypeCoverDriver::handleStart(IOService* provider) {
     if (!super::handleStart(provider))
         return false;
-
-    if (!digitiser.input_mode)
-        return false;
-
-    IOLog("%s::%s Putting device into Precision Touchpad Mode\n", getName(), name);
     
     setKeyboardProperties();
-    
-    enterPrecisionTouchpadMode();
 
     return true;
 }
@@ -296,31 +281,7 @@ void SurfaceTypeCoverDriver::setKeyboardProperties()
     }
     
     properties->setObject(kIOHIDElementKey, keyboard.elements);
-    
     setProperty("Keyboard", properties);
     
-exit:
     OSSafeReleaseNULL(properties);
-}
-
-IOReturn SurfaceTypeCoverDriver::setPowerState(unsigned long whichState, IOService* whatDevice) {
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-    if (!whichState) {
-        if (awake)
-            awake = false;
-    } else {
-        if (!awake) {
-            IOSleep(10);
-            enterPrecisionTouchpadMode();
-
-            awake = true;
-        }
-    }
-    return kIOPMAckImplied;
-}
-
-void SurfaceTypeCoverDriver::stop(IOService *provider) {
-    IOLog("%s::stopped\n", getName());
-    super::stop(provider);
 }

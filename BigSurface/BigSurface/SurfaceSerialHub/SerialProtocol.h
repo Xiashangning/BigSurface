@@ -1,6 +1,6 @@
 //
 //  SerialProtocol.h
-//  BigSurface
+//  SurfaceSerialHub
 //
 //  Created by Xavier on 2021/10/29.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -71,14 +71,14 @@
 #define SSH_CID_TMP_SENSOR          0x01
 #define SSH_CID_TMP_GET_PERF        0x02
 #define SSH_CID_TMP_SET_PERF        0x03
-#define TEMP_SENSOR_MB1             0x01
-#define TEMP_SENSOR_MB2             0x02
-#define TEMP_SENSOR_MB3             0x03
-#define TEMP_SENSOR_MB4             0x04
-#define TEMP_SENSOR_BAT             0x05
-#define TEMP_SENSOR_GPU             0x06
-#define TEMP_SENSOR_SSD             0x07
-#define TEMP_SENSOR_SOC             0x08
+#define SSH_TEMP_SENSOR_MB1         0x01
+#define SSH_TEMP_SENSOR_MB2         0x02
+#define SSH_TEMP_SENSOR_MB3         0x03
+#define SSH_TEMP_SENSOR_MB4         0x04
+#define SSH_TEMP_SENSOR_BAT         0x05
+#define SSH_TEMP_SENSOR_GPU         0x06
+#define SSH_TEMP_SENSOR_SSD         0x07
+#define SSH_TEMP_SENSOR_SOC         0x08
 /* TC=0x15*/
 #define SSH_CID_HID_OUT_REPORT      0x01
 #define SSH_CID_HID_GET_FEAT_REPORT 0x02
@@ -86,20 +86,21 @@
 #define SSH_CID_HID_GET_DESCRIPTOR  0x04
 #define SSH_EVENT_CID_HID_INPUT     0x00
 
-#define EVENT_FLAG_SEQUENCED    BIT(0)
+#define SSH_EVENT_FLAG_SEQUENCED    BIT(0)
 
-#define SYN_BYTE_1  0xAA
-#define SYN_BYTE_2  0x55
-#define SYN_BYTES   0x55AA
+#define SSH_SYN_BYTE_1  0xAA
+#define SSH_SYN_BYTE_2  0x55
+#define SSH_SYN_BYTES   0x55AA
 
-#define FRAME_TYPE_NAK          0x04    /* Sent on error in previously received message. */
-#define FRAME_TYPE_ACK          0x40    /* Sent to acknowledge receival of DATA frame. */
-#define FRAME_TYPE_DATA_SEQ     0x80    /* Sent to transfer data. Sequenced. */
-#define FRAME_TYPE_DATA_NSQ     0x00    /* Same as DATA_SEQ, but does not need to be ACKed. */
+#define SSH_FRAME_TYPE_NAK          0x04    /* Sent on error in previously received message. */
+#define SSH_FRAME_TYPE_ACK          0x40    /* Sent to acknowledge receival of DATA frame. */
+#define SSH_FRAME_TYPE_DATA_SEQ     0x80    /* Sent to transfer data. Sequenced. */
+#define SSH_FRAME_TYPE_DATA_NSQ     0x00    /* Same as DATA_SEQ, but does not need to be ACKed. */
 
-#define COMMAND_TYPE            0x80
+#define SSH_COMMAND_TYPE            0x80
 
-#define DATA_OFFSET          sizeof(SurfaceSerialMessage)+sizeof(SurfaceSerialCommand)
+#define SSH_DATA_OFFSET         sizeof(SurfaceSerialMessage)+sizeof(SurfaceSerialCommand)
+#define SSH_PAYLOAD_OFFSET      sizeof(SurfaceSerialMessage)
 
 #ifndef PACKED
 #define PACKED __attribute__((packed))

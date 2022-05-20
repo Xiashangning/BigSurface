@@ -122,9 +122,9 @@ private:
     /**
      *  @return whether battery is full
      */
-    bool updateBatteryStatus(UInt8 index, UInt8 *buffer);
+    bool updateBatteryStatus(UInt8 index, UInt32 *bst);
     
-    void updateBatteryInfoExtended(UInt8 index, UInt8 *buffer);
+    void updateBatteryInfoExtended(UInt8 index, OSArray *bix);
     
     void updateBatteryTemperature(UInt8 index, UInt16 temp);
     

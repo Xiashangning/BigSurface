@@ -7,8 +7,6 @@
 
 #include "BatteryManager.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str, getName(), ##__VA_ARGS__)
-
 BatteryManager *BatteryManager::instance = nullptr;
 
 OSDefineMetaClassAndStructors(BatteryManager, OSObject)
@@ -62,71 +60,27 @@ bool BatteryManager::needUpdateBIX(UInt8 index) {
     return ret;
 }
 
-bool BatteryManager::updateBatteryStatus(UInt8 index, UInt8 *buffer) {
+bool BatteryManager::updateBatteryStatus(UInt8 index, UInt32 *bst) {
     if (index >= batteriesCount)
         return false;
     
-    UInt32 *bst = reinterpret_cast<UInt32*>(buffer);
     bool is_full;
-    
     IOLockLock(mainLock);
     is_full = batteries[index].updateStatus(bst);
     IOLockUnlock(mainLock);
-    
     return is_full;
 }
 
-void BatteryManager::updateBatteryInfoExtended(UInt8 index, UInt8 *buffer) {
+void BatteryManager::updateBatteryInfoExtended(UInt8 index, OSArray *bix) {
     if (index >= batteriesCount)
         return;
     
-    if (!buffer) {
-        IOLockLock(mainLock);
+    IOLockLock(mainLock);
+    if (!bix)
         batteries[index].reset();
-        IOLockUnlock(mainLock);
-    } else {
-        UInt32 *temp = reinterpret_cast<UInt32*>(buffer+1);
-        const char *str = reinterpret_cast<const char*>(buffer);
-        
-        OSNumber *revision = OSNumber::withNumber(*buffer, 8);
-        OSNumber *power_unit = OSNumber::withNumber(temp[0], 32);
-        OSNumber *design_cap = OSNumber::withNumber(temp[1], 32);
-        OSNumber *last_full_cap = OSNumber::withNumber(temp[2], 32);
-        OSNumber *bat_tech = OSNumber::withNumber(temp[3], 32);
-        OSNumber *design_volt = OSNumber::withNumber(temp[4], 32);
-        OSNumber *design_cap_warn = OSNumber::withNumber(temp[5], 32);
-        OSNumber *design_cap_low = OSNumber::withNumber(temp[6], 32);
-        OSNumber *cycle_cnt = OSNumber::withNumber(temp[7], 32);
-        OSNumber *mesure_acc = OSNumber::withNumber(temp[8], 32);
-        OSNumber *max_sample_t = OSNumber::withNumber(temp[9], 32);
-        OSNumber *min_sample_t = OSNumber::withNumber(temp[10], 32);
-        OSNumber *max_avg_interval = OSNumber::withNumber(temp[11], 32);
-        OSNumber *min_avg_interval = OSNumber::withNumber(temp[12], 32);
-        OSNumber *bat_cap_gra_1 = OSNumber::withNumber(temp[13], 32);
-        OSNumber *bat_cap_gra_2 = OSNumber::withNumber(temp[14], 32);
-        OSString *model_number = OSString::withCString(str+0x3D);
-        OSString *serial_number = OSString::withCString(str+0x52);
-        OSString *bat_type = OSString::withCString(str+0x5D);
-        OSString *oem_info = OSString::withCString(str+0x62);
-        const OSObject *arr[] = {revision, power_unit, design_cap, last_full_cap, bat_tech,
-                            design_volt, design_cap_warn, design_cap_low, cycle_cnt,
-                            mesure_acc, max_sample_t, min_sample_t, max_avg_interval,
-                            min_avg_interval, bat_cap_gra_1, bat_cap_gra_2, model_number,
-                            serial_number, bat_type, oem_info};
-        OSArray *bix = OSArray::withObjects(arr, 20);
-        if (!bix) {
-            IOLog("BatteryManager::Could not create a 20 sized array!\n");
-            return;
-        }
-        
-        IOLockLock(mainLock);
+    else
         batteries[index].updateInfoExtended(bix);
-        IOLockUnlock(mainLock);
-        
-        bix->release();
-        for (int i=0; i<20; i++)
-            arr[i]->release();
-    }
+    IOLockUnlock(mainLock);
 }
 
 void BatteryManager::updateBatteryTemperature(UInt8 index, UInt16 temp) {

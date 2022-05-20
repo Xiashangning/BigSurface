@@ -1,6 +1,6 @@
 //
 //  APDS9960Constants.h
-//  BigSurface
+//  SurfaceAmbientLightSensor
 //
 //  Created by Xavier on 2021/10/27.
 //  Copyright © 2021 Xia Shangning. All rights reserved.

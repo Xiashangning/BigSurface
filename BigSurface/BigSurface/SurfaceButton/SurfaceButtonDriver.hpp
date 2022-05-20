@@ -34,7 +34,7 @@ class EXPORT SurfaceButtonDriver : public IOHIDEventService {
     OSDeclareDefaultStructors(SurfaceButtonDriver);
     
 private:
-    bool awake {true};
+    bool awake {false};
     IOCommandGate* command_gate;
     VoodooGPIO* gpio_controller;
     bool btn_status[BTN_CNT] = {false, false, false};

@@ -20,15 +20,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>Battery SMBus Controller</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSMBusController</string>
-			<key>IOProviderClass</key>
-			<string>SurfaceBatteryDriver</string>
-		</dict>
 		<key>Surface Ambient Light Sensor</key>
 		<dict>
 			<key>BaseALIValue</key>
@@ -46,23 +37,6 @@
 			</dict>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
-		</dict>
-		<key>Surface Battery</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceBatteryDriver</string>
-			<key>IOMatchCategory</key>
-			<string>SurfaceBatteryDriver</string>
-			<key>IOProviderClass</key>
-			<string>IOResources</string>
-			<key>IOResourceMatch</key>
-			<string>IOKit</string>
-			<key>PerformanceMode</key>
-			<integer>1</integer>
-			<key>BatteryCount</key>
-			<integer>1</integer>
 		</dict>
 		<key>Surface Button</key>
 		<dict>
@@ -90,6 +64,70 @@
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
+		<key>Surface Battery</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceBatteryDriver</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceBatteryNub</string>
+			<key>PerformanceMode</key>
+			<integer>1</integer>
+			<key>BatteryCount</key>
+			<integer>1</integer>
+		</dict>
+		<key>Surface Battery SMBus Controller</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSMBusController</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceBatteryDriver</string>
+		</dict>
+		<key>Surface Laptop3 HID</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceLaptop3HIDDriver</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceLaptop3Nub</string>
+		</dict>
+		<key>Surface Laptop3 Touchpad HID Event Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>DeviceUsagePairs</key>
+			<array>
+				<dict>
+					<key>DeviceUsage</key>
+					<integer>5</integer>
+					<key>DeviceUsagePage</key>
+					<integer>13</integer>
+				</dict>
+			</array>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>Transport</key>
+				<string>Surface Serial Hub</string>
+			</dict>
+			<key>IOProbeScore</key>
+			<integer>300</integer>
+			<key>IOClass</key>
+			<string>VoodooI2CPrecisionTouchpadHIDEventDriver</string>
+			<key>IOProviderClass</key>
+			<string>IOHIDInterface</string>
+			<key>RM,deliverNotifications</key>
+			<true/>
+			<key>QuietTimeAfterTyping</key>
+			<integer>200</integer>
+			<key>ProcessUSBMouseStopsTrackpad</key>
+			<false/>
+			<key>ProcessBluetoothMouseStopsTrackpad</key>
+			<false/>
+		</dict>
 		<key>Surface Type Cover</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -103,6 +141,11 @@
 					<integer>13</integer>
 				</dict>
 			</array>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>Transport</key>
+				<string>USB</string>
+			</dict>
 			<key>IOClass</key>
 			<string>SurfaceTypeCoverDriver</string>
 			<key>IOProbeScore</key>

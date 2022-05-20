@@ -1,6 +1,6 @@
 //
 //  SurfaceSerialHubDriver.hpp
-//  BigSurface
+//  SurfaceSerialHub
 //
 //  Created by Xavier on 2021/10/29.
 //  Copyright © 2021 Xia Shangning. All rights reserved.
@@ -16,10 +16,13 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/VoodooUART/VoodooUARTController.hpp"
+#include "SerialProtocol.h"
 
-#define REQID_MIN 34
-
-#define ACK_TIMEOUT 100
+#define SSH_REQID_MIN           34
+#define SSH_MSG_CACHE_SIZE      256     // max length for a single message
+#define SSH_MSG_LENGTH_UNKNOWN  (SSH_MSG_CACHE_SIZE+1)
+#define SSH_BUFFER_SIZE         10
+#define SSH_ACK_TIMEOUT         100
 
 class CircleIDCounter {
 private:
@@ -44,6 +47,8 @@ public:
 struct WaitingRequest {
     bool waiting;
     UInt16 req_id;
+    UInt8* data;
+    UInt16 data_len;
     WaitingRequest *next;
 };
 
@@ -55,26 +60,45 @@ struct PendingCommand {
     PendingCommand *next;
 };
 
+struct SerialMessage {
+    UInt8   cache[SSH_MSG_CACHE_SIZE];
+    UInt16  len;
+    UInt16  pos;
+    bool    partial_syn;
+};
+
+struct CircleBuffer {
+    UInt8* buffer;
+    UInt16 buffer_len;
+    CircleBuffer *next;
+};
+
 class EXPORT SurfaceSerialHubClient : public IOService {
     OSDeclareAbstractStructors(SurfaceSerialHubClient);
     
 public:
+    /*
+     * This method is called when SSH receives corresponding registered events
+     * it should NOT block the thread
+     * the ACTUAL event handling codes should be done in device driver's own workloop thread
+     */
     virtual void eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) = 0;
 };
 
-class EXPORT SurfaceSerialHubDriver : public VoodooUARTClient {
+class SurfaceBatteryNub;
+class SurfaceLaptop3Nub;
+
+class EXPORT SurfaceSerialHubDriver : public IOService {
     OSDeclareDefaultStructors(SurfaceSerialHubDriver);
     
 public:
-    void dataReceived(UInt8 *buffer, UInt16 length) override;
-    
     UInt16 sendCommand(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq);
 
     IOReturn getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq, UInt8 *buffer, UInt16 buffer_len);
 
-    IOReturn registerEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
+    IOReturn registerEvent(SurfaceSerialHubClient *client, UInt8 tc, UInt8 iid);
     
-    void unregisterEvent(UInt8 tc, UInt8 iid, SurfaceSerialHubClient *client);
+    void unregisterEvent(SurfaceSerialHubClient *client, UInt8 tc, UInt8 iid);
     
     bool init(OSDictionary* properties) override;
     
@@ -92,31 +116,29 @@ private:
     IOWorkLoop*             work_loop {nullptr};
     IOCommandGate*          command_gate {nullptr};
     IOInterruptEventSource* interrupt_source {nullptr};
-    IOLock*                 lock {nullptr};
     IOACPIPlatformDevice*   acpi_device {nullptr};
     VoodooUARTController*   uart_controller {nullptr};
-    bool                    awake {true};
+    SurfaceBatteryNub*      battery_nub {nullptr};
+    SurfaceLaptop3Nub*      laptop3_nub {nullptr};
     
-    UInt8*                  rx_buffer {nullptr};
-    UInt16                  rx_buffer_len {0};
-    UInt8*                  rx_data {nullptr};
-    UInt16                  rx_data_len {0};
-    UInt8                   msg_cache[256];
-    unsigned int            _pos {0};
-    int                     msg_len {-1};
-    bool                    partial_syn {false};
+    bool                    awake {false};
+    CircleBuffer*           current {nullptr};
+    CircleBuffer*           last {nullptr};
+    SerialMessage           rx_msg;
     PendingCommand          pending_commands;
     PendingCommand*         last_pending;
     WaitingRequest          waiting_requests;
     WaitingRequest*         last_waiting;
-    SurfaceSerialHubClient* event_handler[REQID_MIN];
+    SurfaceSerialHubClient* handler[SSH_REQID_MIN];
     CircleIDCounter         seq_counter {CircleIDCounter(0x00, 0xff)};
-    CircleIDCounter         req_counter {CircleIDCounter(REQID_MIN, 0xffff)};
+    CircleIDCounter         req_counter {CircleIDCounter(SSH_REQID_MIN, 0xffff)};
     UInt32                  baudrate {0};
     UInt8                   data_bits {0};
     UInt8                   stop_bits {0};
     UInt8                   parity {0};
     UInt16                  fifo_size {0};
+    
+    void bufferReceived(VoodooUARTController *sender, UInt8 *buffer, UInt16 length);
     
     IOReturn sendACK(UInt8 seq_id);
     
@@ -124,9 +146,9 @@ private:
     
     IOReturn processMessage();
     
-    void processReceivedData(OSObject* target, void* refCon, IOService* nubDevice, int source);
+    void processReceivedBuffer(OSObject *owner, IOInterruptEventSource *sender, int count);
     
-    void _process(UInt8* buffer, UInt16 len);
+    void _process(UInt8* buffer, UInt16 length);
     
     IOReturn sendCommandGated(UInt8 *tx_buffer, UInt16 *len, bool *seq);
     

@@ -169,9 +169,6 @@ bool SurfaceButtonDriver::start(IOService *provider) {
         IOLog("%s::Warning: Could not get interrupt event source\n", getName());
         goto exit;
     }
-    startInterrupt(POWER_BUTTON_IDX);
-    startInterrupt(VOLUME_UP_BUTTON_IDX);
-    startInterrupt(VOLUME_DOWN_BUTTON_IDX);
     
     PMinit();
     acpi_device->joinPMtree(this);
@@ -179,11 +176,10 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     
     button_device = OSTypeAlloc(SurfaceButtonDevice);
     if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
-        IOLog("%s::Failed to init Surface Button HID Device!", getName());
+        IOLog("%s::Failed to init and start Surface Button HID Device!", getName());
         goto exit;
     }
     
-    button_device->retain();
     return true;
 exit:
     releaseResources();
@@ -191,7 +187,6 @@ exit:
 }
 
 void SurfaceButtonDriver::stop(IOService *provider) {
-    IOLog("%s::stopped\n", getName());
     PMstop();
     releaseResources();
     super::stop(provider);

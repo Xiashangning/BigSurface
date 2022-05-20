@@ -84,9 +84,9 @@ void VoodooI2CMultitouchHIDEventDriver::handleInterruptReport(AbsoluteTime times
     if (ignore_all)
         return;
     
-    uint64_t now_abs;
+    UInt64 now_abs;
     clock_get_uptime(&now_abs);
-    uint64_t now_ns;
+    UInt64 now_ns;
     absolutetime_to_nanoseconds(now_abs, &now_ns);
     
     if (report_type == kIOHIDReportTypeInput && readyForReports())
@@ -388,7 +388,6 @@ bool VoodooI2CMultitouchHIDEventDriver::handleStart(IOService* provider) {
         return false;
   
     if (strncmp(transport->getCStringNoCopy(), kIOHIDTransportUSBValue, sizeof(kIOHIDTransportUSBValue)) != 0)
-
         hid_interface->setProperty("VoodooI2CServices Supported", kOSBooleanTrue);
 
     hid_device = OSDynamicCast(IOHIDDevice, hid_interface->getParentEntry(gIOServicePlane));
@@ -813,7 +812,7 @@ IOReturn VoodooI2CMultitouchHIDEventDriver::message(UInt32 type, IOService* prov
         case kKeyboardKeyPressTime:
         {
             //  Remember last time key was pressed
-            key_time = *((uint64_t*)argument);
+            key_time = *((UInt64*)argument);
 #if DEBUG
             IOLog("%s::keyPressed = %llu\n", getName(), key_time);
 #endif

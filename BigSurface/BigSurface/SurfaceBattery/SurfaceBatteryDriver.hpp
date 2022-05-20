@@ -2,9 +2,7 @@
 //  SurfaceBatteryDriver.hpp
 //  SurfaceBattery
 //
-//  Copyright © 2018 usrsse2. All rights reserved.
-//
-//  Portions copyright © 2009 Superhai.
+//  Copyright © 2022 Xia Shangning. All rights reserved.
 //
 
 #ifndef SurfaceBatteryDriver_hpp
@@ -19,17 +17,13 @@
 #include <IOKit/IOTimerEventSource.h>
 
 #include "BatteryManager.hpp"
-#include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
-#include "../SurfaceSerialHub/SerialProtocol.h"
+#include "../SurfaceSerialHubDevices/SurfaceBatteryNub.hpp"
 
 #define BST_UPDATE_QUICK    1000
 #define BST_UPDATE_NORMAL   30000
 #define BST_UPDATE_QUICK_CNT    5
 
-#define BIX_LENGTH          119
-#define BST_LENGTH          16
-
-class EXPORT SurfaceBatteryDriver : public SurfaceSerialHubClient {
+class EXPORT SurfaceBatteryDriver : public IOService {
 	OSDeclareDefaultStructors(SurfaceBatteryDriver)
 
 	/**
@@ -99,25 +93,26 @@ public:
 	
 	static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
     
-    void eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) override;
-    
 private:
     IOWorkLoop*             work_loop {nullptr};
     IOTimerEventSource*     timer {nullptr};
     IOInterruptEventSource* update_bix {nullptr};
     IOInterruptEventSource* update_bst {nullptr};
-    SurfaceSerialHubDriver* ssh {nullptr};
+    SurfaceBatteryNub*      nub {nullptr};
     
     bool    awake {false};
-    bool    power_connected {false};
+    bool    power_connected {true};
     bool    bix_fail {false};
     int     quick_cnt {0};
     bool    sync {false};
     AbsoluteTime last_update {0};
 
-    SurfaceSerialHubDriver* getSurfaceSerialHub();
-    void updateBatteryInformation(OSObject* target, void* refCon, IOService* nubDevice, int count);
-    void updateBatteryStatus(OSObject* target, void* refCon, IOService* nubDevice, int count);
+    void eventReceived(SurfaceBatteryNub *sender, SurfaceBatteryEventType type);
+    
+    void updateBatteryInformation(OSObject *owner, IOInterruptEventSource *sender, int count);
+    
+    void updateBatteryStatus(OSObject *owner, IOInterruptEventSource *sender, int count);
+    
     void pollBatteryStatus(OSObject* target, IOTimerEventSource* sender);
     
     void releaseResources();

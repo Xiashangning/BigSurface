@@ -40,10 +40,20 @@
 		25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */; };
 		25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25D907272736E2B2006D799F /* AmbientLightValue.hpp */; };
 		25D9072A2736E2B2006D799F /* AmbientLightValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25D907282736E2B2006D799F /* AmbientLightValue.cpp */; };
-		25E5C168283263C900CC6E24 /* SurfaceLaptopHIDDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25E5C166283263C900CC6E24 /* SurfaceLaptopHIDDriver.hpp */; };
-		25E5C169283263C900CC6E24 /* SurfaceLaptopHIDDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25E5C167283263C900CC6E24 /* SurfaceLaptopHIDDriver.cpp */; };
-		25E5C1732832A13400CC6E24 /* SurfaceLaptopKeyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25E5C16F2832724E00CC6E24 /* SurfaceLaptopKeyboard.cpp */; };
-		25E5C1742832A13700CC6E24 /* SurfaceLaptopKeyboard.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25E5C1702832724E00CC6E24 /* SurfaceLaptopKeyboard.hpp */; };
+		25DBA9742836A77700459629 /* SurfaceLaptop3Nub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */; };
+		25DBA9752836A77700459629 /* SurfaceLaptop3Nub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */; };
+		25DE0A68283738EC002DA176 /* SurfaceLaptopKeyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */; };
+		25DE0A69283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */; };
+		25DE0A6A283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */; };
+		25DE0A6B283738EC002DA176 /* SurfaceLaptopKeyboard.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */; };
+		25DE0A7828377EBE002DA176 /* SurfaceLaptopTouchpad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */; };
+		25DE0A7928377EBE002DA176 /* SurfaceLaptopTouchpad.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */; };
+		25DE0A8D28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */; };
+		25DE0A8E28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */; };
+		25DE0A912837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */; };
+		25DE0A922837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */; };
+		25EA2A7E2836412B00525325 /* SurfaceBatteryNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */; };
+		25EA2A7F2836412B00525325 /* SurfaceBatteryNub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -180,10 +190,20 @@
 		25D907212736E125006D799F /* plugin_start.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
 		25D907272736E2B2006D799F /* AmbientLightValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AmbientLightValue.hpp; sourceTree = "<group>"; };
 		25D907282736E2B2006D799F /* AmbientLightValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AmbientLightValue.cpp; sourceTree = "<group>"; };
-		25E5C166283263C900CC6E24 /* SurfaceLaptopHIDDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopHIDDriver.hpp; sourceTree = "<group>"; };
-		25E5C167283263C900CC6E24 /* SurfaceLaptopHIDDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopHIDDriver.cpp; sourceTree = "<group>"; };
-		25E5C16F2832724E00CC6E24 /* SurfaceLaptopKeyboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopKeyboard.cpp; sourceTree = "<group>"; };
-		25E5C1702832724E00CC6E24 /* SurfaceLaptopKeyboard.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopKeyboard.hpp; sourceTree = "<group>"; };
+		25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3Nub.cpp; sourceTree = "<group>"; };
+		25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3Nub.hpp; sourceTree = "<group>"; };
+		25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopKeyboard.cpp; sourceTree = "<group>"; };
+		25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3HIDDriver.hpp; sourceTree = "<group>"; };
+		25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3HIDDriver.cpp; sourceTree = "<group>"; };
+		25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopKeyboard.hpp; sourceTree = "<group>"; };
+		25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopTouchpad.cpp; sourceTree = "<group>"; };
+		25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopTouchpad.hpp; sourceTree = "<group>"; };
+		25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CPrecisionTouchpadHIDEventDriver.cpp; sourceTree = "<group>"; };
+		25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CPrecisionTouchpadHIDEventDriver.hpp; sourceTree = "<group>"; };
+		25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3HIDDevice.cpp; sourceTree = "<group>"; };
+		25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3HIDDevice.hpp; sourceTree = "<group>"; };
+		25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceBatteryNub.cpp; sourceTree = "<group>"; };
+		25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceBatteryNub.hpp; sourceTree = "<group>"; };
 		7BE66D8F258AC5DC003CA4AD /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = ../MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = "<group>"; };
 		AC94C8382119E50400D26081 /* VoodooI2CSynaptics.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooI2CSynaptics.xcodeproj; path = "../../VoodooI2C Satellites/VoodooI2CSynaptics/VoodooI2CSynaptics.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -203,8 +223,8 @@
 		2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */ = {
 			isa = PBXGroup;
 			children = (
-				2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */,
 				2518A2F42734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp */,
+				2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */,
 				2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */,
 				25D907282736E2B2006D799F /* AmbientLightValue.cpp */,
 				25D907272736E2B2006D799F /* AmbientLightValue.hpp */,
@@ -227,19 +247,19 @@
 		2597316F2738B01F00A7F7C1 /* SurfaceBattery */ = {
 			isa = PBXGroup;
 			children = (
-				259731792738B01F00A7F7C1 /* SurfaceACAdapter.hpp */,
 				259731712738B01F00A7F7C1 /* SurfaceACAdapter.cpp */,
-				259731762738B01F00A7F7C1 /* SurfaceBattery.hpp */,
+				259731792738B01F00A7F7C1 /* SurfaceACAdapter.hpp */,
 				259731752738B01F00A7F7C1 /* SurfaceBattery.cpp */,
-				2597317C2738B01F00A7F7C1 /* BatteryManager.hpp */,
+				259731762738B01F00A7F7C1 /* SurfaceBattery.hpp */,
 				259731742738B01F00A7F7C1 /* BatteryManager.cpp */,
+				2597317C2738B01F00A7F7C1 /* BatteryManager.hpp */,
 				259731772738B01F00A7F7C1 /* BatteryManagerState.hpp */,
-				259731702738B01F00A7F7C1 /* KeyImplementations.hpp */,
 				259731782738B01F00A7F7C1 /* KeyImplementations.cpp */,
-				259731722738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp */,
+				259731702738B01F00A7F7C1 /* KeyImplementations.hpp */,
 				2597317B2738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp */,
-				2597318A2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp */,
+				259731722738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp */,
 				2597318B2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp */,
+				2597318A2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp */,
 			);
 			path = SurfaceBattery;
 			sourceTree = "<group>";
@@ -252,8 +272,9 @@
 				2524C0A326F3233A00CAAF12 /* SurfaceButton */,
 				2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */,
 				25C8D7E727359FCD00F58956 /* SurfaceSerialHub */,
+				25DBA9762836A78900459629 /* SurfaceSerialHubDevices */,
 				2597316F2738B01F00A7F7C1 /* SurfaceBattery */,
-				25E5C165283262E700CC6E24 /* SurfaceLaptopHID */,
+				25DE0A63283738EC002DA176 /* SurfaceLaptopHID */,
 			);
 			path = BigSurface;
 			sourceTree = "<group>";
@@ -263,10 +284,12 @@
 			children = (
 				25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */,
 				25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */,
-				25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */,
-				25B97E18260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp */,
+				25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */,
+				25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */,
 				25B97E2A260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp */,
 				25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */,
+				25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */,
+				25B97E18260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp */,
 			);
 			path = SurfaceTypeCover;
 			sourceTree = "<group>";
@@ -275,8 +298,8 @@
 			isa = PBXGroup;
 			children = (
 				25C8D7E827359FCD00F58956 /* SerialProtocol.h */,
-				25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */,
 				25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */,
+				25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */,
 			);
 			path = SurfaceSerialHub;
 			sourceTree = "<group>";
@@ -398,13 +421,28 @@
 			path = wrappers;
 			sourceTree = "<group>";
 		};
-		25E5C165283262E700CC6E24 /* SurfaceLaptopHID */ = {
+		25DBA9762836A78900459629 /* SurfaceSerialHubDevices */ = {
 			isa = PBXGroup;
 			children = (
-				25E5C1702832724E00CC6E24 /* SurfaceLaptopKeyboard.hpp */,
-				25E5C16F2832724E00CC6E24 /* SurfaceLaptopKeyboard.cpp */,
-				25E5C166283263C900CC6E24 /* SurfaceLaptopHIDDriver.hpp */,
-				25E5C167283263C900CC6E24 /* SurfaceLaptopHIDDriver.cpp */,
+				25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */,
+				25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */,
+				25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */,
+				25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */,
+			);
+			path = SurfaceSerialHubDevices;
+			sourceTree = "<group>";
+		};
+		25DE0A63283738EC002DA176 /* SurfaceLaptopHID */ = {
+			isa = PBXGroup;
+			children = (
+				25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */,
+				25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */,
+				25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */,
+				25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */,
+				25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */,
+				25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */,
+				25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */,
+				25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */,
 			);
 			path = SurfaceLaptopHID;
 			sourceTree = "<group>";
@@ -469,18 +507,23 @@
 				2597317F2738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				259731832738B01F00A7F7C1 /* SurfaceBattery.hpp in Headers */,
+				25EA2A7F2836412B00525325 /* SurfaceBatteryNub.hpp in Headers */,
 				25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */,
 				2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
 				2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */,
+				25DE0A922837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
 				259731862738B01F00A7F7C1 /* SurfaceACAdapter.hpp in Headers */,
+				25DE0A7928377EBE002DA176 /* SurfaceLaptopTouchpad.hpp in Headers */,
+				25DE0A6B283738EC002DA176 /* SurfaceLaptopKeyboard.hpp in Headers */,
 				2597317D2738B01F00A7F7C1 /* KeyImplementations.hpp in Headers */,
-				25E5C1742832A13700CC6E24 /* SurfaceLaptopKeyboard.hpp in Headers */,
-				25E5C168283263C900CC6E24 /* SurfaceLaptopHIDDriver.hpp in Headers */,
 				25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */,
 				25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */,
+				25DBA9752836A77700459629 /* SurfaceLaptop3Nub.hpp in Headers */,
 				259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */,
+				25DE0A69283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp in Headers */,
+				25DE0A8E28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp in Headers */,
 				259040EA26FC065400D605D0 /* SurfaceButtonDevice.hpp in Headers */,
 				25B97E1E260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp in Headers */,
 			);
@@ -626,21 +669,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				25DBA9742836A77700459629 /* SurfaceLaptop3Nub.cpp in Sources */,
 				25B97E1A260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp in Sources */,
 				25B97E2B260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp in Sources */,
 				259731812738B01F00A7F7C1 /* BatteryManager.cpp in Sources */,
 				25C8D7EC27359FCD00F58956 /* SurfaceSerialHubDriver.cpp in Sources */,
-				25E5C1732832A13400CC6E24 /* SurfaceLaptopKeyboard.cpp in Sources */,
+				25DE0A68283738EC002DA176 /* SurfaceLaptopKeyboard.cpp in Sources */,
 				25D9072A2736E2B2006D799F /* AmbientLightValue.cpp in Sources */,
 				259040E926FC065400D605D0 /* SurfaceButtonDevice.cpp in Sources */,
 				2518A2F72734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp in Sources */,
+				25DE0A7828377EBE002DA176 /* SurfaceLaptopTouchpad.cpp in Sources */,
 				259731822738B01F00A7F7C1 /* SurfaceBattery.cpp in Sources */,
-				25E5C169283263C900CC6E24 /* SurfaceLaptopHIDDriver.cpp in Sources */,
 				259731882738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp in Sources */,
+				25DE0A6A283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp in Sources */,
+				25EA2A7E2836412B00525325 /* SurfaceBatteryNub.cpp in Sources */,
 				259731852738B01F00A7F7C1 /* KeyImplementations.cpp in Sources */,
 				2597318D2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp in Sources */,
+				25DE0A8D28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				2597317E2738B01F00A7F7C1 /* SurfaceACAdapter.cpp in Sources */,
+				25DE0A912837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp in Sources */,
 				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
