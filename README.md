@@ -13,6 +13,7 @@ You will need to first DELETE all the original VoodooI2C series Kext, and then a
 - Surface Type Cover
   > The code is based on VoodooI2CHID.kext, but added **integrated and hot pluggable touchpad&keyboard support**.
 - Buttons
+  > Power/VolumeUp/VolumeDown buttons all works properly
 - Ambient Light Sensor
   > ACPI device name: ACSD, attached under I2C4
   > 
@@ -27,8 +28,12 @@ You will need to first DELETE all the original VoodooI2C series Kext, and then a
   > 
   > It can only be set by changing the plist or using `ioio`
   > We need a userspace software to control it if it actually has something useful.
+- Surface Laptop3's keyboard & touchpad
+  > Works now, all keys and gestures are recognised properly.
+  > 
+  > Unknown issue: neither keyboard nor touchpad can wake up the system.
   
-Possible values are:
+Possible values for Performance mode are:
 
       State              Value
       
@@ -50,5 +55,6 @@ Possible values are:
 - Touch Screen
   > Device id: 0x34E4
 
-## Surface Laptop's keyboard & touchpad
-Theoretically works but you need to implement it yourself, check out my battery codes and consult to https://github.com/linux-surface/surface-aggregator-module/blob/master/doc/requests.txt for necessary events registration. In brief, you need to create a virtual keyboard & touchpad IOSerive, register it under `SurfaceSerialHub` and process the returning data(should be in HID format so the only thing needed is to send the data to macOS)
+
+## If you like my project, please consider to `star` this project.
+### If you appreciate my effort and would like to pay me a coffee, here is my PayPal address: `1750546761@qq.com`
