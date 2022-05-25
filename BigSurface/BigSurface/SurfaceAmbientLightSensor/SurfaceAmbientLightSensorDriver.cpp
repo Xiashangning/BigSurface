@@ -59,11 +59,7 @@ bool SurfaceAmbientLightSensorDriver::start(IOService *provider) {
         return false;
     }
     work_loop->retain();
-    command_gate = IOCommandGate::commandGate(this);
-    if (!command_gate || (work_loop->addEventSource(command_gate) != kIOReturnSuccess)) {
-        IOLog("%s::Could not open command gate\n", getName());
-        goto exit;
-    }
+    
     if (!api->open(this)) {
         IOLog("%s::Could not open API\n", getName());
         goto exit;
@@ -183,7 +179,7 @@ IOReturn SurfaceAmbientLightSensorDriver::configDevice(UInt8 func, bool enable) 
     return writeRegister(APDS9960_ENABLE, reg);
 }
 
-void SurfaceAmbientLightSensorDriver::pollALI(OSObject* owner, IOTimerEventSource *timer) {
+void SurfaceAmbientLightSensorDriver::pollALI(IOTimerEventSource *timer) {
     UInt16 color[4];
     if (readRegister(APDS9960_CDATAL, reinterpret_cast<UInt8 *>(color), sizeof(color)) != kIOReturnSuccess) {
         IOLog("%s::Read from ALS failed!\n", getName());
@@ -223,10 +219,6 @@ void SurfaceAmbientLightSensorDriver::releaseResources() {
         poller->disable();
         work_loop->removeEventSource(poller);
         OSSafeReleaseNULL(poller);
-    }
-    if (command_gate) {
-        work_loop->removeEventSource(command_gate);
-        OSSafeReleaseNULL(command_gate);
     }
     
     OSSafeReleaseNULL(work_loop);

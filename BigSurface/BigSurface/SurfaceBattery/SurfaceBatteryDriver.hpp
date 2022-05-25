@@ -109,11 +109,11 @@ private:
 
     void eventReceived(SurfaceBatteryNub *sender, SurfaceBatteryEventType type);
     
-    void updateBatteryInformation(OSObject *owner, IOInterruptEventSource *sender, int count);
+    void updateBatteryInformation(IOInterruptEventSource *sender, int count);
     
-    void updateBatteryStatus(OSObject *owner, IOInterruptEventSource *sender, int count);
+    void updateBatteryStatus(IOInterruptEventSource *sender, int count);
     
-    void pollBatteryStatus(OSObject* target, IOTimerEventSource* sender);
+    void pollBatteryStatus(IOTimerEventSource* sender);
     
     void releaseResources();
 };

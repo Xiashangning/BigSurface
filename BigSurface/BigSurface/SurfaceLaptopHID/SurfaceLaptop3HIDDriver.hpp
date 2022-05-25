@@ -71,9 +71,9 @@ private:
     
     void eventReceived(SurfaceLaptop3Nub *sender, SurfaceLaptop3HIDDeviceType device, UInt8 *buffer, UInt16 len);
     
-    void keyboardInputReceived(OSObject *owner, IOInterruptEventSource *sender, int count);
+    void keyboardInputReceived(IOInterruptEventSource *sender, int count);
     
-    void touchpadInputReceived(OSObject *owner, IOInterruptEventSource *sender, int count);
+    void touchpadInputReceived(IOInterruptEventSource *sender, int count);
     
     void releaseResources();
 };

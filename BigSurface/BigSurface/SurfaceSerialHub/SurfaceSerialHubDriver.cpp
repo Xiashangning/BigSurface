@@ -64,10 +64,10 @@ void SurfaceSerialHubDriver::bufferReceived(VoodooUARTController *sender, UInt8 
     memcpy(buf->buffer, buffer, length);
     buf->buffer_len = length;
     last = last->next;
-    interrupt_source->interruptOccurred(nullptr, this, 0);
+    uart_interrupt->interruptOccurred(nullptr, this, 0);
 }
 
-void SurfaceSerialHubDriver::processReceivedBuffer(OSObject *owner, IOInterruptEventSource *sender, int count) {
+void SurfaceSerialHubDriver::processReceivedBuffer(IOInterruptEventSource *sender, int count) {
     while (current->buffer_len) {
         _process(current->buffer, current->buffer_len);
         current->buffer_len = 0;
@@ -187,9 +187,11 @@ IOReturn SurfaceSerialHubDriver::processMessage() {
             LOG("Warning, NAK received! Resending all pending messages!");
             while (pending_pos->next) {
                 PendingCommand *cmd = pending_pos->next;
-                cmd->trial_count = 0;
-                cmd->timer->cancelTimeout();
-                cmd->timer->setTimeoutMS(1);
+                if (cmd->trial_count) {     // not a NSQ command
+                    cmd->trial_count = 1;
+                    cmd->timer->cancelTimeout();
+                    cmd->timer->setTimeoutUS(1);
+                }
                 pending_pos = pending_pos->next;
             }
             break;
@@ -273,6 +275,9 @@ IOReturn SurfaceSerialHubDriver::sendNAK() {
 }
 
 UInt16 SurfaceSerialHubDriver::sendCommand(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq) {
+    if (!awake)
+        return 0;
+    
     UInt16 len = SSH_DATA_OFFSET+payload_len+2;
     UInt8 *buffer = new UInt8[len];
     
@@ -327,7 +332,7 @@ IOReturn SurfaceSerialHubDriver::sendCommandGated(UInt8 *tx_buffer, UInt16 *len,
     return kIOReturnSuccess;
 }
 
-void SurfaceSerialHubDriver::commandTimeout(OSObject* owner, IOTimerEventSource* timer) {
+void SurfaceSerialHubDriver::commandTimeout(IOTimerEventSource* timer) {
     PendingCommand *pos = &pending_commands;
     bool found = false;
     while (pos->next) {
@@ -386,7 +391,7 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
     last_waiting->next = w;
     last_waiting = w;
     
-    nanoseconds_to_absolutetime(500000000, &abstime); // 500ms
+    nanoseconds_to_absolutetime(SSH_WAIT_TIMEOUT * 1000000, &abstime);
     clock_absolutetime_interval_to_deadline(abstime, &deadline);
     sleep = command_gate->commandSleep(&w->waiting, deadline, THREAD_INTERRUPTIBLE);
     
@@ -487,6 +492,11 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
         return nullptr;
     }
     
+    gpio_controller = getGPIOController();
+    if (!gpio_controller) {
+        LOG("Could not find GPIO controller, exiting");
+        return nullptr;
+    }
     uart_controller = getUARTController();
     if (!uart_controller) {
         LOG("Could not find UART controller, exiting");
@@ -516,6 +526,7 @@ IOService* SurfaceSerialHubDriver::probe(IOService *provider, SInt32 *score) {
 
 bool SurfaceSerialHubDriver::start(IOService *provider) {
     UInt32 version;
+    UInt8 ret;
     if (!super::start(provider))
         return false;
     
@@ -524,45 +535,72 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
         LOG("Could not get work loop");
         goto exit;
     }
-
     command_gate = IOCommandGate::commandGate(this);
-    if (!command_gate || (work_loop->addEventSource(command_gate) != kIOReturnSuccess)) {
+    if (!command_gate) {
         LOG("Could not open command gate");
         goto exit;
     }
+    work_loop->addEventSource(command_gate);
     
-    interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedBuffer));
-    if (!interrupt_source || (work_loop->addEventSource(interrupt_source)!=kIOReturnSuccess)) {
-        LOG("Could not register interrupt!");
+    uart_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedBuffer));
+    if (!uart_interrupt) {
+        LOG("Could not register uart interrupt!");
         goto exit;
     }
+    work_loop->addEventSource(uart_interrupt);
+    gpio_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::gpioWakeUp), this, 0);
+    if (!gpio_interrupt) {
+        LOG("Could not register gpio interrupt!");
+        goto exit;
+    }
+    work_loop->addEventSource(gpio_interrupt);
     
-    if (uart_controller->requestConnect(this, OSMemberFunctionCast(VoodooUARTController::MessageHandler, this, &SurfaceSerialHubDriver::bufferReceived), baudrate, data_bits, stop_bits, parity) != kIOReturnSuccess) {
-        LOG("UART Controller already occupied!");
+    if (uart_controller->requestConnect(this, OSMemberFunctionCast(VoodooUARTController::MessageHandler, this, &SurfaceSerialHubDriver::bufferReceived), baudrate, data_bits, stop_bits, parity, flow_control) != kIOReturnSuccess) {
+        LOG("Failed to connect to UART controller!");
         goto exit;
     }
     
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_VERSION, nullptr, 0, true, reinterpret_cast<UInt8 *>(&version), 4) != kIOReturnSuccess) {
         LOG("Failed to get SAM version from UART!");
-        uart_controller->requestDisconnect(this);
-        goto exit;
+        goto exit_connected;
     }
     LOG("SAM version %u.%u.%u", (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
     
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+        LOG("Unexpected response from D0-entry notification");
+        goto exit_connected;
+    }
+    if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
+        LOG("Unexpected response from display-on notification");
+        goto exit_connected;
+    }
+    
     // publishing necessary surface device nubs
     battery_nub = OSTypeAlloc(SurfaceBatteryNub);
-    if (!battery_nub || !battery_nub->init() || !battery_nub->attach(this) || !battery_nub->start(this)) {
-        LOG("Failed to attach Surface Battery nub!");
+    if (!battery_nub || !battery_nub->init() || !battery_nub->attach(this)) {
+        LOG("Failed to init Surface Battery nub!");
         OSSafeReleaseNULL(battery_nub);
-    } else
-        LOG("Surface Battery nub published!");
+    } else {
+        if (!battery_nub->start(this)) {
+            LOG("Failed to attach Surface Battery nub!");
+            battery_nub->detach(this);
+            OSSafeReleaseNULL(battery_nub);
+        } else
+            LOG("Surface Battery nub published!");
+    }
     
     laptop3_nub = OSTypeAlloc(SurfaceLaptop3Nub);
-    if (!laptop3_nub || !laptop3_nub->init() || !laptop3_nub->attach(this) || !laptop3_nub->start(this)) {
-        LOG("Failed to attach Surface Laptop3 nub! Ignore this if you are not a Laptop3 device");
+    if (!laptop3_nub || !laptop3_nub->init() || !laptop3_nub->attach(this)) {
+        LOG("Failed to init Surface Laptop3 nub!");
         OSSafeReleaseNULL(laptop3_nub);
-    } else
-        LOG("Surface Laptop3 nub published!");
+    } else {
+        if (!laptop3_nub->start(this)) {
+            LOG("Failed to attach Surface Laptop3 nub! Ignore this if you are not a Laptop3 device");
+            laptop3_nub->detach(this);
+            OSSafeReleaseNULL(laptop3_nub);
+        } else
+            LOG("Surface Laptop3 nub published!");
+    }
 
     PMinit();
     uart_controller->joinPMtree(this);
@@ -570,6 +608,9 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     
     registerService();
     return true;
+    
+exit_connected:
+    uart_controller->requestDisconnect(this);
 exit:
     releaseResources();
     return false;
@@ -603,10 +644,11 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
                 LOG("Unexpected response from d0-exit notification");
             }
             awake = false;
-            interrupt_source->disable();
+            uart_interrupt->disable();
             // clear pending commands, rx_buffer and msg cache
             PendingCommand *pending_pos = pending_commands.next;
             if (pending_pos){
+                LOG("There are still pending commands!");
                 while (pending_pos) {
                     PendingCommand *t = pending_pos;
                     pending_pos = pending_pos->next;
@@ -618,9 +660,12 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
                     delete t;
                 }
             }
-            while (current->buffer_len) {
-                current->buffer_len = 0;
-                current = current->next;
+            if (current->buffer_len) {
+                LOG("There are still raw data unprocessed!");
+                while (current->buffer_len) {
+                    current->buffer_len = 0;
+                    current = current->next;
+                }
             }
             rx_msg.pos = 0;
             rx_msg.len = SSH_MSG_LENGTH_UNKNOWN;
@@ -630,7 +675,7 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
     } else {
         if (!awake) {
             awake = true;
-            interrupt_source->enable();
+            uart_interrupt->enable();
             UInt8 ret;
             if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0) {
                 LOG("Unexpected response from D0-entry notification");
@@ -685,10 +730,15 @@ void SurfaceSerialHubDriver::releaseResources() {
         delete[] t->buffer;
         delete t;
     }
-    if (interrupt_source) {
-        interrupt_source->disable();
-        work_loop->removeEventSource(interrupt_source);
-        OSSafeReleaseNULL(interrupt_source);
+    if (uart_interrupt) {
+        uart_interrupt->disable();
+        work_loop->removeEventSource(uart_interrupt);
+        OSSafeReleaseNULL(uart_interrupt);
+    }
+    if (gpio_interrupt) {
+        gpio_interrupt->disable();
+        work_loop->removeEventSource(gpio_interrupt);
+        OSSafeReleaseNULL(gpio_interrupt);
     }
     if (command_gate) {
         work_loop->removeEventSource(command_gate);
@@ -697,20 +747,39 @@ void SurfaceSerialHubDriver::releaseResources() {
     OSSafeReleaseNULL(work_loop);
 }
 
-VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
-    VoodooUARTController* uart = nullptr;
+VoodooGPIO* SurfaceSerialHubDriver::getGPIOController() {
+    VoodooGPIO* gpio_controller = nullptr;
 
-    // Wait for UART controller, up to 5 second (sometimes it takes really a long time for UART to load)
-    OSDictionary* name_match = serviceMatching("VoodooUARTController");
-    IOService* matched = waitForMatchingService(name_match, 5000000000);
-    uart = OSDynamicCast(VoodooUARTController, matched);
-
-    if (uart) {
-        LOG("Got UART Controller! %s", uart->getName());
-    }
+    // Wait for GPIO controller, up to 1 second
+    OSDictionary* name_match = serviceMatching("VoodooGPIO");
+    IOService* matched = waitForMatchingService(name_match, 1000000000);
+    gpio_controller = OSDynamicCast(VoodooGPIO, matched);
+    if (gpio_controller != NULL)
+        IOLog("%s::Got GPIO Controller! %s\n", getName(), gpio_controller->getName());
+    
     OSSafeReleaseNULL(name_match);
     OSSafeReleaseNULL(matched);
-    return uart;
+
+    return gpio_controller;
+}
+
+VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
+    // Wait for UART controller, up to 1 second, try for 5 times
+    // Sometimes it takes really a long time for UART to load
+    for (int i=0; i < 5; i++) {
+        OSDictionary* name_match = serviceMatching("VoodooUARTController");
+        IOService* matched = waitForMatchingService(name_match, 1000000000);
+        VoodooUARTController* uart = OSDynamicCast(VoodooUARTController, matched);
+        OSSafeReleaseNULL(name_match);
+        OSSafeReleaseNULL(matched);
+        if (uart) {
+            LOG("Got UART Controller! %s", uart->getName());
+            return uart;
+        }
+        IOSleep(1000);
+    }
+
+    return nullptr;
 }
 
 IOReturn SurfaceSerialHubDriver::getDeviceResources() {
@@ -725,36 +794,66 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
     }
 
     UInt8 const* crs = reinterpret_cast<UInt8 const*>(data->getBytesNoCopy());
-    unsigned int length = data->getLength();
+    UInt32 length = data->getLength();
     parser.parseACPIResources(crs, 0, length);
-    
     OSSafeReleaseNULL(data);
     
-    if (parser.found_uart) {
-        LOG("Found valid UART Bus!");
-//        LOG("resource_consumer %d", parser.uart_info.resource_consumer);
-//        LOG("device_initiated %d", parser.uart_info.device_initiated);
-//        LOG("flow_control %d", parser.uart_info.flow_control);
-//        LOG("stop_bits %d", parser.uart_info.stop_bits);
-//        LOG("data_bits %d", parser.uart_info.data_bits);
-//        LOG("big_endian %d", parser.uart_info.big_endian);
-//        LOG("baudrate %u", parser.uart_info.baudrate);
-//        LOG("rx_fifo %d", parser.uart_info.rx_fifo);
-//        LOG("tx_fifo %d", parser.uart_info.tx_fifo);
-//        LOG("parity %d", parser.uart_info.parity);
-//        LOG("dtd_enabled %d", parser.uart_info.dtd_enabled);
-//        LOG("ri_enabled %d", parser.uart_info.ri_enabled);
-//        LOG("dsr_enabled %d", parser.uart_info.dsr_enabled);
-//        LOG("dtr_enabled %d", parser.uart_info.dtr_enabled);
-//        LOG("cts_enabled %d", parser.uart_info.cts_enabled);
-//        LOG("rts_enabled %d", parser.uart_info.rts_enabled);
-        
-        baudrate = parser.uart_info.baudrate;
-        data_bits = parser.uart_info.data_bits;
-        stop_bits = parser.uart_info.stop_bits;
-        parity = parser.uart_info.parity;
-        fifo_size = parser.uart_info.rx_fifo;
-        return kIOReturnSuccess;
-    }
-    return kIOReturnNoResources;
+    if (!parser.found_uart || !parser.found_gpio_interrupts)
+        return kIOReturnNoResources;
+    
+    LOG("Found valid UART bus and GPIO interrupt!");
+//    LOG("resource_consumer %d", parser.uart_info.resource_consumer);
+//    LOG("device_initiated %d", parser.uart_info.device_initiated);
+//    LOG("flow_control %d", parser.uart_info.flow_control);
+//    LOG("stop_bits %d", parser.uart_info.stop_bits);
+//    LOG("data_bits %d", parser.uart_info.data_bits);
+//    LOG("big_endian %d", parser.uart_info.big_endian);
+//    LOG("baudrate %u", parser.uart_info.baudrate);
+//    LOG("rx_fifo %d", parser.uart_info.rx_fifo);
+//    LOG("tx_fifo %d", parser.uart_info.tx_fifo);
+//    LOG("parity %d", parser.uart_info.parity);
+//    LOG("dtd_enabled %d", parser.uart_info.dtd_enabled);
+//    LOG("ri_enabled %d", parser.uart_info.ri_enabled);
+//    LOG("dsr_enabled %d", parser.uart_info.dsr_enabled);
+//    LOG("dtr_enabled %d", parser.uart_info.dtr_enabled);
+//    LOG("cts_enabled %d", parser.uart_info.cts_enabled);
+//    LOG("rts_enabled %d", parser.uart_info.rts_enabled);
+    
+    baudrate = parser.uart_info.baudrate;
+    data_bits = parser.uart_info.data_bits;
+    stop_bits = parser.uart_info.stop_bits;
+    parity = parser.uart_info.parity;
+    flow_control = parser.uart_info.flow_control != 0;
+    // For SP6, UART bus reports a rx_fifo of size 32 yet the UART device reports itself with a fifo size 64
+    fifo_size = 64; //parser.uart_info.rx_fifo;
+    
+    gpio_pin = parser.gpio_interrupts.pin_number;
+    gpio_irq = 0x00000001; //parser.gpio_interrupts.irq_type; // Should be Edge rising ?
+    
+    return kIOReturnSuccess;
+}
+
+void SurfaceSerialHubDriver::gpioWakeUp(IOInterruptEventSource *sender, int count) {
+    LOG("GPIO wake up event happened!");
+}
+
+IOReturn SurfaceSerialHubDriver::enableInterrupt(int source) {
+    return gpio_controller->enableInterrupt(gpio_pin);
+}
+
+IOReturn SurfaceSerialHubDriver::disableInterrupt(int source) {
+    return gpio_controller->disableInterrupt(gpio_pin);
+}
+
+IOReturn SurfaceSerialHubDriver::getInterruptType(int source, int* interrupt_type) {
+    return gpio_controller->getInterruptType(gpio_pin, interrupt_type);
+}
+
+IOReturn SurfaceSerialHubDriver::registerInterrupt(int source, OSObject *target, IOInterruptAction handler, void *refcon) {
+    gpio_controller->setInterruptTypeForPin(gpio_pin, gpio_irq);
+    return gpio_controller->registerInterrupt(gpio_pin, target, handler, refcon);
+}
+
+IOReturn SurfaceSerialHubDriver::unregisterInterrupt(int source) {
+    return gpio_controller->unregisterInterrupt(gpio_pin);
 }

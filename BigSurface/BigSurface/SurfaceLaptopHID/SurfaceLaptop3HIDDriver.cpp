@@ -33,7 +33,7 @@ void SurfaceLaptop3HIDDriver::eventReceived(SurfaceLaptop3Nub *sender, SurfaceLa
     }
 }
 
-void SurfaceLaptop3HIDDriver::keyboardInputReceived(OSObject *owner, IOInterruptEventSource *sender, int count) {
+void SurfaceLaptop3HIDDriver::keyboardInputReceived(IOInterruptEventSource *sender, int count) {
     if (!awake)
         return;
     
@@ -44,7 +44,7 @@ void SurfaceLaptop3HIDDriver::keyboardInputReceived(OSObject *owner, IOInterrupt
     OSSafeReleaseNULL(report);
 }
 
-void SurfaceLaptop3HIDDriver::touchpadInputReceived(OSObject *owner, IOInterruptEventSource *sender, int count) {
+void SurfaceLaptop3HIDDriver::touchpadInputReceived(IOInterruptEventSource *sender, int count) {
     if (!awake)
         return;
     
@@ -86,15 +86,18 @@ bool SurfaceLaptop3HIDDriver::start(IOService *provider) {
     }
     
     kbd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceLaptop3HIDDriver::keyboardInputReceived));
-    if (!kbd_interrupt || work_loop->addEventSource(kbd_interrupt) != kIOReturnSuccess) {
-        LOG("Could not register keyboard interrupt!");
+    if (!kbd_interrupt) {
+        LOG("Could not create keyboard interrupt event!");
         goto exit;
     }
+    work_loop->addEventSource(kbd_interrupt);
+    
     tpd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceLaptop3HIDDriver::touchpadInputReceived));
-    if (!tpd_interrupt || work_loop->addEventSource(tpd_interrupt) != kIOReturnSuccess) {
-        LOG("Could not register touchpad interrupt!");
+    if (!tpd_interrupt) {
+        LOG("Could not create touchpad interrupt event!");
         goto exit;
     }
+    work_loop->addEventSource(tpd_interrupt);
     
     if (nub->registerHIDEvent(this, OSMemberFunctionCast(SurfaceLaptop3Nub::EventHandler, this, &SurfaceLaptop3HIDDriver::eventReceived)) != kIOReturnSuccess) {
         LOG("HID event registration failed!");

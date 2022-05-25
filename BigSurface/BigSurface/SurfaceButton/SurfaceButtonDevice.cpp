@@ -34,13 +34,13 @@ IOReturn SurfaceButtonDevice::simulateKeyboardEvent(UInt32 usagePage, UInt32 usa
             csmrreport.keys.insert(usage);
         else
             csmrreport.keys.erase(usage);
+        
         if (auto buffer = IOBufferMemoryDescriptor::withBytes(&csmrreport, sizeof(csmrreport), kIODirectionNone)) {
             result = handleReport(buffer, kIOHIDReportTypeInput, kIOHIDOptionsTypeNone);
-            buffer->release();
+            OSSafeReleaseNULL(buffer);
         }
-    } else {
+    } else
         result = kIOReturnBadArgument;
-    }
     
     return result;
 }

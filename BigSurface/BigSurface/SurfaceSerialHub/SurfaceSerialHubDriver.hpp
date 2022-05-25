@@ -15,6 +15,7 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
+#include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/VoodooUART/VoodooUARTController.hpp"
 #include "SerialProtocol.h"
 
@@ -23,6 +24,7 @@
 #define SSH_MSG_LENGTH_UNKNOWN  (SSH_MSG_CACHE_SIZE+1)
 #define SSH_BUFFER_SIZE         10
 #define SSH_ACK_TIMEOUT         100
+#define SSH_WAIT_TIMEOUT        500
 
 class CircleIDCounter {
 private:
@@ -111,17 +113,29 @@ public:
     void free() override;
     
     IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
+
+    IOReturn enableInterrupt(int source) override;
+    
+    IOReturn disableInterrupt(int source) override;
+
+    IOReturn getInterruptType(int source, int *interruptType) override;
+    
+    IOReturn registerInterrupt(int source, OSObject *target, IOInterruptAction handler, void *refcon) override;
+    
+    IOReturn unregisterInterrupt(int source) override;
     
 private:
     IOWorkLoop*             work_loop {nullptr};
     IOCommandGate*          command_gate {nullptr};
-    IOInterruptEventSource* interrupt_source {nullptr};
+    IOInterruptEventSource* uart_interrupt {nullptr};
+    IOInterruptEventSource* gpio_interrupt {nullptr};
     IOACPIPlatformDevice*   acpi_device {nullptr};
     VoodooUARTController*   uart_controller {nullptr};
+    VoodooGPIO*             gpio_controller {nullptr};
     SurfaceBatteryNub*      battery_nub {nullptr};
     SurfaceLaptop3Nub*      laptop3_nub {nullptr};
     
-    bool                    awake {false};
+    bool                    awake {true};
     CircleBuffer*           current {nullptr};
     CircleBuffer*           last {nullptr};
     SerialMessage           rx_msg;
@@ -136,7 +150,10 @@ private:
     UInt8                   data_bits {0};
     UInt8                   stop_bits {0};
     UInt8                   parity {0};
+    bool                    flow_control {false};
     UInt16                  fifo_size {0};
+    UInt16                  gpio_pin {0};
+    UInt16                  gpio_irq {0};
     
     void bufferReceived(VoodooUARTController *sender, UInt8 *buffer, UInt16 length);
     
@@ -146,19 +163,23 @@ private:
     
     IOReturn processMessage();
     
-    void processReceivedBuffer(OSObject *owner, IOInterruptEventSource *sender, int count);
+    void processReceivedBuffer(IOInterruptEventSource *sender, int count);
+    
+    void gpioWakeUp(IOInterruptEventSource *sender, int count);
     
     void _process(UInt8* buffer, UInt16 length);
     
     IOReturn sendCommandGated(UInt8 *tx_buffer, UInt16 *len, bool *seq);
     
-    void commandTimeout(OSObject* owner, IOTimerEventSource* timer);
+    void commandTimeout(IOTimerEventSource* timer);
     
     IOReturn waitResponse(UInt16 *req_id, UInt8 *buffer, UInt16 *buffer_len);
     
     IOReturn getDeviceResources();
     
     VoodooUARTController* getUARTController();
+    
+    VoodooGPIO* getGPIOController();
     
     void releaseResources();
 };

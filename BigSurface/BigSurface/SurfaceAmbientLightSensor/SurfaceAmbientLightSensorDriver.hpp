@@ -42,12 +42,10 @@ public:
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
     
 private:
-    IOACPIPlatformDevice* acpi_device {nullptr};
-    VoodooI2CDeviceNub* api {nullptr};
-    IOWorkLoop* work_loop {nullptr};
-    IOCommandGate* command_gate {nullptr};
-    IOTimerEventSource* poller {nullptr};
-    bool is_interrupt_started = false;
+    IOACPIPlatformDevice*   acpi_device {nullptr};
+    VoodooI2CDeviceNub*     api {nullptr};
+    IOWorkLoop*             work_loop {nullptr};
+    IOTimerEventSource*     poller {nullptr};
     
     bool awake {true};
     
@@ -84,7 +82,7 @@ private:
     };
     ALSForceBits forceBits;
     
-    void pollALI(OSObject* owner, IOTimerEventSource *timer);
+    void pollALI(IOTimerEventSource *timer);
     
     IOReturn initDevice();
     

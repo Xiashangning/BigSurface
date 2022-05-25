@@ -42,7 +42,7 @@ void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatte
     }
 }
 
-void SurfaceBatteryDriver::updateBatteryInformation(OSObject *owner, IOInterruptEventSource *sender, int count) {
+void SurfaceBatteryDriver::updateBatteryInformation(IOInterruptEventSource *sender, int count) {
     if (!awake)
         return;
     
@@ -68,16 +68,16 @@ void SurfaceBatteryDriver::updateBatteryInformation(OSObject *owner, IOInterrupt
     }
 }
 
-void SurfaceBatteryDriver::updateBatteryStatus(OSObject *owner, IOInterruptEventSource *sender, int count) {
+void SurfaceBatteryDriver::updateBatteryStatus(IOInterruptEventSource *sender, int count) {
     if (!awake)
         return;
+    
     timer->cancelTimeout();
     if (bix_fail)
-        updateBatteryInformation(this, nullptr, 0);
+        updateBatteryInformation(nullptr, 0);
     
     UInt32 psr;
     bool connected = false;
-    
     if (nub->getAdaptorStatus(&psr) != kIOReturnSuccess) {
         LOG("Failed to get power source status from SSH!");
         goto fail;
@@ -129,8 +129,8 @@ fail:
     timer->setTimeoutMS(BST_UPDATE_QUICK/2);
 }
 
-void SurfaceBatteryDriver::pollBatteryStatus(OSObject *target, IOTimerEventSource *sender) {
-    updateBatteryStatus(this, nullptr, 0);
+void SurfaceBatteryDriver::pollBatteryStatus(IOTimerEventSource *sender) {
+    updateBatteryStatus(nullptr, 0);
 }
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
@@ -165,7 +165,7 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
 
 	// AppleSMC presence is a requirement, wait for it.
 	auto dict = nameMatching("AppleSMC");
-	auto applesmc = waitForMatchingService(dict, 3000000000);
+	auto applesmc = waitForMatchingService(dict);
 	if (!applesmc) {
 		LOG("Timeout in waiting for AppleSMC");
 		return false;
@@ -183,19 +183,20 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
     }
     
     timer = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceBatteryDriver::pollBatteryStatus));
-    if (!timer || (work_loop->addEventSource(timer) != kIOReturnSuccess)) {
+    if (!timer) {
         LOG("Could not create timer!");
         goto exit;
     }
+    work_loop->addEventSource(timer);
     
     update_bix = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryInformation));
     update_bst = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryStatus));
-    if (!update_bix || !update_bst ||
-        work_loop->addEventSource(update_bix) != kIOReturnSuccess ||
-        work_loop->addEventSource(update_bst) != kIOReturnSuccess) {
-        LOG("Could not register interrupt!");
+    if (!update_bix || !update_bst) {
+        LOG("Could not create interrupt event!");
         goto exit;
     }
+    work_loop->addEventSource(update_bix);
+    work_loop->addEventSource(update_bst);
     
     if (nub->registerBatteryEvent(this, OSMemberFunctionCast(SurfaceBatteryNub::EventHandler, this, &SurfaceBatteryDriver::eventReceived)) != kIOReturnSuccess) {
         LOG("Battery event registration failed!");
