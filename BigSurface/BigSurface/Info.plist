@@ -38,6 +38,28 @@
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
 		</dict>
+		<key>Surface Battery</key>
+		<dict>
+			<key>BatteryCount</key>
+			<integer>1</integer>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceBatteryDriver</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceBatteryNub</string>
+			<key>PerformanceMode</key>
+			<integer>1</integer>
+		</dict>
+		<key>Surface Battery SMBus Controller</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSMBusController</string>
+			<key>IOProviderClass</key>
+			<string>SurfaceBatteryDriver</string>
+		</dict>
 		<key>Surface Button</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -50,41 +72,6 @@
 			<integer>400</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
-		</dict>
-		<key>Surface Serial Hub</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSerialHubDriver</string>
-			<key>IONameMatch</key>
-			<string>MSHW0084</string>
-			<key>IOProbeScore</key>
-			<integer>600</integer>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
-		</dict>
-		<key>Surface Battery</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceBatteryDriver</string>
-			<key>IOProviderClass</key>
-			<string>SurfaceBatteryNub</string>
-			<key>PerformanceMode</key>
-			<integer>1</integer>
-			<key>BatteryCount</key>
-			<integer>1</integer>
-		</dict>
-		<key>Surface Battery SMBus Controller</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSMBusController</string>
-			<key>IOProviderClass</key>
-			<string>SurfaceBatteryDriver</string>
 		</dict>
 		<key>Surface Laptop3 HID</key>
 		<dict>
@@ -108,25 +95,38 @@
 					<integer>13</integer>
 				</dict>
 			</array>
+			<key>IOClass</key>
+			<string>VoodooI2CPrecisionTouchpadHIDEventDriver</string>
+			<key>IOProbeScore</key>
+			<integer>300</integer>
 			<key>IOPropertyMatch</key>
 			<dict>
 				<key>Transport</key>
 				<string>Surface Serial Hub</string>
 			</dict>
-			<key>IOProbeScore</key>
-			<integer>300</integer>
-			<key>IOClass</key>
-			<string>VoodooI2CPrecisionTouchpadHIDEventDriver</string>
 			<key>IOProviderClass</key>
 			<string>IOHIDInterface</string>
-			<key>RM,deliverNotifications</key>
-			<true/>
-			<key>QuietTimeAfterTyping</key>
-			<integer>200</integer>
-			<key>ProcessUSBMouseStopsTrackpad</key>
-			<false/>
 			<key>ProcessBluetoothMouseStopsTrackpad</key>
 			<false/>
+			<key>ProcessUSBMouseStopsTrackpad</key>
+			<false/>
+			<key>QuietTimeAfterTyping</key>
+			<integer>200</integer>
+			<key>RM,deliverNotifications</key>
+			<true/>
+		</dict>
+		<key>Surface Serial Hub</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSerialHubDriver</string>
+			<key>IONameMatch</key>
+			<string>MSHW0084</string>
+			<key>IOProbeScore</key>
+			<integer>600</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
 		</dict>
 		<key>Surface Type Cover</key>
 		<dict>
@@ -141,15 +141,15 @@
 					<integer>13</integer>
 				</dict>
 			</array>
+			<key>IOClass</key>
+			<string>SurfaceTypeCoverDriver</string>
+			<key>IOProbeScore</key>
+			<integer>9999</integer>
 			<key>IOPropertyMatch</key>
 			<dict>
 				<key>Transport</key>
 				<string>USB</string>
 			</dict>
-			<key>IOClass</key>
-			<string>SurfaceTypeCoverDriver</string>
-			<key>IOProbeScore</key>
-			<integer>9999</integer>
 			<key>IOProviderClass</key>
 			<string>IOHIDInterface</string>
 			<key>ProcessBluetoothMouseStopsTrackpad</key>
@@ -171,27 +171,25 @@
 		<key>as.vit9696.Lilu</key>
 		<string>1.2.0</string>
 		<key>as.vit9696.VirtualSMC</key>
-		<string>1.0.0</string>
+		<string>1.2.0</string>
 		<key>com.alexandred.VoodooI2CServices</key>
 		<string>1.0</string>
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.4</string>
 		<key>com.apple.iokit.IOHIDFamily</key>
 		<string>2.0</string>
+		<key>com.apple.iokit.IOPCIFamily</key>
+		<string>2.9</string>
 		<key>com.apple.iokit.IOSMBusFamily</key>
 		<string>1.0.0</string>
 		<key>com.apple.kpi.bsd</key>
-		<string>10.0</string>
-		<key>com.apple.kpi.dsep</key>
-		<string>10.0.0</string>
+		<string>16.7</string>
 		<key>com.apple.kpi.iokit</key>
-		<string>14.0</string>
+		<string>16.7</string>
 		<key>com.apple.kpi.libkern</key>
-		<string>14.0</string>
+		<string>16.7</string>
 		<key>com.apple.kpi.mach</key>
-		<string>13.0</string>
-		<key>com.apple.kpi.unsupported</key>
-		<string>10.0.0</string>
+		<string>16.7</string>
 		<key>com.xavier.VoodooSerial</key>
 		<string>1.0</string>
 		<key>org.coolstar.VoodooGPIO</key>

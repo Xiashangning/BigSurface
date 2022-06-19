@@ -11,7 +11,7 @@
 #include "KeyImplementations.hpp"
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceBatteryDriver", ##__VA_ARGS__)
 
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceBatteryDriver, IOService)
@@ -72,12 +72,16 @@ void SurfaceBatteryDriver::updateBatteryStatus(IOInterruptEventSource *sender, i
     if (!awake)
         return;
     
-    timer->cancelTimeout();
-    if (bix_fail)
-        updateBatteryInformation(nullptr, 0);
-    
     UInt32 psr;
     bool connected = false;
+    
+    timer->cancelTimeout();
+    if (bix_fail) {
+        updateBatteryInformation(nullptr, 0);
+        if (bix_fail)
+            goto fail;
+    }
+    
     if (nub->getAdaptorStatus(&psr) != kIOReturnSuccess) {
         LOG("Failed to get power source status from SSH!");
         goto fail;
@@ -131,6 +135,22 @@ fail:
 
 void SurfaceBatteryDriver::pollBatteryStatus(IOTimerEventSource *sender) {
     updateBatteryStatus(nullptr, 0);
+}
+
+void SurfaceBatteryDriver::wakeupDelayedUpdate(IOTimerEventSource *sender) {
+    update_bix->enable();
+    update_bst->enable();
+    bix_fail = true;
+    quick_cnt = BST_UPDATE_QUICK_CNT;
+    clock_get_uptime(&last_update);
+    updateBatteryStatus(nullptr, 0);
+    
+    OSNumber *mode = OSDynamicCast(OSNumber, getProperty("PerformanceMode"));
+    if (mode) {
+        UInt32 m = mode->unsigned32BitValue();
+        if (nub->setPerformanceMode(m) != kIOReturnSuccess)
+            LOG("Set performance mode failed!");
+    }
 }
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
@@ -188,6 +208,12 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(timer);
+    wakeup = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceBatteryDriver::wakeupDelayedUpdate));
+    if (!wakeup) {
+        LOG("Could not create wakeup timer!");
+        goto exit;
+    }
+    work_loop->addEventSource(wakeup);
     
     update_bix = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryInformation));
     update_bst = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryStatus));
@@ -283,6 +309,12 @@ void SurfaceBatteryDriver::releaseResources() {
         work_loop->removeEventSource(timer);
         OSSafeReleaseNULL(timer);
     }
+    if (wakeup) {
+        wakeup->cancelTimeout();
+        wakeup->disable();
+        work_loop->removeEventSource(wakeup);
+        OSSafeReleaseNULL(wakeup);
+    }
     if (update_bix) {
         update_bix->disable();
         work_loop->removeEventSource(update_bix);
@@ -341,21 +373,12 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
         if (!awake) {
             awake = true;
             timer->enable();
-            update_bix->enable();
-            update_bst->enable();
-            bix_fail = true;
-            quick_cnt = BST_UPDATE_QUICK_CNT;
-            clock_get_uptime(&last_update);
-            update_bst->interruptOccurred(nullptr, this, 0);
-            
-            // set performance mode
-            OSNumber *mode = OSDynamicCast(OSNumber, getProperty("PerformanceMode"));
-            if (mode) {
-                UInt32 m = mode->unsigned32BitValue();
-                LOG("Set performance mode to %d", m);
-                if (nub->setPerformanceMode(m) != kIOReturnSuccess)
-                    LOG("Set performance mode failed!");
-            }
+            if (initial) {
+                initial = false;
+                // when booting, wait for 30 seconds
+                wakeup->setTimeoutMS(30 * 1000);
+            } else
+                wakeup->setTimeoutMS(1);
             LOG("Woke up");
         }
     }

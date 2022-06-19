@@ -78,26 +78,26 @@
 			remoteGlobalIDString = 25813607272D6A2800EED5C9;
 			remoteInfo = VoodooSerial;
 		};
-		25CBB3662733D503009B568B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = AC2DC71B1F7F0D450071CDCA;
-			remoteInfo = VoodooI2CServices;
-		};
-		25CBB3682733D507009B568B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F1F172C41F42263A00AD98FA;
-			remoteInfo = VoodooGPIO;
-		};
 		25CBB36A2733D50A009B568B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 25B97D6F260B950E00657C76;
 			remoteInfo = VoodooSerial;
+		};
+		25D49D8C2854EE8E008CAAA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = AC2DC71B1F7F0D450071CDCA;
+			remoteInfo = VoodooI2CServices;
+		};
+		25D49D8E2854EE92008CAAA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F1F172C41F42263A00AD98FA;
+			remoteInfo = VoodooGPIO;
 		};
 		AC94C83C2119E50400D26081 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -536,17 +536,17 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 25B97DA2260B950E00657C76 /* Build configuration list for PBXNativeTarget "BigSurface" */;
 			buildPhases = (
+				25B97D8A260B950E00657C76 /* Headers */,
 				25B97D74260B950E00657C76 /* Sources */,
 				25B97D88260B950E00657C76 /* Frameworks */,
-				25B97D8A260B950E00657C76 /* Headers */,
 				25B97DA0260B950E00657C76 /* Resources */,
 				25B97DA1260B950E00657C76 /* Add Plugins */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				25CBB3672733D503009B568B /* PBXTargetDependency */,
-				25CBB3692733D507009B568B /* PBXTargetDependency */,
+				25D49D8D2854EE8E008CAAA5 /* PBXTargetDependency */,
+				25D49D8F2854EE92008CAAA5 /* PBXTargetDependency */,
 				25CBB36B2733D50A009B568B /* PBXTargetDependency */,
 			);
 			name = BigSurface;
@@ -696,20 +696,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		25CBB3672733D503009B568B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = VoodooI2CServices;
-			targetProxy = 25CBB3662733D503009B568B /* PBXContainerItemProxy */;
-		};
-		25CBB3692733D507009B568B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = VoodooGPIO;
-			targetProxy = 25CBB3682733D507009B568B /* PBXContainerItemProxy */;
-		};
 		25CBB36B2733D50A009B568B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = VoodooSerial;
 			targetProxy = 25CBB36A2733D50A009B568B /* PBXContainerItemProxy */;
+		};
+		25D49D8D2854EE8E008CAAA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = VoodooI2CServices;
+			targetProxy = 25D49D8C2854EE8E008CAAA5 /* PBXContainerItemProxy */;
+		};
+		25D49D8F2854EE92008CAAA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = VoodooGPIO;
+			targetProxy = 25D49D8E2854EE92008CAAA5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -727,9 +727,9 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.4;
+				CURRENT_PROJECT_VERSION = 1.0.5;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
@@ -741,7 +741,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				MODULE_NAME = com.xavier.BigSurface;
 				MODULE_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -764,7 +764,7 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.4;
+				CURRENT_PROJECT_VERSION = 1.0.5;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
@@ -779,7 +779,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				MODULE_NAME = com.xavier.BigSurface;
 				MODULE_VERSION = 1.0.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -828,7 +828,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -888,8 +888,9 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

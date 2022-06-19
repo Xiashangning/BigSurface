@@ -22,9 +22,11 @@
 #define SSH_REQID_MIN           34
 #define SSH_MSG_CACHE_SIZE      256     // max length for a single message
 #define SSH_MSG_LENGTH_UNKNOWN  (SSH_MSG_CACHE_SIZE+1)
-#define SSH_BUFFER_SIZE         10
-#define SSH_ACK_TIMEOUT         100
-#define SSH_WAIT_TIMEOUT        500
+#define SSH_RING_BUFFER_SIZE    10
+#define SSH_RING_BUFFER_NEXT(pos)   ((pos) + 1) % SSH_RING_BUFFER_SIZE
+#define SSH_ACK_TIMEOUT         50
+#define SSH_CMD_TRAIL_CNT       3
+#define SSH_WAIT_TIMEOUT        (SSH_ACK_TIMEOUT * SSH_CMD_TRAIL_CNT)
 
 class CircleIDCounter {
 private:
@@ -47,19 +49,19 @@ public:
 };
 
 struct WaitingRequest {
-    bool waiting;
-    UInt16 req_id;
-    UInt8* data;
-    UInt16 data_len;
-    WaitingRequest *next;
+    queue_entry entry;
+    bool    waiting;
+    UInt16  req_id;
+    UInt8*  data;
+    UInt16  data_len;
 };
 
 struct PendingCommand {
-    UInt8 *buffer {nullptr};
-    UInt16 len {0};
+    queue_entry entry;
+    UInt8*  buffer {nullptr};
+    UInt16  len {0};
+    UInt8   trial_count {0};
     IOTimerEventSource* timer {nullptr};
-    UInt8 trial_count {0};
-    PendingCommand *next;
 };
 
 struct SerialMessage {
@@ -69,10 +71,9 @@ struct SerialMessage {
     bool    partial_syn;
 };
 
-struct CircleBuffer {
+struct RingBuffer {
     UInt8* buffer;
-    UInt16 buffer_len;
-    CircleBuffer *next;
+    UInt16 filled_len;
 };
 
 class EXPORT SurfaceSerialHubClient : public IOService {
@@ -134,26 +135,27 @@ private:
     VoodooGPIO*             gpio_controller {nullptr};
     SurfaceBatteryNub*      battery_nub {nullptr};
     SurfaceLaptop3Nub*      laptop3_nub {nullptr};
-    
-    bool                    awake {true};
-    CircleBuffer*           current {nullptr};
-    CircleBuffer*           last {nullptr};
-    SerialMessage           rx_msg;
-    PendingCommand          pending_commands;
-    PendingCommand*         last_pending;
-    WaitingRequest          waiting_requests;
-    WaitingRequest*         last_waiting;
     SurfaceSerialHubClient* handler[SSH_REQID_MIN];
-    CircleIDCounter         seq_counter {CircleIDCounter(0x00, 0xff)};
-    CircleIDCounter         req_counter {CircleIDCounter(SSH_REQID_MIN, 0xffff)};
-    UInt32                  baudrate {0};
-    UInt8                   data_bits {0};
-    UInt8                   stop_bits {0};
-    UInt8                   parity {0};
-    bool                    flow_control {false};
-    UInt16                  fifo_size {0};
-    UInt16                  gpio_pin {0};
-    UInt16                  gpio_irq {0};
+    
+    bool            awake {true};
+    RingBuffer      ring_buffer[SSH_RING_BUFFER_SIZE];
+    int             current {0};
+    int             last {SSH_RING_BUFFER_SIZE-1};
+    SerialMessage   rx_msg;
+    queue_head_t    pending_list;
+    queue_head_t    waiting_list;
+    
+    CircleIDCounter seq_counter {CircleIDCounter(0x00, 0xff)};
+    CircleIDCounter req_counter {CircleIDCounter(SSH_REQID_MIN, 0xffff)};
+    
+    UInt32  baudrate {0};
+    UInt8   data_bits {0};
+    UInt8   stop_bits {0};
+    UInt8   parity {0};
+    bool    flow_control {false};
+    UInt16  fifo_size {0};
+    UInt16  gpio_pin {0};
+    UInt16  gpio_irq {0};
     
     void bufferReceived(VoodooUARTController *sender, UInt8 *buffer, UInt16 length);
     
@@ -180,6 +182,8 @@ private:
     VoodooUARTController* getUARTController();
     
     VoodooGPIO* getGPIOController();
+    
+    IOReturn flushCacheGated();
     
     void releaseResources();
 };

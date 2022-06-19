@@ -10,6 +10,7 @@
 
 #include <IOKit/IOService.h>
 #include <IOKit/IOSMBusController.h>
+#include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
 
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
@@ -33,21 +34,14 @@ class EXPORT SurfaceSMBusController : public IOSMBusController {
 	static void setReceiveData(IOSMBusTransaction *transaction, UInt16 valueToWrite);
 
 	/**
-	 *  Sensible defaults for timer probing and rechecking the new commands.
-	 *  Note: when it was 1000, after extending the code it failed to read all data in 10 seconds,
-	 *  so AppleSmartBatteryManager aborted polling.
-	 */
-	static constexpr UInt32 TimerTimeoutMs = 100;
-
-	/**
 	 *  A workloop in charge of handling timer events with requests.
 	 */
 	IOWorkLoop *workLoop {nullptr};
 
 	/**
-	 *  Timer event source for processing requests.
+	 *  Event source for processing requests.
 	 */
-	IOTimerEventSource *timer {nullptr};
+    IOInterruptEventSource *interruptSource {nullptr};
 
 	/**
 	 *  Registered SMBus requests.
@@ -107,9 +101,9 @@ protected:
 	IOSMBusStatus startRequest(IOSMBusRequest *request) override;
 
 	/**
-	 *  Timer event used to handled queued AppleSmartBatteryManager SMBus requests.
+	 *  handle queued AppleSmartBatteryManager SMBus requests.
 	 */
-	void handleBatteryCommandsEvent();
+	void handleBatteryCommandsEvent(IOInterruptEventSource *sender, int count);
 	
 	/**
 	 *  Holds value of batteriesConnected() when the previous notification was sent, must be guarded by stateLock

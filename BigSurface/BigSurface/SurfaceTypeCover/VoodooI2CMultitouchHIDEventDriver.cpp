@@ -137,30 +137,6 @@ void VoodooI2CMultitouchHIDEventDriver::handleDigitizerReport(AbsoluteTime times
     if (!wrapper)
         return;
 
-    UInt8 finger_count = digitiser.fingers->getCount();
-    
-    if (finger_count) {
-        // Check if we are sending the report to the right wrapper, 99% of the time, `digitiser.current_report - 1` will
-        // be the correct index but in rare circumstances, it won't be so we should ensure we have the right index
-    
-        if (!wrapper->first_identifier)
-            return;
-    
-        UInt8 first_identifier = wrapper->first_identifier->getValue() ? wrapper->first_identifier->getValue() : 0;
-    
-        // Round up the result of division
-        // This is equivalent to ceil(1.0f * (first_identifer + 1) / finger_count) - 1
-        UInt8 actual_index = (first_identifier + finger_count) / finger_count - 1;
-    
-        if (actual_index != digitiser.current_report - 1) {
-            wrapper = OSDynamicCast(VoodooI2CHIDTransducerWrapper, digitiser.wrappers->getObject(actual_index));
-            if (!wrapper) {
-                // Fall back to the original wrapper
-                wrapper = OSDynamicCast(VoodooI2CHIDTransducerWrapper, digitiser.wrappers->getObject(digitiser.current_report - 1));
-            }
-        }
-    }
-
     for (int i = 0; i < wrapper->transducers->getCount(); i++) {
         VoodooI2CDigitiserTransducer* transducer = OSDynamicCast(VoodooI2CDigitiserTransducer, wrapper->transducers->getObject(i));
         if (transducer) {
@@ -241,21 +217,21 @@ void VoodooI2CMultitouchHIDEventDriver::handleDigitizerTransducerReport(VoodooI2
                 switch (usage) {
                     case kHIDUsage_GD_X:
                     {
-                        transducer->coordinates.x.update(element->getValue(), timestamp);
+                        transducer->coordinates.x.update(value, timestamp);
                         transducer->logical_max_x = element->getLogicalMax();
                         handled    |= element_is_current;
                         break;
                     }
                     case kHIDUsage_GD_Y:
                     {
-                        transducer->coordinates.y.update(element->getValue(), timestamp);
+                        transducer->coordinates.y.update(value, timestamp);
                         transducer->logical_max_y = element->getLogicalMax();
                         handled    |= element_is_current;
                         break;
                     }
                     case kHIDUsage_GD_Z:
                     {
-                        transducer->coordinates.z.update(element->getValue(), timestamp);
+                        transducer->coordinates.z.update(value, timestamp);
                         transducer->logical_max_z = element->getLogicalMax();
                         handled    |= element_is_current;
                         break;
@@ -497,7 +473,6 @@ IOReturn VoodooI2CMultitouchHIDEventDriver::parseDigitizerElement(IOHIDElement* 
         return kIOReturnNotFound;
     
     // Let's parse the configuration page first
-    
     if (digitiser_element->conformsTo(kHIDPage_Digitizer, kHIDUsage_Dig_DeviceConfiguration)) {
         for (int i = 0; i < children->getCount(); i++) {
             IOHIDElement* element = OSDynamicCast(IOHIDElement, children->getObject(i));
@@ -618,8 +593,7 @@ IOReturn VoodooI2CMultitouchHIDEventDriver::parseElements() {
         
         if (multitouch_interface && element->conformsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchScreen))
             multitouch_interface->setProperty(kIOHIDDisplayIntegratedKey, kOSBooleanTrue);
-        }
-    
+    }
 
     if (digitiser.styluses->getCount() == 0 && digitiser.fingers->getCount() == 0)
         return kIOReturnError;
@@ -659,25 +633,12 @@ IOReturn VoodooI2CMultitouchHIDEventDriver::parseElements() {
                 transducer->release();
                 digitiser.transducers->setObject(transducer);
             }
-        
-            VoodooI2CDigitiserTransducer* transducer = OSDynamicCast(VoodooI2CDigitiserTransducer, wrapper->transducers->getObject(0));
-        
-            for (int j = 0; j < transducer->collection->getChildElements()->getCount(); j++) {
-                IOHIDElement* element = OSDynamicCast(IOHIDElement, transducer->collection->getChildElements()->getObject(j));
-            
-                if (!element)
-                    continue;
-            
-                if (element->conformsTo(kHIDPage_Digitizer, kHIDUsage_Dig_ContactIdentifier))
-                    wrapper->first_identifier = element;
-            }
             
             wrapper->release();
         }
     }
     
     // Add stylus as the final wrapper
-    
     if (digitiser.styluses->getCount()) {
         VoodooI2CHIDTransducerWrapper* stylus_wrapper = VoodooI2CHIDTransducerWrapper::wrapper();
         digitiser.wrappers->setObject(stylus_wrapper);
@@ -722,12 +683,13 @@ exit:
 }
 
 inline void VoodooI2CMultitouchHIDEventDriver::setButtonState(DigitiserTransducerButtonState* state, UInt32 bit, UInt32 value, AbsoluteTime timestamp) {
-    UInt32 buttonMask = (1 << bit);
-    
+    UInt32 button_mask = 1 << bit;
+    UInt16 new_value = state->value();
     if (value != 0)
-        state->update(state->current.value |= buttonMask, timestamp);
+        new_value |= button_mask;
     else
-        state->update(state->current.value &= ~buttonMask, timestamp);
+        new_value &= ~button_mask;
+    state->update(new_value, timestamp);
 }
 
 void VoodooI2CMultitouchHIDEventDriver::setDigitizerProperties() {

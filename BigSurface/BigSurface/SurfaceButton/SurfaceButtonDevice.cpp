@@ -50,7 +50,6 @@ bool SurfaceButtonDevice::handleStart(IOService *provider) {
         return false;
     }
 
-    setProperty("AppleVendorSupported", kOSBooleanTrue);
     setProperty("Built-In", kOSBooleanTrue);
     setProperty("HIDDefaultBehavior", kOSBooleanTrue);
 

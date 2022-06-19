@@ -16,11 +16,6 @@
 
 #include "VoodooI2CPrecisionTouchpadHIDEventDriver.hpp"
 
-#define KEYBOARD_REPORT_SIZE            4
-#define KEYBOARD_REPORT_CAPSLOCK_INDEX  2
-#define KEYBOARD_CAPSLOCK_ON            0x02
-#define KEYBOARD_CAPSLOCK_OFF           0x00
-
 /*
  * Merged code for Surface Type Cover
  * Support keyboard & touchpad at the same time

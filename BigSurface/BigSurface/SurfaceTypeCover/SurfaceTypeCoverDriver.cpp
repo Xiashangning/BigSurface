@@ -60,15 +60,6 @@ void SurfaceTypeCoverDriver::handleKeyboardReport(AbsoluteTime timeStamp, UInt32
         usagePage   = element->getUsagePage();
         usage       = element->getUsage();
         
-        if (usagePage == kHIDPage_KeyboardOrKeypad && usage == kHIDUsage_KeyboardCapsLock) {
-//            UInt8 buffer[2];
-//            buffer[0] = 0x01;
-//            buffer[1] = value ? KEYBOARD_CAPSLOCK_ON : KEYBOARD_CAPSLOCK_OFF;
-//            IOMemoryDescriptor *report = IOBufferMemoryDescriptor::withBytes(buffer, 2, kIODirectionNone);
-//            hid_interface->setReport(report, kIOHIDReportTypeOutput, 1);
-//            OSSafeReleaseNULL(report);
-        }
-        
         if (usagePage == kHIDPage_Consumer) {
             bool suppress = true;
             switch (usage) {

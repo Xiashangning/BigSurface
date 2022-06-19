@@ -8,7 +8,7 @@
 
 #include "SurfaceLaptop3Nub.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceLaptop3Nub", ##__VA_ARGS__)
 
 #define super SurfaceSerialHubClient
 OSDefineMetaClassAndStructors(SurfaceLaptop3Nub, SurfaceSerialHubClient)
@@ -25,6 +25,7 @@ bool SurfaceLaptop3Nub::attach(IOService* provider) {
 }
 
 void SurfaceLaptop3Nub::detach(IOService* provider) {
+    ssh = nullptr;
     super::detach(provider);
 }
 

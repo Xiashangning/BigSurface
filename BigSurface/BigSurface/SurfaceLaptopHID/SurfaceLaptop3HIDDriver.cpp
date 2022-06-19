@@ -152,13 +152,13 @@ void SurfaceLaptop3HIDDriver::releaseResources() {
     OSSafeReleaseNULL(work_loop);
     
     if (keyboard) {
-        keyboard->detach(this);
         keyboard->stop(this);
+        keyboard->detach(this);
         OSSafeReleaseNULL(keyboard);
     }
     if (touchpad) {
-        touchpad->detach(this);
         touchpad->stop(this);
+        touchpad->detach(this);
         OSSafeReleaseNULL(touchpad);
     }
 }

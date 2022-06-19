@@ -22,8 +22,6 @@ class EXPORT VoodooI2CHIDTransducerWrapper : public OSObject {
 
  public:
     OSArray*      transducers;
-    
-    IOHIDElement* first_identifier;
 
     bool init() override;
     void free() override;

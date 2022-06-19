@@ -8,7 +8,7 @@
 
 #include "SurfaceBatteryNub.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceBatteryNub", ##__VA_ARGS__)
 
 #define super SurfaceSerialHubClient
 OSDefineMetaClassAndStructors(SurfaceBatteryNub, SurfaceSerialHubClient)
@@ -25,6 +25,7 @@ bool SurfaceBatteryNub::attach(IOService* provider) {
 }
 
 void SurfaceBatteryNub::detach(IOService* provider) {
+    ssh = nullptr;
     super::detach(provider);
 }
 

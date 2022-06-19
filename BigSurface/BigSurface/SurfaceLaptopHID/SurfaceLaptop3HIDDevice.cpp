@@ -25,6 +25,7 @@ bool SurfaceLaptop3HIDDevice::attach(IOService* provider) {
 }
 
 void SurfaceLaptop3HIDDevice::detach(IOService* provider) {
+    api = nullptr;
     super::detach(provider);
 }
 

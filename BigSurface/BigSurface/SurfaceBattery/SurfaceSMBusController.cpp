@@ -40,23 +40,14 @@ bool SurfaceSMBusController::start(IOService *provider) {
 	setProperty("_SBS", 1, 32);
 	registerService();
 
-	timer = IOTimerEventSource::timerEventSource(this,
-        [](OSObject *owner, IOTimerEventSource *) {
-            auto ctrl = OSDynamicCast(SurfaceSMBusController, owner);
-            if (ctrl) {
-                ctrl->handleBatteryCommandsEvent();
-            }
-        });
-
-	if (timer) {
-		getWorkLoop()->addEventSource(timer);
-		timer->setTimeoutMS(TimerTimeoutMs);
-	} else {
-        IOLog("%s::failed to allocate normal timer event\n", getName());
+    interruptSource = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSMBusController::handleBatteryCommandsEvent));
+	if (!interruptSource) {
+        IOLog("%s::failed to allocate interrupt event\n", getName());
 		OSSafeReleaseNULL(workLoop);
 		OSSafeReleaseNULL(requestQueue);
 		return false;
 	}
+    getWorkLoop()->addEventSource(interruptSource);
 
 	BatteryManager::getShared()->subscribe(handleACPINotification, this);
 	
@@ -70,7 +61,7 @@ void SurfaceSMBusController::setReceiveData(IOSMBusTransaction *transaction, UIn
 }
 
 IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
-	auto result = IOSMBusController::startRequest(request);
+	auto result = super::startRequest(request);
 	if (result != kIOSMBusStatusOK)
         return result;
 	
@@ -131,10 +122,13 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
 					setReceiveData(transaction, 1000);
 					break;
 				}
-				case kBReadCellVoltage1Cmd:
-				case kBReadCellVoltage2Cmd:
-				case kBReadCellVoltage3Cmd:
-				case kBReadCellVoltage4Cmd:
+                case kBReadCellVoltage1Cmd:
+                case kBReadCellVoltage2Cmd:
+                case kBReadCellVoltage3Cmd:
+                case kBReadCellVoltage4Cmd: {
+                    setReceiveData(transaction, defaultBatteryCellVoltage);
+                    break;
+                }
                 case kBVoltageCmd: {
                     IOSimpleLockLock(BatteryManager::getShared()->stateLock);
                     auto value = BatteryManager::getShared()->state.btInfo[0].state.presentVoltage;
@@ -308,6 +302,7 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
         IOLog("%s::startRequest failed to append a request\n", getName());
 		return kIOSMBusStatusUnknownFailure;
 	}
+    interruptSource->interruptOccurred(nullptr, this, 0);
     
     IOSimpleLockLock(BatteryManager::getShared()->stateLock);
     clock_get_uptime(&BatteryManager::getShared()->lastAccess);
@@ -316,13 +311,11 @@ IOSMBusStatus SurfaceSMBusController::startRequest(IOSMBusRequest *request) {
 	return result;
 }
 
-void SurfaceSMBusController::handleBatteryCommandsEvent() {
-	timer->setTimeoutMS(TimerTimeoutMs);
-
+void SurfaceSMBusController::handleBatteryCommandsEvent(IOInterruptEventSource *sender, int count) {
 	// requestQueue contains objects owned by two parties:
 	// 1. requestQueue itself, as the addition of any object retains it
 	// 2. IOSMBusController, since it does not release the object after passing it
-	// to us in OSMBusController::performTransactionGated.
+	// to us in IOSMBusController::performTransactionGated.
 	// OSArray::removeObject takes away our ownership, and then
 	// IOSMBusController::completeRequest releases the request inside.
 

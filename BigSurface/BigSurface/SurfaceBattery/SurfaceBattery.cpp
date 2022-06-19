@@ -75,13 +75,15 @@ void SurfaceBattery::updateInfoExtended(OSArray *bix) {
 }
 
 bool SurfaceBattery::updateStatus(UInt32 *bst) {
-    if (!hasBIX)
-        return false;
 	IOSimpleLockLock(batteryInfoLock);
-	auto st = batteryInfo->state;
+    BatteryInfo::State st = batteryInfo->state;
+    if (!hasBIX) {
+        IOSimpleLockUnlock(batteryInfoLock);
+        return false;
+    }
 	IOSimpleLockUnlock(batteryInfoLock);
     
-    UInt32 defaultRate = (5000*1000/st.designVoltage);
+    UInt32 defaultRate = 5000*1000 / st.designVoltage;  // 5w
 	st.state = bst[BSTState];
 	st.presentRate = bst[BSTPresentRate];
 	st.remainingCapacity = bst[BSTRemainingCapacity];
