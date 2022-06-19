@@ -20,6 +20,22 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
+		<key>Intel Precise Touch &amp; Stylus Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>IntelPreciseTouchStylusDriver</string>
+			<key>IOPropertyMatch</key>
+			<dict>
+				<key>MEIClientUUID</key>
+				<string>3e8d0870-271a-4208-8eb5-9acb9402ae04</string>
+			</dict>
+			<key>IOProviderClass</key>
+			<string>SurfaceManagementEngineClient</string>
+			<key>IOUserClientClass</key>
+			<string>IntelPreciseTouchStylusUserClient</string>
+		</dict>
 		<key>Surface Ambient Light Sensor</key>
 		<dict>
 			<key>BaseALIValue</key>
@@ -115,6 +131,19 @@
 			<key>RM,deliverNotifications</key>
 			<true/>
 		</dict>
+		<key>Surface Management Engine</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceManagementEngineDriver</string>
+			<key>IOPCIMatch</key>
+			<string>0x34e48086</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
 		<key>Surface Serial Hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -127,6 +156,26 @@
 			<integer>600</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
+		</dict>
+		<key>Surface Touchscreen HID Event Driver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>DeviceUsagePairs</key>
+			<array>
+				<dict>
+					<key>DeviceUsage</key>
+					<integer>4</integer>
+					<key>DeviceUsagePage</key>
+					<integer>13</integer>
+				</dict>
+			</array>
+			<key>IOClass</key>
+			<string>VoodooI2CTouchscreenHIDEventDriver</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOHIDInterface</string>
 		</dict>
 		<key>Surface Type Cover</key>
 		<dict>

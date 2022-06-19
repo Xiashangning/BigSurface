@@ -1,0 +1,9 @@
+Build
+DerivedData
+Distribute
+*.xccheckout
+.DS_Store
+xcuserdata
+xcshareddata
+project.xcworkspace
+/MacKernelSDK

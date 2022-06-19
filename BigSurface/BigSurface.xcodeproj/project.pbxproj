@@ -38,6 +38,22 @@
 		25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D7E827359FCD00F58956 /* SerialProtocol.h */; };
 		25C8D7EC27359FCD00F58956 /* SurfaceSerialHubDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */; };
 		25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */; };
+		25CDE609285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE5F9285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp */; };
+		25CDE60A285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE5FA285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp */; };
+		25CDE60B285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE5FB285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp */; };
+		25CDE60C285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE5FC285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp */; };
+		25CDE60D285F27A7003FB4C4 /* IPTSKenerlUserShared.h in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE5FD285F27A7003FB4C4 /* IPTSKenerlUserShared.h */; };
+		25CDE60E285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE5FE285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp */; };
+		25CDE60F285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE5FF285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp */; };
+		25CDE610285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE600285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp */; };
+		25CDE611285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE601285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp */; };
+		25CDE612285F27A7003FB4C4 /* MEIProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE602285F27A7003FB4C4 /* MEIProtocol.h */; };
+		25CDE613285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE603285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp */; };
+		25CDE614285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE604285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp */; };
+		25CDE615285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25CDE605285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp */; };
+		25CDE616285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE606285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h */; };
+		25CDE617285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE607285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp */; };
+		25CDE618285F27A7003FB4C4 /* IPTSProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE608285F27A7003FB4C4 /* IPTSProtocol.h */; };
 		25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25D907272736E2B2006D799F /* AmbientLightValue.hpp */; };
 		25D9072A2736E2B2006D799F /* AmbientLightValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25D907282736E2B2006D799F /* AmbientLightValue.cpp */; };
 		25DBA9742836A77700459629 /* SurfaceLaptop3Nub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */; };
@@ -84,6 +100,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 25B97D6F260B950E00657C76;
 			remoteInfo = VoodooSerial;
+		};
+		25CDE61D285F291D003FB4C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25CDE619285F291D003FB4C4 /* VoodooInput.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7BBAB1F922E3A2F800B2941A;
+			remoteInfo = VoodooInput;
+		};
+		25CDE625285F2972003FB4C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25CDE619285F291D003FB4C4 /* VoodooInput.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 7BBAB1F822E3A2F800B2941A;
+			remoteInfo = VoodooInput;
 		};
 		25D49D8C2854EE8E008CAAA5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -144,6 +174,23 @@
 		25C8D7E827359FCD00F58956 /* SerialProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialProtocol.h; sourceTree = "<group>"; };
 		25C8D7E927359FCD00F58956 /* SurfaceSerialHubDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceSerialHubDriver.cpp; sourceTree = "<group>"; };
 		25C8D7EA27359FCD00F58956 /* SurfaceSerialHubDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceSerialHubDriver.hpp; sourceTree = "<group>"; };
+		25CDE5F9285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceManagementEngineClient.hpp; sourceTree = "<group>"; };
+		25CDE5FA285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceTouchScreenDevice.cpp; sourceTree = "<group>"; };
+		25CDE5FB285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceManagementEngineDriver.cpp; sourceTree = "<group>"; };
+		25CDE5FC285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IntelPreciseTouchStylusUserClient.cpp; sourceTree = "<group>"; };
+		25CDE5FD285F27A7003FB4C4 /* IPTSKenerlUserShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPTSKenerlUserShared.h; sourceTree = "<group>"; };
+		25CDE5FE285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CTouchscreenHIDEventDriver.cpp; sourceTree = "<group>"; };
+		25CDE5FF285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = IntelPreciseTouchStylusDriver.hpp; sourceTree = "<group>"; };
+		25CDE600285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceManagementEngineDriver.hpp; sourceTree = "<group>"; };
+		25CDE601285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = IntelPreciseTouchStylusUserClient.hpp; sourceTree = "<group>"; };
+		25CDE602285F27A7003FB4C4 /* MEIProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MEIProtocol.h; sourceTree = "<group>"; };
+		25CDE603285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CTouchscreenHIDEventDriver.hpp; sourceTree = "<group>"; };
+		25CDE604285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IntelPreciseTouchStylusDriver.cpp; sourceTree = "<group>"; };
+		25CDE605285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceManagementEngineClient.cpp; sourceTree = "<group>"; };
+		25CDE606285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfaceTouchScreenReportDescriptor.h; sourceTree = "<group>"; };
+		25CDE607285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceTouchScreenDevice.hpp; sourceTree = "<group>"; };
+		25CDE608285F27A7003FB4C4 /* IPTSProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPTSProtocol.h; sourceTree = "<group>"; };
+		25CDE619285F291D003FB4C4 /* VoodooInput.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooInput.xcodeproj; path = VoodooInput/VoodooInput.xcodeproj; sourceTree = "<group>"; };
 		25D9064A2736DB7F006D799F /* kern_smcinfo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_smcinfo.hpp; sourceTree = "<group>"; };
 		25D9064B2736DB7F006D799F /* kern_vsmcapi.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_vsmcapi.hpp; sourceTree = "<group>"; };
 		25D9064C2736DB7F006D799F /* AppleSmc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleSmc.h; sourceTree = "<group>"; };
@@ -275,6 +322,7 @@
 				25DBA9762836A78900459629 /* SurfaceSerialHubDevices */,
 				2597316F2738B01F00A7F7C1 /* SurfaceBattery */,
 				25DE0A63283738EC002DA176 /* SurfaceLaptopHID */,
+				25CDE5F8285F27A7003FB4C4 /* SurfaceTouchScreen */,
 			);
 			path = BigSurface;
 			sourceTree = "<group>";
@@ -324,6 +372,37 @@
 			isa = PBXGroup;
 			children = (
 				25CBB3652733D4C9009B568B /* VoodooSerial.kext */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		25CDE5F8285F27A7003FB4C4 /* SurfaceTouchScreen */ = {
+			isa = PBXGroup;
+			children = (
+				25CDE602285F27A7003FB4C4 /* MEIProtocol.h */,
+				25CDE600285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp */,
+				25CDE5FB285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp */,
+				25CDE5F9285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp */,
+				25CDE605285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp */,
+				25CDE608285F27A7003FB4C4 /* IPTSProtocol.h */,
+				25CDE5FF285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp */,
+				25CDE604285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp */,
+				25CDE607285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp */,
+				25CDE5FA285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp */,
+				25CDE606285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h */,
+				25CDE603285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp */,
+				25CDE5FE285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp */,
+				25CDE601285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp */,
+				25CDE5FC285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp */,
+				25CDE5FD285F27A7003FB4C4 /* IPTSKenerlUserShared.h */,
+			);
+			path = SurfaceTouchScreen;
+			sourceTree = "<group>";
+		};
+		25CDE61A285F291D003FB4C4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				25CDE61E285F291D003FB4C4 /* VoodooInput.kext */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -460,8 +539,9 @@
 			children = (
 				25D906A72736DC1A006D799F /* LiluSDK */,
 				25D906492736DB7F006D799F /* VirtualSMCSDK */,
-				25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */,
 				25B97DB8260B971000657C76 /* VoodooGPIO.xcodeproj */,
+				25CDE619285F291D003FB4C4 /* VoodooInput.xcodeproj */,
+				25B97DBF260B972000657C76 /* VoodooI2CServices.xcodeproj */,
 				25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */,
 			);
 			name = Dependencies;
@@ -501,12 +581,16 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				25CDE617285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp in Headers */,
 				259731842738B01F00A7F7C1 /* BatteryManagerState.hpp in Headers */,
 				2518A2F62734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp in Headers */,
 				259731892738B01F00A7F7C1 /* BatteryManager.hpp in Headers */,
+				25CDE618285F27A7003FB4C4 /* IPTSProtocol.h in Headers */,
+				25CDE60F285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp in Headers */,
 				2597317F2738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				259731832738B01F00A7F7C1 /* SurfaceBattery.hpp in Headers */,
+				25CDE616285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h in Headers */,
 				25EA2A7F2836412B00525325 /* SurfaceBatteryNub.hpp in Headers */,
 				25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */,
 				2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */,
@@ -517,13 +601,19 @@
 				259731862738B01F00A7F7C1 /* SurfaceACAdapter.hpp in Headers */,
 				25DE0A7928377EBE002DA176 /* SurfaceLaptopTouchpad.hpp in Headers */,
 				25DE0A6B283738EC002DA176 /* SurfaceLaptopKeyboard.hpp in Headers */,
+				25CDE610285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp in Headers */,
+				25CDE60D285F27A7003FB4C4 /* IPTSKenerlUserShared.h in Headers */,
 				2597317D2738B01F00A7F7C1 /* KeyImplementations.hpp in Headers */,
 				25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */,
+				25CDE609285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp in Headers */,
+				25CDE613285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp in Headers */,
 				25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */,
 				25DBA9752836A77700459629 /* SurfaceLaptop3Nub.hpp in Headers */,
+				25CDE612285F27A7003FB4C4 /* MEIProtocol.h in Headers */,
 				259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */,
 				25DE0A69283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp in Headers */,
 				25DE0A8E28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp in Headers */,
+				25CDE611285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp in Headers */,
 				259040EA26FC065400D605D0 /* SurfaceButtonDevice.hpp in Headers */,
 				25B97E1E260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp in Headers */,
 			);
@@ -545,8 +635,9 @@
 			buildRules = (
 			);
 			dependencies = (
-				25D49D8D2854EE8E008CAAA5 /* PBXTargetDependency */,
 				25D49D8F2854EE92008CAAA5 /* PBXTargetDependency */,
+				25CDE626285F2972003FB4C4 /* PBXTargetDependency */,
+				25D49D8D2854EE8E008CAAA5 /* PBXTargetDependency */,
 				25CBB36B2733D50A009B568B /* PBXTargetDependency */,
 			);
 			name = BigSurface;
@@ -594,6 +685,10 @@
 					ProjectRef = AC94C8382119E50400D26081 /* VoodooI2CSynaptics.xcodeproj */;
 				},
 				{
+					ProductGroup = 25CDE61A285F291D003FB4C4 /* Products */;
+					ProjectRef = 25CDE619285F291D003FB4C4 /* VoodooInput.xcodeproj */;
+				},
+				{
 					ProductGroup = 25CBB3612733D4C9009B568B /* Products */;
 					ProjectRef = 25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */;
 				},
@@ -625,6 +720,13 @@
 			fileType = wrapper.cfbundle;
 			path = VoodooSerial.kext;
 			remoteRef = 25CBB3642733D4C9009B568B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		25CDE61E285F291D003FB4C4 /* VoodooInput.kext */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = VoodooInput.kext;
+			remoteRef = 25CDE61D285F291D003FB4C4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		AC94C83D2119E50400D26081 /* VoodooI2CSynaptics.kext */ = {
@@ -659,7 +761,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooGPIO.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooGPIO.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooI2CServices.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooI2CServices.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooSerial.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooSerial.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooInput.kext\"\ncp -r \"${SRCROOT}/../Dependencies/VoodooInput/${CONFIGURATION}\"/VoodooInput.kext \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/VoodooInput.kext.dSYM\"\ncp -r \"${SRCROOT}/../Dependencies/VoodooInput/${CONFIGURATION}\"/*.dSYM ${BUILT_PRODUCTS_DIR} 2>/dev/null || true\n";
+			shellScript = "mkdir -p \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooGPIO.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooGPIO.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooInput.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooInput.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooI2CServices.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooI2CServices.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n\nrm -rf \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns/VoodooSerial.kext\"\nmv \"${BUILT_PRODUCTS_DIR}/VoodooSerial.kext\" \"${BUILT_PRODUCTS_DIR}/BigSurface.kext/Contents/PlugIns\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -680,14 +782,20 @@
 				2518A2F72734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp in Sources */,
 				25DE0A7828377EBE002DA176 /* SurfaceLaptopTouchpad.cpp in Sources */,
 				259731822738B01F00A7F7C1 /* SurfaceBattery.cpp in Sources */,
+				25CDE615285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp in Sources */,
+				25CDE60E285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp in Sources */,
 				259731882738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp in Sources */,
 				25DE0A6A283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp in Sources */,
 				25EA2A7E2836412B00525325 /* SurfaceBatteryNub.cpp in Sources */,
 				259731852738B01F00A7F7C1 /* KeyImplementations.cpp in Sources */,
+				25CDE614285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp in Sources */,
 				2597318D2738B2BA00A7F7C1 /* SurfaceSMBusController.cpp in Sources */,
 				25DE0A8D28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp in Sources */,
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
+				25CDE60C285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp in Sources */,
+				25CDE60B285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp in Sources */,
 				2597317E2738B01F00A7F7C1 /* SurfaceACAdapter.cpp in Sources */,
+				25CDE60A285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp in Sources */,
 				25DE0A912837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp in Sources */,
 				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,
 			);
@@ -700,6 +808,11 @@
 			isa = PBXTargetDependency;
 			name = VoodooSerial;
 			targetProxy = 25CBB36A2733D50A009B568B /* PBXContainerItemProxy */;
+		};
+		25CDE626285F2972003FB4C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = VoodooInput;
+			targetProxy = 25CDE625285F2972003FB4C4 /* PBXContainerItemProxy */;
 		};
 		25D49D8D2854EE8E008CAAA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -727,7 +840,7 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.5;
+				CURRENT_PROJECT_VERSION = 1.0.6;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -741,7 +854,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				MODULE_NAME = com.xavier.BigSurface;
 				MODULE_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -764,7 +877,7 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.5;
+				CURRENT_PROJECT_VERSION = 1.0.6;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
@@ -779,7 +892,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../MacKernelSDK/Library/x86_64",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				MODULE_NAME = com.xavier.BigSurface;
 				MODULE_VERSION = 1.0.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -797,7 +910,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -857,7 +970,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
