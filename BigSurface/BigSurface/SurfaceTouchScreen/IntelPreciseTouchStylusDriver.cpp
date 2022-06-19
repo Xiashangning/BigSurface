@@ -452,7 +452,8 @@ void IntelPreciseTouchStylusDriver::handleMessage(SurfaceManagementEngineClient 
             ret = sendIPTSCommand(IPTS_CMD_READY_FOR_DATA, nullptr, 0);
             if (ret != kIOReturnSuccess)
                 break;
-            ret = sendSetFeatureReport(0x5, 0x1);   // magic command to enable multitouch on SP7
+            if (touch_screen->vendor_id == 0x045e && touch_screen->device_id & 0x0100)
+                ret = sendSetFeatureReport(0x5, 0x1);   // magic command to enable multitouch on newer devices
             break;
         case IPTS_RSP_FEEDBACK: {
             if (state != IPTSDeviceStateStopping)
