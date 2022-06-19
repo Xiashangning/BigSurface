@@ -7,3 +7,6 @@
 [submodule "Dependencies/VoodooSerial"]
 	path = Dependencies/VoodooSerial
 	url = https://github.com/Xiashangning/VoodooSerial.git
+[submodule "Dependencies/VoodooInput"]
+	path = Dependencies/VoodooInput
+	url = https://github.com/Xiashangning/VoodooInput.git
