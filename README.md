@@ -39,7 +39,11 @@ See my sub-repo `VoodooSerial` for details
 - Surface Laptop3's keyboard & touchpad
   > Works now, all keys and gestures are recognised properly.
   > 
-  > Unknown issue: neither keyboard nor touchpad can wake up the system.
+  > Known issue: neither keyboard nor touchpad can wake up the system.
+- Touch Screen & Stylus
+  > The code is ported from linux, including `mei` and surface-linux's `ipts` & `iptsd` drivers.
+  > 
+  > 10 finger touch & stylus
   
 Possible values for Performance mode are:
 
@@ -60,8 +64,6 @@ Possible values for Performance mode are:
   > Corresponding device id: OV8865,OV5693,OV7251
   > 
   > Even Linux failed to drive the cameras on SP7 (IPU4), SP6 and before (IPU3) might be possible but I do not have the device.
-- Touch Screen
-  > Device id: 0x34E4
 
 
 ## If you like my project, please consider to `star` this project.
