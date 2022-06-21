@@ -44,6 +44,8 @@ See my sub-repo `VoodooSerial` for details
   > The code is ported from linux, including `mei` and surface-linux's `ipts` & `iptsd` drivers.
   > 
   > 10 finger touch & stylus
+  > 
+  > **Important**: need a SSDT patch! See in the release section 
   
 Possible values for Performance mode are:
 
