@@ -17,14 +17,13 @@
 #include <IOKit/graphics/IOFramebuffer.h>
 #include <IOKit/graphics/IODisplay.h>
 
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CDigitiserStylus.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CMultitouchInterface.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/MultitouchHelpers.hpp"
+#include "../../SurfaceMultitouch/VoodooI2CDigitiserStylus.hpp"
+#include "../../SurfaceMultitouch/VoodooI2CMultitouchInterface.hpp"
+#include "../../SurfaceMultitouch/MultitouchHelpers.hpp"
 
-#include "../SurfaceTypeCover/VoodooI2CMultitouchHIDEventDriver.hpp"
+#include "VoodooI2CMultitouchHIDEventDriver.hpp"
 
 #define RIGHT_CLICK_PRESS_RANGE 100     // in which range is considered a long press right click event
-#define RIGHT_CLICK_COUNT        50     // long press time
 
 /* Implements an HID Event Driver for touchscreen devices as well as stylus input.
  */
@@ -61,21 +60,18 @@ class EXPORT VoodooI2CTouchscreenHIDEventDriver : public VoodooI2CMultitouchHIDE
     IOFramebuffer* active_framebuffer;
     UInt8 current_rotation;
     
-    /* transducer variables
-     */
-    UInt32 buttons = 0;
     UInt32 stylus_buttons = 0;
     UInt32 barrel_switch_offset = 0;
     UInt32 eraser_switch_offset = 0;
     
-    /* handler variables
-     */
-    int click_tick = 0;
-    bool right_click = false;
-    bool start_scroll = true;
+    bool click_mask = false;
+    
     UInt16 compare_input_x = 0;
     UInt16 compare_input_y = 0;
-    int long_press_counter = 0;
+    AbsoluteTime long_press_timeout = 0;
+    
+    AbsoluteTime click_start = 0;
+    AbsoluteTime last_click = 0;
     
     /* The transducer is checked for singletouch finger based operation and the pointer event dispatched. This function
      * also handles a long-press, right-click function.

@@ -35,7 +35,7 @@ bool SurfaceBatteryNub::start(IOService *provider) {
 
     PMinit();
     ssh->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
     return true;

@@ -272,7 +272,7 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
     
     PMinit();
     nub->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
 
 	vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
     if (!vsmcNotifier) {

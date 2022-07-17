@@ -30,9 +30,9 @@
 
 #include "VoodooI2CHIDTransducerWrapper.hpp"
 
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CDigitiserStylus.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/VoodooI2CMultitouchInterface.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/Multitouch Support/MultitouchHelpers.hpp"
+#include "../../SurfaceMultitouch/VoodooI2CDigitiserStylus.hpp"
+#include "../../SurfaceMultitouch/VoodooI2CMultitouchInterface.hpp"
+#include "../../SurfaceMultitouch/MultitouchHelpers.hpp"
 
 #include "../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
 

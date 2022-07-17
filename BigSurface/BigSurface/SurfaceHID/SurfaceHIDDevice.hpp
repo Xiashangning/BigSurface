@@ -1,23 +1,23 @@
 //
-//  SurfaceTouchScreenDevice.hpp
-//  SurfaceTouchScreen
+//  SurfaceHIDDevice.hpp
+//  SurfaceHID
 //
-//  Created by Xavier on 2022/6/8.
+//  Created by Xavier on 2022/5/20.
 //  Copyright © 2022 Xia Shangning. All rights reserved.
 //
 
-#ifndef SurfaceTouchScreenDevice_hpp
-#define SurfaceTouchScreenDevice_hpp
+#ifndef SurfaceHIDDevice_hpp
+#define SurfaceHIDDevice_hpp
 
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/usb/AppleUSBDefinitions.h>
 
-#include "IntelPreciseTouchStylusDriver.hpp"
+#include "SurfaceHIDDriver.hpp"
 
-class EXPORT SurfaceTouchScreenDevice : public IOHIDDevice {
-    OSDeclareDefaultStructors(SurfaceTouchScreenDevice);
+class EXPORT SurfaceHIDDevice : public IOHIDDevice {
+    OSDeclareDefaultStructors(SurfaceHIDDevice);
     
-    friend class IntelPreciseTouchStylusDriver;
+    friend class SurfaceHIDDriver;
 
 public:
     bool attach(IOService *provider) override;
@@ -26,27 +26,27 @@ public:
     
     bool handleStart(IOService *provider) override;
     
-    IOReturn newReportDescriptor(IOMemoryDescriptor **descriptor) const override;
-
     IOReturn getReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) override;
     
     IOReturn setReport(IOMemoryDescriptor * report, IOHIDReportType reportType, IOOptionBits options=0) override;
+
+    IOReturn newReportDescriptor(IOMemoryDescriptor **descriptor) const override;
     
     OSString *newTransportString() const override;
     OSString *newManufacturerString() const override;
-    OSString *newProductString() const override;
     OSNumber *newVendorIDNumber() const override;
     OSNumber *newProductIDNumber() const override;
+    OSNumber *newLocationIDNumber() const override;
+    OSNumber *newCountryCodeNumber() const override;
     OSNumber *newVersionNumber() const override;
+    OSString *newProductString() const override;
     
 private:
-    IntelPreciseTouchStylusDriver*  api {nullptr};
-    IOBufferMemoryDescriptor *hid_desc {nullptr};
-    
-    UInt16 vendor_id {0};
-    UInt16 device_id {0};
-    UInt32 version {0};
-    UInt8 max_contacts {1};
+    SurfaceHIDDriver*       api {nullptr};
+    SurfaceHIDDescriptor    descriptor;
+    SurfaceHIDAttributes    attributes;
+    SurfaceHIDDeviceType    device;
+    OSString*               device_name;
 };
 
-#endif /* SurfaceTouchScreenDevice_hpp */
+#endif /* SurfaceHIDDevice_hpp */

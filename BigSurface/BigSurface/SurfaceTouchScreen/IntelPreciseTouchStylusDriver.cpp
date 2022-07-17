@@ -82,17 +82,6 @@ bool IntelPreciseTouchStylusDriver::start(IOService *provider) {
         LOG("Failed to start IPTS device!");
         goto exit;
     }
-    // Wait 1 second for device to start
-    for (int i = 0; i < 40; i++) {
-        if (state == IPTSDeviceStateStarted || state == IPTSDeviceStateStopped)
-            break;
-        IOSleep(25);
-    }
-    if (state == IPTSDeviceStateStopping || state == IPTSDeviceStateStopped) {
-        LOG("Error occurred during starting process");
-        goto exit;
-    }
-    timer->setTimeoutMS(1000);
     
     PMinit();
     api->joinPMtree(this);
@@ -123,9 +112,6 @@ IOReturn IntelPreciseTouchStylusDriver::setPowerState(unsigned long whichState, 
     if (whichState == 0) {
         if (awake) {
             awake = false;
-            timer->cancelTimeout();
-            timer->disable();
-            current_doorbell = 0;
             stopDevice();
             // Wait at most 500ms for device to stop
             for (int i = 0; i < 20; i++) {
@@ -133,6 +119,7 @@ IOReturn IntelPreciseTouchStylusDriver::setPowerState(unsigned long whichState, 
                     break;
                 IOSleep(25);
             }
+            current_doorbell = 0;
             LOG("Going to sleep");
         }
     } else {
@@ -140,16 +127,14 @@ IOReturn IntelPreciseTouchStylusDriver::setPowerState(unsigned long whichState, 
             awake = true;
             IOReturn ret = kIOReturnSuccess;
             for (int i = 0; i < 5; i++) {
-                IOSleep(500);
+                IOSleep(100);
                 ret = startDevice();
                 if (ret != kIOReturnNoDevice)
                     break;
+                IOSleep(400);
             }
             if (ret != kIOReturnSuccess) {
                 LOG("Failed to restart IPTS device from sleep!");
-            } else {
-                timer->enable();
-                timer->setTimeoutMS(1000);
             }
             LOG("Woke up");
         }
@@ -346,6 +331,10 @@ IOReturn IntelPreciseTouchStylusDriver::stopDevice()
         return kIOReturnBusy;
     
     state = IPTSDeviceStateStopping;
+    
+    timer->cancelTimeout();
+    timer->disable();
+    
     freeDMAResources();
     IOReturn ret = sendFeedback(0);
     if (ret == kIOReturnNoDevice)
@@ -454,6 +443,12 @@ void IntelPreciseTouchStylusDriver::handleMessage(SurfaceManagementEngineClient 
                 break;
             if (touch_screen->vendor_id == 0x045e && touch_screen->device_id & 0x0100)
                 ret = sendSetFeatureReport(0x5, 0x1);   // magic command to enable multitouch on newer devices
+            if (ret != kIOReturnSuccess)
+                LOG("Failed to enable multitouch on SP7 and newer devices!");
+            
+            timer->enable();
+            timer->setTimeoutMS(IPTS_IDLE_TIMEOUT);
+            
             break;
         case IPTS_RSP_FEEDBACK: {
             if (state != IPTSDeviceStateStopping)

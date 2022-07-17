@@ -173,7 +173,7 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     
     PMinit();
     acpi_device->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
     
     return true;
 exit:

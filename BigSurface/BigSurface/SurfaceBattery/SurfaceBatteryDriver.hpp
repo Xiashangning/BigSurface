@@ -75,7 +75,7 @@ class EXPORT SurfaceBatteryDriver : public IOService {
 	IONotifier *vsmcNotifier {nullptr};
 
 	VirtualSMCAPI::Plugin vsmcPlugin {
-		xStringify(PRODUCT_NAME),
+		"SurfaceBatteryDriver",
 		parseModuleVersion(xStringify(MODULE_VERSION)),
 		VirtualSMCAPI::Version,
 	};

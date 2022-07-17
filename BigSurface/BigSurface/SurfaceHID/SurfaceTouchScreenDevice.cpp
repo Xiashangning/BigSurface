@@ -27,7 +27,6 @@ bool SurfaceTouchScreenDevice::attach(IOService* provider) {
 
 void SurfaceTouchScreenDevice::detach(IOService* provider) {
     api = nullptr;
-    OSSafeReleaseNULL(hid_desc);
     super::detach(provider);
 }
 
@@ -44,13 +43,6 @@ bool SurfaceTouchScreenDevice::handleStart(IOService *provider) {
 }
 
 IOReturn SurfaceTouchScreenDevice::newReportDescriptor(IOMemoryDescriptor **reportDescriptor) const {
-//    UInt16 desc_len = 0;
-//    if (hid_desc)
-//        desc_len = hid_desc->getLength();
-//    IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::withCapacity(sizeof(virt_reportDescriptor) + desc_len, kIODirectionNone);
-//    buffer->writeBytes(0, virt_reportDescriptor, sizeof(virt_reportDescriptor));
-//    if (hid_desc)
-//        buffer->writeBytes(sizeof(virt_reportDescriptor), hid_desc->getBytesNoCopy(), desc_len);
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::withBytes(virt_reportDescriptor, sizeof(virt_reportDescriptor), kIODirectionNone);
     *reportDescriptor = buffer;
     return kIOReturnSuccess;
@@ -59,24 +51,17 @@ IOReturn SurfaceTouchScreenDevice::newReportDescriptor(IOMemoryDescriptor **repo
 IOReturn SurfaceTouchScreenDevice::getReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) {
     if (reportType == kIOHIDReportTypeFeature) {
         UInt8 report_id = options & 0xff;
-        OSData *get_buffer = OSData::withCapacity(1);
-        LOG("Get feature report for id %d", report_id);
         if (report_id == 0x40) {
             UInt8 buffer[] = {0x40, max_contacts};
-            get_buffer->appendBytes(buffer, sizeof(buffer));
+            report->writeBytes(0, buffer, sizeof(buffer));
+            return kIOReturnSuccess;
         }
-        report->writeBytes(0, get_buffer->getBytesNoCopy(), get_buffer->getLength());
-        get_buffer->release();
     }
-    return kIOReturnSuccess;
+    return kIOReturnUnsupported;
 }
 
 IOReturn SurfaceTouchScreenDevice::setReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) {
-    if (reportType == kIOHIDReportTypeFeature || reportType == kIOHIDReportTypeOutput) {
-        UInt8 report_id = options & 0xff;
-        LOG("Set feature/output report for id %d", report_id);
-    }
-    return kIOReturnSuccess;
+    return kIOReturnUnsupported;
 }
 
 OSString* SurfaceTouchScreenDevice::newTransportString() const {

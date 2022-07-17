@@ -90,19 +90,10 @@ enum MEIPowerGatingState {
     MEIPowerGatingOn  = 1,
 };
 
-struct MEIDMARingInfo {
-    IOBufferMemoryDescriptor*   buffer;
-    IODMACommand*               dma_cmd;
-    void*                       vaddr;
-    IOPhysicalAddress           paddr;
-    UInt32                      size;
-};
-
 struct MEIPhysicalDevice {
     IOPCIDevice*        pci_dev;
     IOMemoryMap*        mmap;
     MEIDeviceState      state;
-    MEIDMARingInfo      ring_desc[MEIDMADescriptorSize];
     MEIPowerGatingEvent pg_event;
     MEIPowerGatingState pg_state;
     queue_head_t        write_q;
@@ -216,7 +207,6 @@ private:
     bool isHostReady();
     bool isBusMessageVersionSupported();
     bool isWriteQueueEmpty();
-    bool isDMARingAllocated();
     
     inline void setHostCSR(UInt32 hcsr);
     
@@ -239,10 +229,6 @@ private:
     IOReturn enterPowerGatingSync();
     IOReturn exitPowerGatingSync();
     
-    IOReturn allocateDMARing();
-    void freeDMARing();
-    void resetDMARing();
-    
     void readMessage(UInt8 *buffer, UInt16 buffer_len);
     
     IOReturn writeMessage(UInt8 *header, UInt16 header_len, UInt8 *data, UInt16 data_len);
@@ -255,7 +241,6 @@ private:
     IOReturn sendCapabilityRequest();
     IOReturn sendClientEnumerationRequest();
     IOReturn sendClientPropertyRequest(UInt client_idx);
-    IOReturn sendDMASetupRequest();
     IOReturn sendAddClientResponse(UInt8 me_addr, MEIHostBusMessageReturnType status);
     
     void scheduleReset(IOInterruptEventSource *sender, int count);

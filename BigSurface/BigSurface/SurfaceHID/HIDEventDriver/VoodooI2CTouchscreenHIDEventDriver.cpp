@@ -15,7 +15,6 @@ OSDefineMetaClassAndStructors(VoodooI2CTouchscreenHIDEventDriver, VoodooI2CMulti
 bool VoodooI2CTouchscreenHIDEventDriver::checkFingerTouch(AbsoluteTime timestamp, VoodooI2CMultitouchEvent event) {
     bool got_transducer = false;
     
-    // If there is a finger touch event, decide if it is single or multitouch.
     for (int index = 0; index < event.transducers->getCount(); index++) {
         VoodooI2CDigitiserTransducer* transducer = OSDynamicCast(VoodooI2CDigitiserTransducer, event.transducers->getObject(index));
         if (!transducer)
@@ -33,50 +32,93 @@ bool VoodooI2CTouchscreenHIDEventDriver::checkFingerTouch(AbsoluteTime timestamp
                 
                 checkRotation(&x, &y);
                 
-                // Begin long press right click routine.  Increasing compare_input_counter check will lengthen the time until execution.
-                UInt16 temp_x = x;
-                UInt16 temp_y = y;
-                if (!right_click) {
-                    SInt16 diff_x = compare_input_x - temp_x;
-                    SInt16 diff_y = compare_input_y - temp_y;
-                    if (abs(diff_x) < RIGHT_CLICK_PRESS_RANGE && abs(diff_y) < RIGHT_CLICK_PRESS_RANGE) {
-                        long_press_counter++;
-                        if (long_press_counter >= RIGHT_CLICK_COUNT && !right_click) {
-                            compare_input_x = 0;
-                            compare_input_y = 0;
-                            long_press_counter = 0;
-                            right_click = true;
-                        }
-                    } else {
-                        compare_input_x = temp_x;
-                        compare_input_y = temp_y;
-                        long_press_counter = 0;
+                // Double click routine
+                if (!last_value)    // touch starts
+                    clock_get_uptime(&click_start);
+                if (!value) {       // touch ends
+                    AbsoluteTime click_end;
+                    UInt64 nsecs;
+                    clock_get_uptime(&click_end);
+                    SUB_ABSOLUTETIME(&click_end, &click_start);
+                    absolutetime_to_nanoseconds(click_end, &nsecs);
+                    if (nsecs < 100000000) {    // < 100ms a quick click
+                        clock_get_uptime(&click_end);
+                        SUB_ABSOLUTETIME(&click_end, &last_click);
+                        absolutetime_to_nanoseconds(click_end, &nsecs);
+                        if (nsecs < 200000000) {    // < 200ms between two quick clicks
+                            
+                            dispatchDigitizerEventWithTiltOrientation(timestamp, transducer->secondary_id, transducer->type, 0x1, 0x00, x, y);
+                            
+                            // double click event
+                            dispatchDigitizerEventWithTiltOrientation(timestamp, transducer->secondary_id, transducer->type, 0x1, 0x01, x, y);
+                            IOSleep(10);
+                            dispatchDigitizerEventWithTiltOrientation(timestamp, transducer->secondary_id, transducer->type, 0x1, 0x00, x, y);
+                            
+                            IOSleep(50);
+                            
+                            dispatchDigitizerEventWithTiltOrientation(timestamp, transducer->secondary_id, transducer->type, 0x1, 0x01, x, y);
+                            IOSleep(10);
+                            // The second lift event will be executed below
+                            
+                            last_click = 0;
+                        } else
+                            clock_get_uptime(&last_click);
                     }
                 }
-                //  End long press right click routine.
                 
-                //  We need the first couple of single touch events to be in hover mode.  In modes such as Mission Control, this allows us
-                //  to select and drag windows vs just select and exit.  We are mimicking a cursor being moved into position prior to
-                //  executing a drag movement.  There is little noticeable affect in other circumstances.  This also assists in transitioning
-                //  between single / multitouch.
-                if (click_tick <= 2) {
-                    buttons = 0x00;
-                    click_tick++;
-                } else {
-                    if (right_click && value)
-                        buttons = 0x2;
-                    else
-                        buttons = value;
+                // Begin long press -> right click routine.
+                // Increasing long_press_counter check will lengthen the time until execution.
+                bool right_click = false;
+                UInt16 temp_x = x;
+                UInt16 temp_y = y;
+                if (!click_mask && value) {
+                    SInt16 diff_x = compare_input_x - temp_x;
+                    SInt16 diff_y = compare_input_y - temp_y;
+                    if (long_press_timeout
+                        && abs(diff_x) < RIGHT_CLICK_PRESS_RANGE
+                        && abs(diff_y) < RIGHT_CLICK_PRESS_RANGE) {
+                        AbsoluteTime cur_time;
+                        clock_get_uptime(&cur_time);
+                        if (cur_time > long_press_timeout) {
+                            click_mask = true;
+                            right_click = true;
+                            
+                            compare_input_x = 0;
+                            compare_input_y = 0;
+                        }
+                    } else {
+                        AbsoluteTime timeout;
+                        nanoseconds_to_absolutetime(1000000000, &timeout);  // 1s
+                        clock_get_uptime(&long_press_timeout);
+                        ADD_ABSOLUTETIME(&long_press_timeout, &timeout);
+                        
+                        compare_input_x = temp_x;
+                        compare_input_y = temp_y;
+                    }
                 }
+                //  End long press -> right click routine.
+                
+                /* We need the first couple of single touch events to be in hover mode.
+                 * In modes such as Mission Control, this allows us to select and drag
+                 * windows vs just select and exit.
+                 * We are mimicking a cursor being moved into position prior to executing a drag movement.
+                 * There is little noticeable affect in other circumstances. */
+                UInt32 buttons;
+                if (!last_value)
+                    buttons = 0x00;
+                else if (right_click)
+                    buttons = 0x02;
+                else if (click_mask)
+                    buttons = 0x00;
+                else
+                    buttons = value;
                 
                 dispatchDigitizerEventWithTiltOrientation(timestamp, transducer->secondary_id, transducer->type, 0x1, buttons, x, y);
                 
                 // Finger lifted
-                if (!value && last_value) {
-                    // First 3 touch no click
-                    click_tick = 0;
-                    start_scroll = true;
-                    right_click = false;
+                if (!value) {
+                    click_mask = false;
+                    long_press_timeout = 0;
                 }
             }
         }

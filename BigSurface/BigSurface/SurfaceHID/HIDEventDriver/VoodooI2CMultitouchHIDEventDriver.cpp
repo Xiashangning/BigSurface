@@ -413,7 +413,7 @@ bool VoodooI2CMultitouchHIDEventDriver::handleStart(IOService* provider) {
 
     PMinit();
     hid_interface->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
 
     return true;
 }

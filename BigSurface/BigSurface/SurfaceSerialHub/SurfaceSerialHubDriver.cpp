@@ -9,7 +9,7 @@
 #include "SurfaceSerialHubDriver.hpp"
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
 #include "../SurfaceSerialHubDevices/SurfaceBatteryNub.hpp"
-#include "../SurfaceSerialHubDevices/SurfaceLaptop3Nub.hpp"
+#include "../SurfaceSerialHubDevices/SurfaceHIDNub.hpp"
 
 OSDefineMetaClassAndAbstractStructors(SurfaceSerialHubClient, IOService);
 
@@ -506,13 +506,13 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     
     uart_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedBuffer));
     if (!uart_interrupt) {
-        LOG("Could not register uart interrupt!");
+        LOG("Could not create uart interrupt!");
         goto exit;
     }
     work_loop->addEventSource(uart_interrupt);
     gpio_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::gpioWakeUp), this, 0);
     if (!gpio_interrupt) {
-        LOG("Could not register gpio interrupt!");
+        LOG("Could not create gpio interrupt!");
         goto exit;
     }
     work_loop->addEventSource(gpio_interrupt);
@@ -547,22 +547,22 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
             LOG("Surface Battery nub published!");
     }
     
-    laptop3_nub = OSTypeAlloc(SurfaceLaptop3Nub);
-    if (!laptop3_nub || !laptop3_nub->init() || !laptop3_nub->attach(this)) {
-        LOG("Failed to init Surface Laptop3 nub!");
-        OSSafeReleaseNULL(laptop3_nub);
+    hid_nub = OSTypeAlloc(SurfaceHIDNub);
+    if (!hid_nub || !hid_nub->init() || !hid_nub->attach(this)) {
+        LOG("Failed to init Surface HID nub!");
+        OSSafeReleaseNULL(hid_nub);
     } else {
-        if (!laptop3_nub->start(this)) {
-            LOG("Failed to attach Surface Laptop3 nub! Ignore this if you are not a Laptop3 device");
-            laptop3_nub->detach(this);
-            OSSafeReleaseNULL(laptop3_nub);
+        if (!hid_nub->start(this)) {
+            LOG("Failed to attach Surface HID nub! Ignore this if you don't need this");
+            hid_nub->detach(this);
+            OSSafeReleaseNULL(hid_nub);
         } else
-            LOG("Surface Laptop3 nub published!");
+            LOG("Surface HID nub published!");
     }
 
     PMinit();
     uart_controller->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
     return true;
@@ -654,10 +654,10 @@ void SurfaceSerialHubDriver::releaseResources() {
         battery_nub->detach(this);
         OSSafeReleaseNULL(battery_nub);
     }
-    if (laptop3_nub) {
-        laptop3_nub->stop(this);
-        laptop3_nub->detach(this);
-        OSSafeReleaseNULL(laptop3_nub);
+    if (hid_nub) {
+        hid_nub->stop(this);
+        hid_nub->detach(this);
+        OSSafeReleaseNULL(hid_nub);
     }
     WaitingRequest *req;
     qe_foreach_element_safe(req, &waiting_list, entry) {
@@ -777,7 +777,7 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
     fifo_size = 64; //parser.uart_info.rx_fifo;
     
     gpio_pin = parser.gpio_interrupts.pin_number;
-    gpio_irq = 0x00000001; //parser.gpio_interrupts.irq_type; // Should be Edge rising ?
+    gpio_irq = 0x00000001; // Set irq type to edge rising
     
     return kIOReturnSuccess;
 }

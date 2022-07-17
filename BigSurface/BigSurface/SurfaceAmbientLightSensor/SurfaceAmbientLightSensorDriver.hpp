@@ -42,7 +42,7 @@ public:
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
     
 private:
-    IOACPIPlatformDevice*   acpi_device {nullptr};
+    IOACPIPlatformDevice*   alsd_device {nullptr};
     VoodooI2CDeviceNub*     api {nullptr};
     IOWorkLoop*             work_loop {nullptr};
     IOTimerEventSource*     poller {nullptr};
@@ -50,7 +50,6 @@ private:
     bool awake {true};
     
     _Atomic(UInt32) current_lux;
-    UInt16 base_ali {100};
     IONotifier *vsmcNotifier {nullptr};
     static constexpr SMC_KEY KeyAL   = SMC_MAKE_IDENTIFIER('A','L','!',' ');
     static constexpr SMC_KEY KeyALI0 = SMC_MAKE_IDENTIFIER('A','L','I','0');
@@ -62,7 +61,7 @@ private:
     static constexpr SMC_KEY KeyLKSS = SMC_MAKE_IDENTIFIER('L','K','S','S');
     static constexpr SMC_KEY KeyMSLD = SMC_MAKE_IDENTIFIER('M','S','L','D');
     VirtualSMCAPI::Plugin vsmcPlugin {
-        xStringify(PRODUCT_NAME),
+        "SurfaceAmbientLightSensorDriver",
         parseModuleVersion(xStringify(MODULE_VERSION)),
         VirtualSMCAPI::Version,
     };
@@ -90,9 +89,9 @@ private:
     
     void releaseResources();
     
-    IOReturn readRegister(UInt8 reg, UInt8* values, size_t len);
+    inline IOReturn readRegister(UInt8 reg, UInt8* values, size_t len);
     
-    IOReturn writeRegister(UInt8 reg, UInt8 cmd);
+    inline IOReturn writeRegister(UInt8 reg, UInt8 cmd);
 };
 
 #endif /* SurfaceAmbientLightSensorDriver_hpp */

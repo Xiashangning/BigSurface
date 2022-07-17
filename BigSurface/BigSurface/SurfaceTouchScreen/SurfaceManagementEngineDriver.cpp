@@ -388,10 +388,6 @@ bool SurfaceManagementEngineDriver::isWriteQueueEmpty() {
     return device.state == MEIDeviceEnabled && queue_empty(&bus.tx_queue);
 }
 
-bool SurfaceManagementEngineDriver::isDMARingAllocated() {
-    return device.ring_desc[MEIDMADescriptorHost].vaddr != nullptr;
-}
-
 inline void SurfaceManagementEngineDriver::setHostCSR(UInt32 hcsr) {
     hcsr &= ~MEI_H_CSR_INT_STA_MASK;
     writeRegister(hcsr, MEI_H_CSR);
@@ -439,10 +435,6 @@ IOReturn SurfaceManagementEngineDriver::initDevice() {
         LOG("Could not map pci_device memory");
         return kIOReturnError;
     }
-    // DMA ring
-    device.ring_desc[MEIDMADescriptorHost].size = MEI_DMA_RING_HOST_SIZE;
-    device.ring_desc[MEIDMADescriptorDevice].size = MEI_DMA_RING_DEVICE_SIZE;
-    device.ring_desc[MEIDMADescriptorControl].size = MEI_DMA_RING_CTRL_SIZE;
     
     device.state = MEIDeviceInitializing;
     memset(me_client_map, 0, sizeof(me_client_map));
@@ -659,9 +651,6 @@ void SurfaceManagementEngineDriver::configDeviceFeatures() {
          device.version_minor >= MEI_HBM_MINOR_VERSION_CD))
         device.cd_supported = true;
     
-    device.dr_supported = false;
-    device.cd_supported = false;
-    
 //    LOG("power gating isolation           %d", device.pg_supported);
 //    LOG("dynamic clients                  %d", device.dc_supported);
 //    LOG("disconnect on timeout            %d", device.dot_supported);
@@ -673,6 +662,9 @@ void SurfaceManagementEngineDriver::configDeviceFeatures() {
 //    LOG("vtag                             %d", device.vt_supported);
 //    LOG("capabilities message             %d", device.cap_supported);
 //    LOG("client dma                       %d", device.cd_supported);
+    
+    device.dr_supported = false;
+    device.cd_supported = false;
 }
 
 void SurfaceManagementEngineDriver::resetBus() {
@@ -790,69 +782,6 @@ out:
     return ret;
 }
 
-IOReturn SurfaceManagementEngineDriver::allocateDMARing() {
-    for (int i=0; i < MEIDMADescriptorSize; i++) {
-        if (!device.ring_desc[i].size || device.ring_desc[i].vaddr)
-            continue;
-        
-        IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithPhysicalMask(kernel_task, kIODirectionInOut | kIOMemoryPhysicallyContiguous | kIOMapInhibitCache, device.ring_desc[i].size, DMA_BIT_MASK(64));
-        if (!buffer) {
-            LOG("Failed to create DMA buffer for %d", i);
-            goto err;
-        }
-        buffer->prepare();
-        
-        IODMACommand *cmd = IODMACommand::withSpecification(kIODMACommandOutputHost64, 64, 0, IODMACommand::kMapped, 0, PAGE_SIZE);
-        if (!cmd) {
-            LOG("Failed to create IODMACommand for %d", i);
-            buffer->complete();
-            OSSafeReleaseNULL(buffer);
-            goto err;
-        }
-        cmd->setMemoryDescriptor(buffer);
-
-        IODMACommand::Segment64 seg;
-        UInt64 offset = 0;
-        UInt32 seg_num = 1;
-        if (cmd->gen64IOVMSegments(&offset, &seg, &seg_num) != kIOReturnSuccess) {
-            LOG("Failed to generate IO virtual address for %d", i);
-            OSSafeReleaseNULL(cmd);
-            buffer->complete();
-            OSSafeReleaseNULL(buffer);
-            goto err;
-        }
-        device.ring_desc[i].paddr = seg.fIOVMAddr;
-        device.ring_desc[i].vaddr = buffer->getBytesNoCopy();
-        device.ring_desc[i].buffer = buffer;
-        device.ring_desc[i].dma_cmd = cmd;
-        memset(device.ring_desc[i].vaddr, 0, device.ring_desc[i].size);
-    }
-    return kIOReturnSuccess;
-err:
-    freeDMARing();
-    return kIOReturnNoMemory;
-}
-
-void SurfaceManagementEngineDriver::freeDMARing() {
-    for (int i=0; i < MEIDMADescriptorSize; i++) {
-        if (!device.ring_desc[i].vaddr)
-            continue;
-        
-        device.ring_desc[i].dma_cmd->clearMemoryDescriptor();
-        OSSafeReleaseNULL(device.ring_desc[i].dma_cmd);
-        device.ring_desc[i].buffer->complete();
-        OSSafeReleaseNULL(device.ring_desc[i].buffer);
-        device.ring_desc[i].vaddr = nullptr;
-    }
-}
-
-void SurfaceManagementEngineDriver::resetDMARing() {
-    MEIBusDMARingControl *ctrl = reinterpret_cast<MEIBusDMARingControl *>(device.ring_desc[MEIDMADescriptorControl].vaddr);
-    
-    if (ctrl)
-        memset(ctrl, 0, sizeof(MEIBusDMARingControl));
-}
-
 void SurfaceManagementEngineDriver::readMessage(UInt8 *buffer, UInt16 buffer_len) {
     UInt32 *buf = reinterpret_cast<UInt32 *>(buffer);
     for (; buffer_len >= MEI_SLOT_SIZE; buffer_len -= MEI_SLOT_SIZE)
@@ -919,7 +848,6 @@ IOReturn SurfaceManagementEngineDriver::sendClientMessage(SurfaceManagementEngin
     return command_gate->runAction(client_msg_action, client, buffer, &buffer_len, &blocking);
 }
 
-//TODO: DMA ring
 IOReturn SurfaceManagementEngineDriver::sendClientMessageGated(SurfaceManagementEngineClient *client, UInt8 *buffer, UInt16 *buffer_len, bool *blocking) {
     if (device.state != MEIDeviceEnabled || !client->active)
         return kIOReturnNoDevice;
@@ -1065,28 +993,6 @@ IOReturn SurfaceManagementEngineDriver::sendClientPropertyRequest(UInt start_idx
     IOReturn ret = writeHostMessage(&header, MEI_TO_MSG(&req));
     if (ret != kIOReturnSuccess)
         return ret;
-    init_timeout->setTimeoutMS(MEI_CLIENTS_INIT_TIMEOUT * 1000);
-    return kIOReturnSuccess;
-}
-
-IOReturn SurfaceManagementEngineDriver::sendDMASetupRequest() {
-    MEIBusMessageHeader header;
-    MEIBusDMASetupRequest req;
-    setupMessageHeader(&header, sizeof(req));
-    memset(&req, 0, sizeof(req));
-    req.cmd = MEI_DMA_SETUP_REQ_CMD;
-    for (int i = 0; i < MEIDMADescriptorSize; i++) {
-        IOPhysicalAddress paddr = device.ring_desc[i].paddr;
-        req.dma_info[i].addr_hi = paddr >> 32;
-        req.dma_info[i].addr_lo = paddr & 0xffffffff;
-        req.dma_info[i].size = device.ring_desc[i].size;
-    }
-    resetDMARing();
-    
-    IOReturn ret = writeHostMessage(&header, MEI_TO_MSG(&req));
-    if (ret != kIOReturnSuccess)
-        return ret;
-    bus.state = MEIBusSetupDMARing;
     init_timeout->setTimeoutMS(MEI_CLIENTS_INIT_TIMEOUT * 1000);
     return kIOReturnSuccess;
 }
@@ -1345,15 +1251,8 @@ IOReturn SurfaceManagementEngineDriver::handleHostMessage(MEIBusMessageHeader *h
     MEIBusHostVersionResponse *version_res;
     MEIBusClientPropertyResponse *props_res;
     MEIBusHostEnumerationResponse *enum_res;
-    MEIBusDMASetupResponse *dma_setup_res;
     MEIBusAddClientRequest *add_client_req;
     MEIBusCapabilityResponse *cap_res;
-    
-//    MEIBusClientConnectionResponse *connect_res;
-//    MEIBusClientConnectionRequest *disconnect_req;
-//    MEIBusFlowControl *flow_ctrl;
-//    MEIBusNotificationResponse *notif_res;
-//    MEIBusClientDMAResponse *client_dma_res;
     
     MEIHostBusMessageReturnType status;
     IOReturn ret;
@@ -1421,18 +1320,6 @@ IOReturn SurfaceManagementEngineDriver::handleHostMessage(MEIBusMessageHeader *h
                 command_gate->commandWakeup(&wait_bus_start);
                 break;
             }
-
-            if (device.dr_supported) {
-                if (allocateDMARing() == kIOReturnSuccess) {
-                    if (sendDMASetupRequest() != kIOReturnSuccess){
-                        LOG("DMA setup request request failed");
-                        return kIOReturnIOError;
-                    }
-                    command_gate->commandWakeup(&wait_bus_start);
-                    break;
-                }
-            }
-            device.dr_supported = false;
             
             if (sendClientEnumerationRequest() != kIOReturnSuccess) {
                 LOG("Enumeration request failed");
@@ -1458,47 +1345,6 @@ IOReturn SurfaceManagementEngineDriver::handleHostMessage(MEIBusMessageHeader *h
                 device.vt_supported = false;
             if (!(cap_res->capability_granted[0] & MEI_HBM_CAP_CLIENT_DMA))
                 device.cd_supported = false;
-
-            if (device.dr_supported) {
-                if (allocateDMARing() == kIOReturnSuccess) {
-                    if (sendDMASetupRequest() != kIOReturnSuccess){
-                        LOG("DMA setup request request failed");
-                        return kIOReturnIOError;
-                    }
-                    break;
-                }
-            }
-            device.dr_supported = false;
-
-            if (sendClientEnumerationRequest() != kIOReturnSuccess) {
-                LOG("Enumeration request failed");
-                return kIOReturnIOError;
-            }
-            break;
-
-        case MEI_DMA_SETUP_RES_CMD:
-            LOG("DMA setup response message received");
-            init_timeout->cancelTimeout();
-            if (device.state != MEIDeviceInitClients || bus.state != MEIBusSetupDMARing) {
-                if (device.state == MEIDevicePowerDown) {
-                    LOG("DMA setup response on shutdown, ignoring");
-                    return kIOReturnSuccess;
-                }
-                LOG("Error! DMA setup response: state mismatch, [%d, %d]", device.state, bus.state);
-                return kIOReturnError;
-            }
-
-            dma_setup_res = reinterpret_cast<MEIBusDMASetupResponse *>(mei_msg);
-            if (dma_setup_res->status != MEIHostBusMessageReturnSuccess) {
-                if (dma_setup_res->status == MEIHostBusMessageReturnNotAllowed) {
-                    //FIXME: why not allowed ?
-                    LOG("Warning, DMA setup not allowed");
-                } else {
-                    LOG("DMA setup failed %d", dma_setup_res->status);
-                }
-                device.dr_supported = false;
-                freeDMARing();
-            }
 
             if (sendClientEnumerationRequest() != kIOReturnSuccess) {
                 LOG("Enumeration request failed");
@@ -1647,155 +1493,9 @@ IOReturn SurfaceManagementEngineDriver::handleHostMessage(MEIBusMessageHeader *h
                 return kIOReturnIOError;
             }
             break;
-            
-//        case MEI_CLIENT_CONNECT_RES_CMD:
-//            LOG("Client connect response message received");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            connect_res = reinterpret_cast<MEIBusClientConnectionResponse *>(cl_cmd);
-//            if (connect_res->status == MEIClientConnectionSuccess)
-//                ipts_client->state = MEI_FILE_CONNECTED;
-//            else {
-//                LOG("Client connection failed, response status %d", connect_res->status);
-//                ipts_client->state = MEI_FILE_DISCONNECT_REPLY;
-//                if (connect_res->status == MEIClientConnectionNotFound) {
-//                    LOG("Invalid client!");
-//                    ipts_client->active = false;
-//                    if (device.state == MEI_DEV_ENABLED)
-//                        rescan_work->interruptOccurred(nullptr, this, 0);
-//                }
-//            }
-//            switch (connect_res->status) {
-//                case MEIClientConnectionSuccess:
-//                    ipts_client->status = kIOReturnSuccess;
-//                    break;
-//                case MEIClientConnectionNotFound:
-//                    ipts_client->status = kIOReturnNoResources;
-//                    break;
-//                case MEIClientConnectionAlreadyStarted:
-//                case MEIClientConnectionOutOfResources:
-//                case MEIClientConnectionNotAllowed:
-//                    ipts_client->status = kIOReturnBusy;
-//                    break;
-//                case MEIClientConnectionMessageTooSmall:
-//                default:
-//                    ipts_client->status = kIOReturnInvalid;
-//                    break;
-//            }
-//
-//            ipts_client->connection_timeout->cancelTimeout();
-//            command_gate->commandWakeup(&ipts_client->ctrl_wait);
-//            break;
-//
-//        case MEI_CLIENT_DISCONNECT_RES_CMD:
-//            LOG("Client disconnect response message received");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            connect_res = reinterpret_cast<MEIBusClientConnectionResponse *>(cl_cmd);
-//            if (connect_res->status == MEIClientConnectionSuccess)
-//                ipts_client->state = MEI_FILE_DISCONNECT_REPLY;
-//            ipts_client->status = kIOReturnSuccess;
-//
-//            ipts_client->connection_timeout->cancelTimeout();
-//            command_gate->commandWakeup(&ipts_client->ctrl_wait);
-//            break;
-//
-//        case MEI_FLOW_CONTROL_CMD:
-//            LOG("Client flow control response message received");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            flow_ctrl = reinterpret_cast<MEIBusFlowControl *>(cl_cmd);
-//            if (!flow_ctrl->host_addr && !ipts_client->properties.single_recv_buf) {
-//                LOG("This client does not share receive buffer!");
-//                break;
-//            }
-//            ipts_client->tx_credits++;
-//            break;
-//
-//        case MEI_CLIENT_DISCONNECT_REQ_CMD:
-//            LOG("Disconnect request message received");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            disconnect_req = reinterpret_cast<MEIBusClientConnectionRequest *>(cl_cmd);
-//            ipts_client->state = MEI_FILE_DISCONNECTING;
-//            ipts_client->connection_timeout->cancelTimeout();
-//
-//            mei_cl_enqueue_ctrl_wr_cb(cl, 0, MEI_FOP_DISCONNECT_RSP,
-//            break;
-//
-//        case MEI_NOTIFY_RES_CMD:
-//            LOG("Notify response received");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            notif_res = reinterpret_cast<MEIBusNotificationResponse *>(cl_cmd);
-//            if (notif_res->start) {
-//                LOG("Notify start");
-//                if (notif_res->status == MEIHostBusMessageReturnSuccess || notif_res->status == MEIHostBusMessageReturnAlreadyStarted) {
-//                    ipts_client->notify_enabled = true;
-//                    ipts_client->status = kIOReturnSuccess;
-//                } else
-//                    ipts_client->status = kIOReturnInvalid;
-//            } else {
-//                LOG("Notify stop");
-//                if (notif_res->status == MEIHostBusMessageReturnSuccess || notif_res->status == MEIHostBusMessageReturnNotStarted) {
-//                    ipts_client->notify_enabled = false;
-//                    ipts_client->status = kIOReturnSuccess;
-//                } else
-//                    ipts_client->status = kIOReturnInvalid;
-//            }
-//
-//            ipts_client->connection_timeout->cancelTimeout();
-//            command_gate->commandWakeup(&ipts_client->ctrl_wait);
-//            break;
-//
-//        case MEI_NOTIFICATION_CMD:
-//            LOG("Notification");
-//            if (!ipts_client || ipts_client->addr != cl_cmd->me_addr) {
-//                LOG("WTF? Client not found");
-//                break;
-//            }
-//
-//            if (!ipts_client->notify_enabled) {
-//                LOG("Notification not enabled yet");
-//                break;
-//            }
-//
-//            cl->notify_ev = true;
-//            if (!mei_cl_bus_notify_event(cl))
-//                wake_up_interruptible(&cl->ev_wait);
-//            if (cl->ev_async)
-//                kill_fasync(&cl->ev_async, SIGIO, POLL_PRI);
-//            break;
-//
-//        case MEI_CLIENT_DMA_MAP_RES_CMD:
-//            LOG("Client DMA map response message received");
-//            client_dma_res = reinterpret_cast<MEIBusClientDMAResponse *>(mei_msg);
-//            mei_hbm_cl_dma_map_res(dev, client_dma_res);
-//            break;
-//
-//        case MEI_CLIENT_DMA_UNMAP_RES_CMD:
-//            LOG("Client DMA unmap response message received");
-//            client_dma_res = reinterpret_cast<MEIBusClientDMAResponse *>(mei_msg);
-//            mei_hbm_cl_dma_unmap_res(dev, client_dma_res);
-//            break;
 
         default:
-            LOG("WTF? Unknown command %d", mei_msg->cmd);
+            LOG("WTF? Unknown command %X", mei_msg->cmd);
             return kIOReturnError;
 
     }
@@ -1806,15 +1506,8 @@ IOReturn SurfaceManagementEngineDriver::handleClientMessage(SurfaceManagementEng
     UInt16 data_len;
     UInt16 length = mei_hdr->length;
     
-    //TODO: extended & dma ring
-    if (mei_hdr->extended) {
-        LOG("Got extended header");
+    if (mei_hdr->extended || mei_hdr->dma_ring)
         goto discard;
-    }
-    if (mei_hdr->dma_ring) {
-        LOG("Got dma ring");
-        goto discard;
-    }
 
     data_len = length + client->rx_cache_pos;
     if (client->properties.max_msg_length < data_len) {
@@ -1837,11 +1530,6 @@ discard:
 }
 
 void SurfaceManagementEngineDriver::discardMessage(MEIBusMessageHeader *hdr, UInt16 discard_len) {
-    if (hdr->dma_ring) {
-        //TODO: DMA ring read
-//        mei_dma_ring_read(dev, NULL, hdr->extension[dev->rd_msg_hdr_count - 2]);
-        discard_len = 0;
-    }
     readMessage(bus.rx_msg_buf, discard_len);
 }
 

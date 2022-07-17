@@ -1,13 +1,13 @@
 //
-//  SurfaceLaptop3Nub.hpp
+//  SurfaceHIDNub.hpp
 //  SurfaceSerialHubDevices
 //
 //  Created by Xavier on 2022/5/20.
 //  Copyright © 2022 Xia Shangning. All rights reserved.
 //
 
-#ifndef SurfaceLaptop3Nub_hpp
-#define SurfaceLaptop3Nub_hpp
+#ifndef SurfaceHIDNub_hpp
+#define SurfaceHIDNub_hpp
 
 #include <IOKit/IOService.h>
 #include <IOKit/IOWorkLoop.h>
@@ -15,15 +15,16 @@
 
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 
-enum SurfaceHIDDescriptorEntry {
-    SurfaceDescriptorHIDEntry = 0,
-    SurfaceDescriptorReportEntry = 1,
-    SurfaceDescriptorAttributesEntry = 2,
+enum SurfaceHIDDescriptorEntryType : UInt8 {
+    SurfaceHIDDescriptorEntry       = 0,
+    SurfaceHIDAttributesEntry       = 2,
+    SurfaceReportDescriptorEntry    = 1,
 };
 
-enum SurfaceLaptop3HIDDeviceType {
-    SurfaceLaptop3Keyboard = 0x01,
-    SurfaceLaptop3Touchpad = 0x03,
+enum SurfaceHIDDeviceType {
+    SurfaceLegacyKeyboardDevice = 0x00,
+    SurfaceKeyboardDevice       = 0x01,
+    SurfaceTouchpadDevice       = 0x03,
 };
 
 struct PACKED SurfaceHIDDescriptorBufferHeader {
@@ -52,13 +53,16 @@ struct PACKED SurfaceHIDAttributes {
     UInt8  _unknown[22];
 };
 
+#define SURFACE_LEGACY_HID_STRING       "SurfaceLegacyHID"
+#define SURFACE_LEGACY_FEAT_REPORT_SIZE 7
+
 #define SURFACE_HID_DESC_HEADER_SIZE sizeof(SurfaceHIDDescriptorBufferHeader)
 
-class EXPORT SurfaceLaptop3Nub : public SurfaceSerialHubClient {
-    OSDeclareDefaultStructors(SurfaceLaptop3Nub)
+class EXPORT SurfaceHIDNub : public SurfaceSerialHubClient {
+    OSDeclareDefaultStructors(SurfaceHIDNub)
 
 public:
-    typedef void (*EventHandler)(OSObject *owner, SurfaceLaptop3Nub *sender, SurfaceLaptop3HIDDeviceType device, UInt8 *buffer, UInt16 len);
+    typedef void (*EventHandler)(OSObject *owner, SurfaceHIDNub *sender, SurfaceHIDDeviceType device, UInt8 *buffer, UInt16 len);
     
     bool attach(IOService* provider) override;
     
@@ -76,15 +80,15 @@ public:
     
     void eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) override;
     
-    IOReturn getHIDDescriptor(SurfaceLaptop3HIDDeviceType device, SurfaceHIDDescriptor *desc);
+    IOReturn getHIDDescriptor(SurfaceHIDDeviceType device, SurfaceHIDDescriptor *desc);
     
-    IOReturn getHIDAttributes(SurfaceLaptop3HIDDeviceType device, SurfaceHIDAttributes *attr);
+    IOReturn getHIDAttributes(SurfaceHIDDeviceType device, SurfaceHIDAttributes *attr);
     
-    IOReturn getHIDReportDescriptor(SurfaceLaptop3HIDDeviceType device, UInt8 *buffer, UInt16 len);
+    IOReturn getReportDescriptor(SurfaceHIDDeviceType device, UInt8 *buffer, UInt16 len);
     
-    IOReturn getHIDRawReport(SurfaceLaptop3HIDDeviceType device, UInt8 report_id, UInt8 *buffer, UInt16 len);
+    IOReturn getHIDRawReport(SurfaceHIDDeviceType device, UInt8 report_id, UInt8 *buffer, UInt16 len);
     
-    void setHIDRawReport(SurfaceLaptop3HIDDeviceType device, UInt8 report_id, bool feature, UInt8 *buffer, UInt16 len);
+    void setHIDRawReport(SurfaceHIDDeviceType device, UInt8 report_id, bool feature, UInt8 *buffer, UInt16 len);
     
 private:
     SurfaceSerialHubDriver* ssh {nullptr};
@@ -93,8 +97,13 @@ private:
     
     bool    awake {false};
     bool    registered {false};
+    bool    legacy {true};
+    UInt8   tc {SSH_TC_KBD};
 
-    IOReturn getHIDData(SurfaceLaptop3HIDDeviceType device, SurfaceHIDDescriptorEntry entry, UInt8 *buffer, UInt16 buffer_len);
+    IOReturn getDescriptorData(SurfaceHIDDeviceType device, SurfaceHIDDescriptorEntryType entry, UInt8 *buffer, UInt16 buffer_len);
+    
+    IOReturn getLegacyData(SurfaceHIDDeviceType device, SurfaceHIDDescriptorEntryType entry, UInt8 *buffer, UInt16 buffer_len);
+    IOReturn getData(SurfaceHIDDeviceType device, SurfaceHIDDescriptorEntryType entry, UInt8 *buffer, UInt16 buffer_len);
 };
 
-#endif /* SurfaceLaptop3Nub_hpp */
+#endif /* SurfaceHIDNub_hpp */

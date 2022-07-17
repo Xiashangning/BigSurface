@@ -56,18 +56,37 @@
 		25CDE618285F27A7003FB4C4 /* IPTSProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 25CDE608285F27A7003FB4C4 /* IPTSProtocol.h */; };
 		25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25D907272736E2B2006D799F /* AmbientLightValue.hpp */; };
 		25D9072A2736E2B2006D799F /* AmbientLightValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25D907282736E2B2006D799F /* AmbientLightValue.cpp */; };
-		25DBA9742836A77700459629 /* SurfaceLaptop3Nub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */; };
-		25DBA9752836A77700459629 /* SurfaceLaptop3Nub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */; };
-		25DE0A68283738EC002DA176 /* SurfaceLaptopKeyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */; };
-		25DE0A69283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */; };
-		25DE0A6A283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */; };
-		25DE0A6B283738EC002DA176 /* SurfaceLaptopKeyboard.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */; };
-		25DE0A7828377EBE002DA176 /* SurfaceLaptopTouchpad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */; };
-		25DE0A7928377EBE002DA176 /* SurfaceLaptopTouchpad.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */; };
+		25DBA9742836A77700459629 /* SurfaceHIDNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DBA9722836A77700459629 /* SurfaceHIDNub.cpp */; };
+		25DBA9752836A77700459629 /* SurfaceHIDNub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DBA9732836A77700459629 /* SurfaceHIDNub.hpp */; };
+		25DE0A69283738EC002DA176 /* SurfaceHIDDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A65283738EC002DA176 /* SurfaceHIDDriver.hpp */; };
+		25DE0A6A283738EC002DA176 /* SurfaceHIDDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A66283738EC002DA176 /* SurfaceHIDDriver.cpp */; };
 		25DE0A8D28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */; };
 		25DE0A8E28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */; };
-		25DE0A912837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */; };
-		25DE0A922837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */; };
+		25DE0A912837BC4C002DA176 /* SurfaceHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DE0A8F2837BC4C002DA176 /* SurfaceHIDDevice.cpp */; };
+		25DE0A922837BC4C002DA176 /* SurfaceHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DE0A902837BC4C002DA176 /* SurfaceHIDDevice.hpp */; };
+		25DFC00F2877EF8B00EA6990 /* VoodooI2CMultitouchInterface.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFF82877EF8B00EA6990 /* VoodooI2CMultitouchInterface.hpp */; };
+		25DFC0102877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFF92877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.hpp */; };
+		25DFC0112877EF8B00EA6990 /* VoodooI2CMultitouchEngine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFFA2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.hpp */; };
+		25DFC0122877EF8B00EA6990 /* VoodooI2CDigitiserStylus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFFB2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.hpp */; };
+		25DFC0132877EF8B00EA6990 /* VoodooI2CNativeEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFBFFD2877EF8B00EA6990 /* VoodooI2CNativeEngine.cpp */; };
+		25DFC0142877EF8B00EA6990 /* VoodooI2CNativeEngine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFFE2877EF8B00EA6990 /* VoodooI2CNativeEngine.hpp */; };
+		25DFC0152877EF8B00EA6990 /* MultitouchHelpers.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFBFFF2877EF8B00EA6990 /* MultitouchHelpers.hpp */; };
+		25DFC0162877EF8B00EA6990 /* VoodooI2CCSGestureEngine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0012877EF8B00EA6990 /* VoodooI2CCSGestureEngine.hpp */; };
+		25DFC0172877EF8B00EA6990 /* AverageClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0022877EF8B00EA6990 /* AverageClasses.h */; };
+		25DFC0182877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC0032877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.cpp */; };
+		25DFC0192877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0042877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.h */; };
+		25DFC01A2877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC0052877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.cpp */; };
+		25DFC01B2877EF8B00EA6990 /* csgesturescroll.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC0062877EF8B00EA6990 /* csgesturescroll.cpp */; };
+		25DFC01C2877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0072877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.hpp */; };
+		25DFC01D2877EF8B00EA6990 /* VoodooI2CCSGestureEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC0082877EF8B00EA6990 /* VoodooI2CCSGestureEngine.cpp */; };
+		25DFC01E2877EF8C00EA6990 /* csgesturescroll.h in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0092877EF8B00EA6990 /* csgesturescroll.h */; };
+		25DFC01F2877EF8C00EA6990 /* csgesture-softc.h in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC00A2877EF8B00EA6990 /* csgesture-softc.h */; };
+		25DFC0202877EF8C00EA6990 /* VoodooI2CDigitiserTransducer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC00B2877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.cpp */; };
+		25DFC0212877EF8C00EA6990 /* VoodooI2CMultitouchInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC00C2877EF8B00EA6990 /* VoodooI2CMultitouchInterface.cpp */; };
+		25DFC0222877EF8C00EA6990 /* VoodooI2CMultitouchEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC00D2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.cpp */; };
+		25DFC0232877EF8C00EA6990 /* VoodooI2CDigitiserStylus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC00E2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.cpp */; };
+		25DFC0432877F2F200EA6990 /* VoodooI2CHIDDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25DFC0412877F2F200EA6990 /* VoodooI2CHIDDevice.hpp */; };
+		25DFC0442877F2F200EA6990 /* VoodooI2CHIDDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25DFC0422877F2F200EA6990 /* VoodooI2CHIDDevice.cpp */; };
 		25EA2A7E2836412B00525325 /* SurfaceBatteryNub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */; };
 		25EA2A7F2836412B00525325 /* SurfaceBatteryNub.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */; };
 /* End PBXBuildFile section */
@@ -237,18 +256,37 @@
 		25D907212736E125006D799F /* plugin_start.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
 		25D907272736E2B2006D799F /* AmbientLightValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AmbientLightValue.hpp; sourceTree = "<group>"; };
 		25D907282736E2B2006D799F /* AmbientLightValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AmbientLightValue.cpp; sourceTree = "<group>"; };
-		25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3Nub.cpp; sourceTree = "<group>"; };
-		25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3Nub.hpp; sourceTree = "<group>"; };
-		25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopKeyboard.cpp; sourceTree = "<group>"; };
-		25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3HIDDriver.hpp; sourceTree = "<group>"; };
-		25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3HIDDriver.cpp; sourceTree = "<group>"; };
-		25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopKeyboard.hpp; sourceTree = "<group>"; };
-		25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptopTouchpad.cpp; sourceTree = "<group>"; };
-		25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptopTouchpad.hpp; sourceTree = "<group>"; };
+		25DBA9722836A77700459629 /* SurfaceHIDNub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceHIDNub.cpp; sourceTree = "<group>"; };
+		25DBA9732836A77700459629 /* SurfaceHIDNub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceHIDNub.hpp; sourceTree = "<group>"; };
+		25DE0A65283738EC002DA176 /* SurfaceHIDDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceHIDDriver.hpp; sourceTree = "<group>"; };
+		25DE0A66283738EC002DA176 /* SurfaceHIDDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceHIDDriver.cpp; sourceTree = "<group>"; };
 		25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CPrecisionTouchpadHIDEventDriver.cpp; sourceTree = "<group>"; };
 		25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CPrecisionTouchpadHIDEventDriver.hpp; sourceTree = "<group>"; };
-		25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceLaptop3HIDDevice.cpp; sourceTree = "<group>"; };
-		25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceLaptop3HIDDevice.hpp; sourceTree = "<group>"; };
+		25DE0A8F2837BC4C002DA176 /* SurfaceHIDDevice.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceHIDDevice.cpp; sourceTree = "<group>"; };
+		25DE0A902837BC4C002DA176 /* SurfaceHIDDevice.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceHIDDevice.hpp; sourceTree = "<group>"; };
+		25DFBFF82877EF8B00EA6990 /* VoodooI2CMultitouchInterface.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CMultitouchInterface.hpp; sourceTree = "<group>"; };
+		25DFBFF92877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CDigitiserTransducer.hpp; sourceTree = "<group>"; };
+		25DFBFFA2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CMultitouchEngine.hpp; sourceTree = "<group>"; };
+		25DFBFFB2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CDigitiserStylus.hpp; sourceTree = "<group>"; };
+		25DFBFFD2877EF8B00EA6990 /* VoodooI2CNativeEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CNativeEngine.cpp; sourceTree = "<group>"; };
+		25DFBFFE2877EF8B00EA6990 /* VoodooI2CNativeEngine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CNativeEngine.hpp; sourceTree = "<group>"; };
+		25DFBFFF2877EF8B00EA6990 /* MultitouchHelpers.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultitouchHelpers.hpp; sourceTree = "<group>"; };
+		25DFC0012877EF8B00EA6990 /* VoodooI2CCSGestureEngine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CCSGestureEngine.hpp; sourceTree = "<group>"; };
+		25DFC0022877EF8B00EA6990 /* AverageClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AverageClasses.h; sourceTree = "<group>"; };
+		25DFC0032877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooCSGestureHIDWrapper.cpp; sourceTree = "<group>"; };
+		25DFC0042877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoodooCSGestureHIDWrapper.h; sourceTree = "<group>"; };
+		25DFC0052877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooCSGestureHIPointingWrapper.cpp; sourceTree = "<group>"; };
+		25DFC0062877EF8B00EA6990 /* csgesturescroll.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = csgesturescroll.cpp; sourceTree = "<group>"; };
+		25DFC0072877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooCSGestureHIPointingWrapper.hpp; sourceTree = "<group>"; };
+		25DFC0082877EF8B00EA6990 /* VoodooI2CCSGestureEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CCSGestureEngine.cpp; sourceTree = "<group>"; };
+		25DFC0092877EF8B00EA6990 /* csgesturescroll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csgesturescroll.h; sourceTree = "<group>"; };
+		25DFC00A2877EF8B00EA6990 /* csgesture-softc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "csgesture-softc.h"; sourceTree = "<group>"; };
+		25DFC00B2877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CDigitiserTransducer.cpp; sourceTree = "<group>"; };
+		25DFC00C2877EF8B00EA6990 /* VoodooI2CMultitouchInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CMultitouchInterface.cpp; sourceTree = "<group>"; };
+		25DFC00D2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CMultitouchEngine.cpp; sourceTree = "<group>"; };
+		25DFC00E2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CDigitiserStylus.cpp; sourceTree = "<group>"; };
+		25DFC0412877F2F200EA6990 /* VoodooI2CHIDDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoodooI2CHIDDevice.hpp; sourceTree = "<group>"; };
+		25DFC0422877F2F200EA6990 /* VoodooI2CHIDDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooI2CHIDDevice.cpp; sourceTree = "<group>"; };
 		25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceBatteryNub.cpp; sourceTree = "<group>"; };
 		25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SurfaceBatteryNub.hpp; sourceTree = "<group>"; };
 		7BE66D8F258AC5DC003CA4AD /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = ../MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = "<group>"; };
@@ -270,9 +308,9 @@
 		2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */ = {
 			isa = PBXGroup;
 			children = (
+				2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */,
 				2518A2F42734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp */,
 				2518A2F32734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.hpp */,
-				2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */,
 				25D907282736E2B2006D799F /* AmbientLightValue.cpp */,
 				25D907272736E2B2006D799F /* AmbientLightValue.hpp */,
 			);
@@ -315,13 +353,14 @@
 			isa = PBXGroup;
 			children = (
 				AC0955711F4ED49E0052E343 /* Dependencies */,
+				25DFBFF72877EF8B00EA6990 /* SurfaceMultitouch */,
 				25B97DAF260B95B600657C76 /* SurfaceTypeCover */,
 				2524C0A326F3233A00CAAF12 /* SurfaceButton */,
 				2518A2F22734F6AA00B0D631 /* SurfaceAmbientLightSensor */,
 				25C8D7E727359FCD00F58956 /* SurfaceSerialHub */,
 				25DBA9762836A78900459629 /* SurfaceSerialHubDevices */,
 				2597316F2738B01F00A7F7C1 /* SurfaceBattery */,
-				25DE0A63283738EC002DA176 /* SurfaceLaptopHID */,
+				25DE0A63283738EC002DA176 /* SurfaceHID */,
 				25CDE5F8285F27A7003FB4C4 /* SurfaceTouchScreen */,
 			);
 			path = BigSurface;
@@ -330,12 +369,6 @@
 		25B97DAF260B95B600657C76 /* SurfaceTypeCover */ = {
 			isa = PBXGroup;
 			children = (
-				25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */,
-				25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */,
-				25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */,
-				25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */,
-				25B97E2A260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp */,
-				25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */,
 				25B97E15260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp */,
 				25B97E18260B9F1100657C76 /* SurfaceTypeCoverDriver.hpp */,
 			);
@@ -380,20 +413,15 @@
 			isa = PBXGroup;
 			children = (
 				25CDE602285F27A7003FB4C4 /* MEIProtocol.h */,
-				25CDE600285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp */,
 				25CDE5FB285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp */,
-				25CDE5F9285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp */,
+				25CDE600285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp */,
 				25CDE605285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp */,
+				25CDE5F9285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp */,
 				25CDE608285F27A7003FB4C4 /* IPTSProtocol.h */,
-				25CDE5FF285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp */,
 				25CDE604285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp */,
-				25CDE607285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp */,
-				25CDE5FA285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp */,
-				25CDE606285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h */,
-				25CDE603285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp */,
-				25CDE5FE285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp */,
-				25CDE601285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp */,
+				25CDE5FF285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp */,
 				25CDE5FC285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp */,
+				25CDE601285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp */,
 				25CDE5FD285F27A7003FB4C4 /* IPTSKenerlUserShared.h */,
 			);
 			path = SurfaceTouchScreen;
@@ -505,25 +533,86 @@
 			children = (
 				25EA2A7C2836412B00525325 /* SurfaceBatteryNub.cpp */,
 				25EA2A7D2836412B00525325 /* SurfaceBatteryNub.hpp */,
-				25DBA9722836A77700459629 /* SurfaceLaptop3Nub.cpp */,
-				25DBA9732836A77700459629 /* SurfaceLaptop3Nub.hpp */,
+				25DBA9722836A77700459629 /* SurfaceHIDNub.cpp */,
+				25DBA9732836A77700459629 /* SurfaceHIDNub.hpp */,
 			);
 			path = SurfaceSerialHubDevices;
 			sourceTree = "<group>";
 		};
-		25DE0A63283738EC002DA176 /* SurfaceLaptopHID */ = {
+		25DE0A63283738EC002DA176 /* SurfaceHID */ = {
 			isa = PBXGroup;
 			children = (
-				25DE0A66283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp */,
-				25DE0A65283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp */,
-				25DE0A8F2837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp */,
-				25DE0A902837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp */,
-				25DE0A64283738EC002DA176 /* SurfaceLaptopKeyboard.cpp */,
-				25DE0A67283738EC002DA176 /* SurfaceLaptopKeyboard.hpp */,
-				25DE0A7628377EBE002DA176 /* SurfaceLaptopTouchpad.cpp */,
-				25DE0A7728377EBE002DA176 /* SurfaceLaptopTouchpad.hpp */,
+				25DFC0242877F03E00EA6990 /* HIDEventDriver */,
+				25DE0A66283738EC002DA176 /* SurfaceHIDDriver.cpp */,
+				25DE0A65283738EC002DA176 /* SurfaceHIDDriver.hpp */,
+				25DE0A8F2837BC4C002DA176 /* SurfaceHIDDevice.cpp */,
+				25DE0A902837BC4C002DA176 /* SurfaceHIDDevice.hpp */,
+				25CDE5FA285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp */,
+				25CDE607285F27A7003FB4C4 /* SurfaceTouchScreenDevice.hpp */,
+				25CDE606285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h */,
+				25DFC0422877F2F200EA6990 /* VoodooI2CHIDDevice.cpp */,
+				25DFC0412877F2F200EA6990 /* VoodooI2CHIDDevice.hpp */,
 			);
-			path = SurfaceLaptopHID;
+			path = SurfaceHID;
+			sourceTree = "<group>";
+		};
+		25DFBFF72877EF8B00EA6990 /* SurfaceMultitouch */ = {
+			isa = PBXGroup;
+			children = (
+				25DFC0002877EF8B00EA6990 /* CSGesture */,
+				25DFBFFC2877EF8B00EA6990 /* Native */,
+				25DFC00C2877EF8B00EA6990 /* VoodooI2CMultitouchInterface.cpp */,
+				25DFBFF82877EF8B00EA6990 /* VoodooI2CMultitouchInterface.hpp */,
+				25DFC00B2877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.cpp */,
+				25DFBFF92877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.hpp */,
+				25DFC00D2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.cpp */,
+				25DFBFFA2877EF8B00EA6990 /* VoodooI2CMultitouchEngine.hpp */,
+				25DFC00E2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.cpp */,
+				25DFBFFB2877EF8B00EA6990 /* VoodooI2CDigitiserStylus.hpp */,
+				25DFBFFF2877EF8B00EA6990 /* MultitouchHelpers.hpp */,
+			);
+			path = SurfaceMultitouch;
+			sourceTree = "<group>";
+		};
+		25DFBFFC2877EF8B00EA6990 /* Native */ = {
+			isa = PBXGroup;
+			children = (
+				25DFBFFD2877EF8B00EA6990 /* VoodooI2CNativeEngine.cpp */,
+				25DFBFFE2877EF8B00EA6990 /* VoodooI2CNativeEngine.hpp */,
+			);
+			path = Native;
+			sourceTree = "<group>";
+		};
+		25DFC0002877EF8B00EA6990 /* CSGesture */ = {
+			isa = PBXGroup;
+			children = (
+				25DFC0012877EF8B00EA6990 /* VoodooI2CCSGestureEngine.hpp */,
+				25DFC0022877EF8B00EA6990 /* AverageClasses.h */,
+				25DFC0032877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.cpp */,
+				25DFC0042877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.h */,
+				25DFC0052877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.cpp */,
+				25DFC0062877EF8B00EA6990 /* csgesturescroll.cpp */,
+				25DFC0072877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.hpp */,
+				25DFC0082877EF8B00EA6990 /* VoodooI2CCSGestureEngine.cpp */,
+				25DFC0092877EF8B00EA6990 /* csgesturescroll.h */,
+				25DFC00A2877EF8B00EA6990 /* csgesture-softc.h */,
+			);
+			path = CSGesture;
+			sourceTree = "<group>";
+		};
+		25DFC0242877F03E00EA6990 /* HIDEventDriver */ = {
+			isa = PBXGroup;
+			children = (
+				25B97E2A260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp */,
+				25B97E2D260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp */,
+				25B97E14260B9F1000657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp */,
+				25B97E16260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp */,
+				25DE0A8B28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.cpp */,
+				25DE0A8C28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp */,
+				25CDE5FE285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp */,
+				25CDE603285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp */,
+			);
+			path = HIDEventDriver;
 			sourceTree = "<group>";
 		};
 		7BE66D8E258AC5DC003CA4AD /* Frameworks */ = {
@@ -588,30 +677,41 @@
 				25CDE618285F27A7003FB4C4 /* IPTSProtocol.h in Headers */,
 				25CDE60F285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.hpp in Headers */,
 				2597317F2738B01F00A7F7C1 /* SurfaceBatteryDriver.hpp in Headers */,
+				25DFC01E2877EF8C00EA6990 /* csgesturescroll.h in Headers */,
+				25DFC0122877EF8B00EA6990 /* VoodooI2CDigitiserStylus.hpp in Headers */,
 				25B97E2E260BA13A00657C76 /* VoodooI2CHIDTransducerWrapper.hpp in Headers */,
 				259731832738B01F00A7F7C1 /* SurfaceBattery.hpp in Headers */,
 				25CDE616285F27A7003FB4C4 /* SurfaceTouchScreenReportDescriptor.h in Headers */,
+				25DFC0102877EF8B00EA6990 /* VoodooI2CDigitiserTransducer.hpp in Headers */,
 				25EA2A7F2836412B00525325 /* SurfaceBatteryNub.hpp in Headers */,
 				25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */,
 				2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */,
 				25B97E1C260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.hpp in Headers */,
+				25DFC01F2877EF8C00EA6990 /* csgesture-softc.h in Headers */,
 				2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */,
-				25DE0A922837BC4C002DA176 /* SurfaceLaptop3HIDDevice.hpp in Headers */,
+				25DFC0162877EF8B00EA6990 /* VoodooI2CCSGestureEngine.hpp in Headers */,
+				25DE0A922837BC4C002DA176 /* SurfaceHIDDevice.hpp in Headers */,
+				25DFC0152877EF8B00EA6990 /* MultitouchHelpers.hpp in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
 				259731862738B01F00A7F7C1 /* SurfaceACAdapter.hpp in Headers */,
-				25DE0A7928377EBE002DA176 /* SurfaceLaptopTouchpad.hpp in Headers */,
-				25DE0A6B283738EC002DA176 /* SurfaceLaptopKeyboard.hpp in Headers */,
 				25CDE610285F27A7003FB4C4 /* SurfaceManagementEngineDriver.hpp in Headers */,
+				25DFC01C2877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.hpp in Headers */,
 				25CDE60D285F27A7003FB4C4 /* IPTSKenerlUserShared.h in Headers */,
 				2597317D2738B01F00A7F7C1 /* KeyImplementations.hpp in Headers */,
 				25C8D7EB27359FCD00F58956 /* SerialProtocol.h in Headers */,
 				25CDE609285F27A7003FB4C4 /* SurfaceManagementEngineClient.hpp in Headers */,
 				25CDE613285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.hpp in Headers */,
+				25DFC00F2877EF8B00EA6990 /* VoodooI2CMultitouchInterface.hpp in Headers */,
 				25C8D7ED27359FCD00F58956 /* SurfaceSerialHubDriver.hpp in Headers */,
-				25DBA9752836A77700459629 /* SurfaceLaptop3Nub.hpp in Headers */,
+				25DFC0192877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.h in Headers */,
+				25DBA9752836A77700459629 /* SurfaceHIDNub.hpp in Headers */,
 				25CDE612285F27A7003FB4C4 /* MEIProtocol.h in Headers */,
 				259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */,
-				25DE0A69283738EC002DA176 /* SurfaceLaptop3HIDDriver.hpp in Headers */,
+				25DE0A69283738EC002DA176 /* SurfaceHIDDriver.hpp in Headers */,
+				25DFC0142877EF8B00EA6990 /* VoodooI2CNativeEngine.hpp in Headers */,
+				25DFC0432877F2F200EA6990 /* VoodooI2CHIDDevice.hpp in Headers */,
+				25DFC0112877EF8B00EA6990 /* VoodooI2CMultitouchEngine.hpp in Headers */,
+				25DFC0172877EF8B00EA6990 /* AverageClasses.h in Headers */,
 				25DE0A8E28379886002DA176 /* VoodooI2CPrecisionTouchpadHIDEventDriver.hpp in Headers */,
 				25CDE611285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.hpp in Headers */,
 				259040EA26FC065400D605D0 /* SurfaceButtonDevice.hpp in Headers */,
@@ -771,21 +871,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				25DBA9742836A77700459629 /* SurfaceLaptop3Nub.cpp in Sources */,
+				25DBA9742836A77700459629 /* SurfaceHIDNub.cpp in Sources */,
 				25B97E1A260B9F1100657C76 /* VoodooI2CMultitouchHIDEventDriver.cpp in Sources */,
 				25B97E2B260BA12100657C76 /* VoodooI2CHIDTransducerWrapper.cpp in Sources */,
 				259731812738B01F00A7F7C1 /* BatteryManager.cpp in Sources */,
 				25C8D7EC27359FCD00F58956 /* SurfaceSerialHubDriver.cpp in Sources */,
-				25DE0A68283738EC002DA176 /* SurfaceLaptopKeyboard.cpp in Sources */,
+				25DFC0232877EF8C00EA6990 /* VoodooI2CDigitiserStylus.cpp in Sources */,
 				25D9072A2736E2B2006D799F /* AmbientLightValue.cpp in Sources */,
+				25DFC0202877EF8C00EA6990 /* VoodooI2CDigitiserTransducer.cpp in Sources */,
+				25DFC0222877EF8C00EA6990 /* VoodooI2CMultitouchEngine.cpp in Sources */,
+				25DFC01A2877EF8B00EA6990 /* VoodooCSGestureHIPointingWrapper.cpp in Sources */,
+				25DFC0212877EF8C00EA6990 /* VoodooI2CMultitouchInterface.cpp in Sources */,
 				259040E926FC065400D605D0 /* SurfaceButtonDevice.cpp in Sources */,
 				2518A2F72734F6AA00B0D631 /* SurfaceAmbientLightSensorDriver.cpp in Sources */,
-				25DE0A7828377EBE002DA176 /* SurfaceLaptopTouchpad.cpp in Sources */,
+				25DFC01B2877EF8B00EA6990 /* csgesturescroll.cpp in Sources */,
 				259731822738B01F00A7F7C1 /* SurfaceBattery.cpp in Sources */,
 				25CDE615285F27A7003FB4C4 /* SurfaceManagementEngineClient.cpp in Sources */,
+				25DFC01D2877EF8B00EA6990 /* VoodooI2CCSGestureEngine.cpp in Sources */,
 				25CDE60E285F27A7003FB4C4 /* VoodooI2CTouchscreenHIDEventDriver.cpp in Sources */,
 				259731882738B01F00A7F7C1 /* SurfaceBatteryDriver.cpp in Sources */,
-				25DE0A6A283738EC002DA176 /* SurfaceLaptop3HIDDriver.cpp in Sources */,
+				25DFC0182877EF8B00EA6990 /* VoodooCSGestureHIDWrapper.cpp in Sources */,
+				25DE0A6A283738EC002DA176 /* SurfaceHIDDriver.cpp in Sources */,
 				25EA2A7E2836412B00525325 /* SurfaceBatteryNub.cpp in Sources */,
 				259731852738B01F00A7F7C1 /* KeyImplementations.cpp in Sources */,
 				25CDE614285F27A7003FB4C4 /* IntelPreciseTouchStylusDriver.cpp in Sources */,
@@ -794,9 +900,11 @@
 				25B97E1B260B9F1100657C76 /* SurfaceTypeCoverDriver.cpp in Sources */,
 				25CDE60C285F27A7003FB4C4 /* IntelPreciseTouchStylusUserClient.cpp in Sources */,
 				25CDE60B285F27A7003FB4C4 /* SurfaceManagementEngineDriver.cpp in Sources */,
+				25DFC0442877F2F200EA6990 /* VoodooI2CHIDDevice.cpp in Sources */,
 				2597317E2738B01F00A7F7C1 /* SurfaceACAdapter.cpp in Sources */,
 				25CDE60A285F27A7003FB4C4 /* SurfaceTouchScreenDevice.cpp in Sources */,
-				25DE0A912837BC4C002DA176 /* SurfaceLaptop3HIDDevice.cpp in Sources */,
+				25DFC0132877EF8B00EA6990 /* VoodooI2CNativeEngine.cpp in Sources */,
+				25DE0A912837BC4C002DA176 /* SurfaceHIDDevice.cpp in Sources */,
 				2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
