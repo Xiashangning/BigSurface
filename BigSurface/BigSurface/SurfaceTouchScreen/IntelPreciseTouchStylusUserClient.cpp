@@ -108,7 +108,7 @@ IOReturn IntelPreciseTouchStylusUserClient::sMethodReceiveInput(OSObject *target
 
 IOReturn IntelPreciseTouchStylusUserClient::receiveInput(void *ref, IOExternalMethodArguments *args) {
     UInt8 buffer_idx;
-    if (driver->getCurrentInputBufferID(&buffer_idx) != kIOReturnSuccess)
+    if (driver->getCurrentInputBuffer(&buffer_idx) != kIOReturnSuccess)
         return kIOReturnError;
     args->scalarOutput[0] = buffer_idx;
     return kIOReturnSuccess;

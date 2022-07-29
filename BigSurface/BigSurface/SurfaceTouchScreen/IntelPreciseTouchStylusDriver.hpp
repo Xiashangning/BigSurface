@@ -52,7 +52,7 @@ public:
     UInt16 getDeviceID();
     UInt8  getMaxContacts();
     
-    IOReturn getCurrentInputBufferID(UInt8 *buffer_idx);
+    IOReturn getCurrentInputBuffer(UInt8 *buffer_idx);
     
     void handleHIDReport(const IPTSHIDReport *report);
     
@@ -72,7 +72,6 @@ private:
     bool busy {false};
     bool restart {false};
     bool wait {false};
-    bool waiting {false};
     UInt32 current_doorbell {0};
     AbsoluteTime last_activate;
     
@@ -103,13 +102,13 @@ private:
     
     IOReturn allocateDMAMemory(IPTSBufferInfo *info, UInt32 size);
     IOReturn allocateDMAResources();
-    void freeDMAMemory(IPTSBufferInfo *info);
+    void freeDMAMemory(IPTSBufferInfo *info, bool keep_ref = false);
     void freeDMAResources();
     
     void handleMessage(SurfaceManagementEngineClient *sender, UInt8 *msg, UInt16 msg_len);
     bool isResponseError(IPTSResponse *rsp);
     
-    IOReturn getCurrentInputBufferIDGated(UInt8 *buffer_idx);
+    IOReturn getCurrentInputBufferGated(UInt8 *buffer_idx);
     void handleHIDReportGated(IOInterruptEventSource *sender, int count);
 };
 

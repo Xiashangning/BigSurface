@@ -414,15 +414,6 @@
 			<key>VendorID</key>
 			<integer>1452</integer>
 		</dict>
-		<key>Native Multitouch Engine</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>VoodooI2CNativeEngine</string>
-			<key>IOProviderClass</key>
-			<string>VoodooI2CMultitouchInterface</string>
-		</dict>
 		<key>Intel Precise Touch &amp; Stylus Driver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -438,6 +429,15 @@
 			<string>SurfaceManagementEngineClient</string>
 			<key>IOUserClientClass</key>
 			<string>IntelPreciseTouchStylusUserClient</string>
+		</dict>
+		<key>Native Multitouch Engine</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>VoodooI2CNativeEngine</string>
+			<key>IOProviderClass</key>
+			<string>VoodooI2CMultitouchInterface</string>
 		</dict>
 		<key>Surface Ambient Light Sensor</key>
 		<dict>
@@ -499,6 +499,32 @@
 			<key>IOProviderClass</key>
 			<string>SurfaceHIDNub</string>
 		</dict>
+		<key>Surface Management Engine</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceManagementEngineDriver</string>
+			<key>IOPCIMatch</key>
+			<string>0x34e48086 0x9d3e8086</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
+		<key>Surface Serial Hub</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SurfaceSerialHubDriver</string>
+			<key>IONameMatch</key>
+			<string>MSHW0084</string>
+			<key>IOProbeScore</key>
+			<integer>600</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+		</dict>
 		<key>Surface Touchpad HID Event Driver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -531,32 +557,6 @@
 			<integer>200</integer>
 			<key>RM,deliverNotifications</key>
 			<true/>
-		</dict>
-		<key>Surface Management Engine</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceManagementEngineDriver</string>
-			<key>IOPCIMatch</key>
-			<string>0x34e48086 0x9d3e8086</string>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
-			<key>IOProviderClass</key>
-			<string>IOPCIDevice</string>
-		</dict>
-		<key>Surface Serial Hub</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SurfaceSerialHubDriver</string>
-			<key>IONameMatch</key>
-			<string>MSHW0084</string>
-			<key>IOProbeScore</key>
-			<integer>600</integer>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
 		</dict>
 		<key>Surface Touchscreen HID Event Driver</key>
 		<dict>
@@ -617,13 +617,13 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
 			<string>VoodooI2CHIDDevice</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
 			<key>IOPropertyMatch</key>
 			<dict>
 				<key>compatible</key>
 				<string>PNP0C50</string>
 			</dict>
-			<key>IOProbeScore</key>
-			<integer>100</integer>
 			<key>IOProviderClass</key>
 			<string>VoodooI2CDeviceNub</string>
 		</dict>
@@ -657,7 +657,7 @@
 		<key>com.apple.kpi.mach</key>
 		<string>16.7</string>
 		<key>com.xavier.VoodooSerial</key>
-		<string>1.0</string>
+		<string>1.2</string>
 		<key>org.coolstar.VoodooGPIO</key>
 		<string>1.2</string>
 	</dict>

@@ -54,7 +54,7 @@ bool IntelPreciseTouchStylusDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(command_gate);
-    wait_input = OSMemberFunctionCast(IOCommandGate::Action, this, &IntelPreciseTouchStylusDriver::getCurrentInputBufferIDGated);
+    wait_input = OSMemberFunctionCast(IOCommandGate::Action, this, &IntelPreciseTouchStylusDriver::getCurrentInputBufferGated);
     interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &IntelPreciseTouchStylusDriver::handleHIDReportGated));
     if (!interrupt_source) {
         LOG("Failed to create interrupt source!");
@@ -124,18 +124,18 @@ IOReturn IntelPreciseTouchStylusDriver::setPowerState(unsigned long whichState, 
         }
     } else {
         if (!awake) {
-            awake = true;
+            command_gate->commandWakeup(&wait);
             IOReturn ret = kIOReturnSuccess;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 3; i++) {
                 IOSleep(100);
                 ret = startDevice();
-                if (ret != kIOReturnNoDevice)
+                if (ret != kIOReturnNoDevice || i == 2)
                     break;
                 IOSleep(400);
             }
-            if (ret != kIOReturnSuccess) {
+            if (ret != kIOReturnSuccess)
                 LOG("Failed to restart IPTS device from sleep!");
-            }
+            awake = true;
             LOG("Woke up");
         }
     }
@@ -188,16 +188,20 @@ UInt8 IntelPreciseTouchStylusDriver::getMaxContacts() {
     return touch_screen->max_contacts;
 }
 
-IOReturn IntelPreciseTouchStylusDriver::getCurrentInputBufferID(UInt8 *buffer_idx) {
+IOReturn IntelPreciseTouchStylusDriver::getCurrentInputBuffer(UInt8 *buffer_idx) {
     return command_gate->runAction(wait_input, buffer_idx);
 }
 
-IOReturn IntelPreciseTouchStylusDriver::getCurrentInputBufferIDGated(UInt8 *buffer_idx) {
-    waiting = true;
+IOReturn IntelPreciseTouchStylusDriver::getCurrentInputBufferGated(UInt8 *buffer_idx) {
     IOReturn ret = command_gate->commandSleep(&wait);
+    
     if (ret != THREAD_AWAKENED)
         return kIOReturnError;
-    *buffer_idx = (current_doorbell - 1) % IPTS_BUFFER_NUM;
+    
+    if (!awake)
+        *buffer_idx = IPTS_BUFFER_NUM; // Special index indicating reconnect needed
+    else
+        *buffer_idx = (current_doorbell - 1) % IPTS_BUFFER_NUM;
     return kIOReturnSuccess;
 }
 
@@ -228,9 +232,6 @@ void IntelPreciseTouchStylusDriver::handleHIDReport(const IPTSHIDReport *report)
 }
 
 void IntelPreciseTouchStylusDriver::pollTouchData(IOTimerEventSource *sender) {
-    if (state != IPTSDeviceStateStarted) // IPTS not started yet
-        timer->setTimeoutMS(1000);
-    
     UInt32 doorbell;
     memcpy(&doorbell, doorbell_buffer.vaddr, sizeof(UInt32));
     
@@ -259,10 +260,8 @@ void IntelPreciseTouchStylusDriver::pollTouchData(IOTimerEventSource *sender) {
         current_doorbell = doorbell;
         timer->setTimeoutMS(IPTS_BUSY_TIMEOUT);
     } else {
-        if (waiting) {
-            command_gate->commandWakeup(&wait);
-            waiting = false;
-        }
+        command_gate->commandWakeup(&wait);
+        
         sendFeedback(current_doorbell % IPTS_BUFFER_NUM, false);   // non blocking feedback
         current_doorbell++;
         busy = true;
@@ -563,11 +562,14 @@ release_resources:
     return kIOReturnNoMemory;
 }
 
-void IntelPreciseTouchStylusDriver::freeDMAMemory(IPTSBufferInfo *info) {
+void IntelPreciseTouchStylusDriver::freeDMAMemory(IPTSBufferInfo *info, bool keep_ref) {
     info->dma_cmd->clearMemoryDescriptor();
     OSSafeReleaseNULL(info->dma_cmd);
     info->buffer->complete();
-    OSSafeReleaseNULL(info->buffer);
+    if (keep_ref)
+        info->buffer->release();    // maybe still hold by client, so needed when client wants to release them
+    else
+        OSSafeReleaseNULL(info->buffer);
     info->vaddr = nullptr;
     info->paddr = 0;
 }
@@ -578,7 +580,7 @@ void IntelPreciseTouchStylusDriver::freeDMAResources()
     for (int i = 0; i < IPTS_BUFFER_NUM; i++) {
         if (!buffers[i].vaddr)
             continue;
-        freeDMAMemory(buffers+i);
+        freeDMAMemory(buffers+i, true);
     }
     buffers = feedback_buffer;
     for (int i = 0; i < IPTS_BUFFER_NUM; i++) {
