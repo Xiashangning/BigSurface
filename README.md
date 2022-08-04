@@ -8,7 +8,7 @@ PS : If you have a better name, please let me know.
 
 ## How to install
 
-You will need to first DELETE all the original VoodooI2C series kext AND SMCBatteryManager.kext, then add my kext into opencore's `config.plist` in the order specified as below<img width="932" alt="截屏2022-01-03 下午5 43 49" src="https://user-images.githubusercontent.com/18528518/147917419-bf24e033-d4f4-43b0-b5f0-561b75c34e7c.png">
+You will need to first **DELETE** all the original **VoodooI2C** kexts including its plugins (all of them), **SMCBatteryManager.kext**, **SMCLightSensor.kext** and **SSDT_ALS0.aml**, then add BigSurface and SSDT-SURFACE.aml into opencore's `config.plist` in the order specified as below<img width="932" alt="截屏2022-01-03 下午5 43 49" src="https://user-images.githubusercontent.com/18528518/147917419-bf24e033-d4f4-43b0-b5f0-561b75c34e7c.png">
 
 ## Which Surface series are supported ?
 Check your UART device id in Windows, currently device id `34a8` is supported perfectly, `9d27` still needs some ameliorations but usable
