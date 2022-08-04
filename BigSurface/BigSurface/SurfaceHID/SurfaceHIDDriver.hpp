@@ -51,11 +51,10 @@ private:
     SurfaceHIDDevice*       keyboard {nullptr};
     SurfaceHIDDevice*       touchpad {nullptr};
     
-    bool    awake {false};
+    bool    awake {true};
     bool    legacy {false};
     UInt8   kbd_report[32];
     UInt16  kbd_report_len {0};
-    UInt8   kbd_country_code {0x21}; // default US
     UInt8   tpd_report[32];
     UInt16  tpd_report_len {0};
     

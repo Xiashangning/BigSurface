@@ -46,7 +46,7 @@ private:
     SurfaceHIDDescriptor    descriptor;
     SurfaceHIDAttributes    attributes;
     SurfaceHIDDeviceType    device;
-    OSString*               device_name;
+    const char*             device_name;
 };
 
 #endif /* SurfaceHIDDevice_hpp */

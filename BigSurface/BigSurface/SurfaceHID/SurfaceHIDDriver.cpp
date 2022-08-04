@@ -34,9 +34,6 @@ void SurfaceHIDDriver::eventReceived(SurfaceHIDNub *sender, SurfaceHIDDeviceType
 }
 
 void SurfaceHIDDriver::keyboardInputReceived(IOInterruptEventSource *sender, int count) {
-    if (!awake)
-        return;
-    
     IOBufferMemoryDescriptor *report = IOBufferMemoryDescriptor::withBytes(kbd_report, kbd_report_len, kIODirectionNone);
     if (keyboard->handleReport(report) != kIOReturnSuccess)
         LOG("Handle keyboard report error!");
@@ -45,9 +42,6 @@ void SurfaceHIDDriver::keyboardInputReceived(IOInterruptEventSource *sender, int
 }
 
 void SurfaceHIDDriver::touchpadInputReceived(IOInterruptEventSource *sender, int count) {
-    if (!awake)
-        return;
-    
     IOBufferMemoryDescriptor *report = IOBufferMemoryDescriptor::withBytes(tpd_report, tpd_report_len, kIODirectionNone);
     if (touchpad->handleReport(report) != kIOReturnSuccess)
         LOG("Handle touchpad report error!");
@@ -94,6 +88,7 @@ bool SurfaceHIDDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(kbd_interrupt);
+    kbd_interrupt->enable();
     
     if (!legacy) {
         tpd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceHIDDriver::touchpadInputReceived));
@@ -102,6 +97,7 @@ bool SurfaceHIDDriver::start(IOService *provider) {
             goto exit;
         }
         work_loop->addEventSource(tpd_interrupt);
+        tpd_interrupt->enable();
     }
     
     if (nub->registerHIDEvent(this, OSMemberFunctionCast(SurfaceHIDNub::EventHandler, this, &SurfaceHIDDriver::eventReceived)) != kIOReturnSuccess) {
@@ -117,12 +113,10 @@ bool SurfaceHIDDriver::start(IOService *provider) {
     }
     if (legacy) {
         keyboard->device = SurfaceLegacyKeyboardDevice;
-        keyboard->device_name = OSString::withCString("Surface Legacy Keyboard");
-        keyboard->setName("SurfaceLegacyKeyboard");
+        keyboard->device_name = "Surface Legacy Keyboard";
     } else {
         keyboard->device = SurfaceKeyboardDevice;
-        keyboard->device_name = OSString::withCString("Surface Keyboard");
-        keyboard->setName("SurfaceKeyboard");
+        keyboard->device_name = "Surface Keyboard";
     }
     if (!keyboard->init() || !keyboard->attach(this)) {
         LOG("Could not init keyboard device");
@@ -141,8 +135,7 @@ bool SurfaceHIDDriver::start(IOService *provider) {
             goto exit;
         }
         touchpad->device = SurfaceTouchpadDevice;
-        touchpad->device_name = OSString::withCString("Surface Touchpad");
-        touchpad->setName("SurfaceTouchpad");
+        touchpad->device_name = "Surface Touchpad";
         if (!touchpad->init() || !touchpad->attach(this)) {
             LOG("Could not init Surface touchpad device");
             goto exit;
@@ -206,13 +199,11 @@ IOReturn SurfaceHIDDriver::setPowerState(unsigned long whichState, IOService *de
     if (whichState == 0) {
         if (awake) {
             awake = false;
-            work_loop->disableAllEventSources();
             LOG("Going to sleep");
         }
     } else {
         if (!awake) {
             awake = true;
-            work_loop->enableAllEventSources();
             LOG("Woke up");
         }
     }

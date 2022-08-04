@@ -114,9 +114,6 @@ void SurfaceHIDNub::unregisterHIDEvent(OSObject* owner) {
 }
 
 void SurfaceHIDNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) {
-    if (!awake)
-        return;
-    
     SurfaceHIDDeviceType device;
     if (legacy) {
         if ((cid != SSH_EVENT_CID_KBD_INPUT_GENERIC && cid != SSH_EVENT_CID_KBD_INPUT_HOTKEYS)

@@ -8,7 +8,7 @@
 
 #include "SurfaceHIDDevice.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+#define LOG(str, ...)    IOLog("%s::%s " str "\n", getName(), device_name, ##__VA_ARGS__)
 
 #define super IOHIDDevice
 OSDefineMetaClassAndStructors(SurfaceHIDDevice, IOHIDDevice);
@@ -62,6 +62,8 @@ void SurfaceHIDDevice::detach(IOService* provider) {
 bool SurfaceHIDDevice::handleStart(IOService *provider) {
     if (!super::handleStart(provider))
         return false;
+    
+    setName(device_name);
     
     setProperty("AppleVendorSupported", kOSBooleanTrue);
     setProperty("Built-In", kOSBooleanTrue);
@@ -140,5 +142,5 @@ OSNumber *SurfaceHIDDevice::newVersionNumber() const {
 }
 
 OSString *SurfaceHIDDevice::newProductString() const {
-    return device_name;
+    return OSString::withCString(device_name);
 }
