@@ -23,9 +23,10 @@ See my sub-repo `VoodooSerial` for details
 - Buttons
   > Power/VolumeUp/VolumeDown buttons all works properly
 - Ambient Light Sensor
-  > ACPI device name: ACSD, attached under I2C4
+  > ACPI device name: ACSD, attached under I2C4. **ONLY SP7 and SL3 devices use this hardware** for other devices, you need to write your own driver and then make a pull request. I am happy to merge your driver in :)
 - Battery status--Surface Serial Hub
   > UART driver as well as MS's SAM module driver are implemented. 
+  > **TODO**: support dual batteries for SB3.
 - Performance mode
   > Right now it is set by `PerformanceMode` in `SurfaceBattery` (default 0x01), changing it to other values is not observed to have any effects. If you find any difference (fan speed or battery life), please let me know
   > 
@@ -64,4 +65,4 @@ Possible values for Performance mode are:
 
 
 ## If you like my project, please consider to star this project, thanks!
-### If you appreciate my effort and would like to pay me a coffee, here is my PayPal address: `1750546761@qq.com`
+### If you appreciate my effort and would like to pay me a coffee, here is my PayPal address: `ritchiexia@163.com`
