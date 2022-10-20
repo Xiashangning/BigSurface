@@ -23,20 +23,20 @@
 #define SSH_TC_FWU              0x09
 #define SSH_TC_UNI              0x0a
 #define SSH_TC_LPC              0x0b
-#define SSH_TC_TCL              0x0c
+#define SSH_TC_TCL              0x0c    /* Telemetry, Crashdumps, and Logs? */
 #define SSH_TC_SFL              0x0d
-#define SSH_TC_KIP              0x0e
+#define SSH_TC_KIP              0x0e    /* Keyboard and Integrated Peripherals. (hotplug stuff) */
 #define SSH_TC_EXT              0x0f
 #define SSH_TC_BLD              0x10
 #define SSH_TC_BAS              0x11    /* Detachment system (Surface Book 2/3). */
 #define SSH_TC_SEN              0x12
 #define SSH_TC_SRQ              0x13
 #define SSH_TC_MCU              0x14
-#define SSH_TC_HID              0x15    /* Generic HID input subsystem. */
+#define SSH_TC_HID              0x15    /* User Input/HID subsystem (Keyboard + Touchpad). */
 #define SSH_TC_TCH              0x16
 #define SSH_TC_BKL              0x17
 #define SSH_TC_TAM              0x18
-#define SSH_TC_ACC              0x19
+#define SSH_TC_ACC0             0x19
 #define SSH_TC_UFI              0x1a
 #define SSH_TC_USC              0x1b
 #define SSH_TC_PEN              0x1c
@@ -44,7 +44,14 @@
 #define SSH_TC_AUD              0x1e
 #define SSH_TC_SMC              0x1f
 #define SSH_TC_KPD              0x20
-#define SSH_TC_REG              0x21
+#define SSH_TC_REG              0x21    /* Event/notifier registry. */
+#define SSH_TC_SPT              0x22
+#define SSH_TC_SYS              0x23
+#define SSH_TC_ACC1             0x24
+#define SSH_TC_SHB              0x25
+#define SSH_TC_POS              0x26    /* Laptop Studio screen position. */
+
+#define SSH_TC_COUNT            0x26
 
 #define SSH_TID_PRIMARY         0x01
 #define SSH_TID_SECONDARY       0x02
@@ -82,63 +89,79 @@
 /* TC=0x08 */
 #define SSH_CID_KBD_GET_DESCRIPTOR      0x00
 #define SSH_CID_KBD_SET_CAPS_LED        0x01
-#define SSH_CID_KBD_GET_FEAT_REPORT     0x0b
+#define SSH_CID_KBD_GET_FEAT_REPORT     0x0B
 #define SSH_EVENT_CID_KBD_INPUT_GENERIC 0x03
 #define SSH_EVENT_CID_KBD_INPUT_HOTKEYS 0x04
+/* TC=0x0e */
+#define SSH_CID_KIP_ENABLE_EVENT    0x27
+#define SSH_CID_KIP_DISABLE_EVENT   0x28
 /* TC=0x15 */
 #define SSH_CID_HID_OUT_REPORT      0x01
 #define SSH_CID_HID_GET_FEAT_REPORT 0x02
 #define SSH_CID_HID_SET_FEAT_REPORT 0x03
 #define SSH_CID_HID_GET_DESCRIPTOR  0x04
 #define SSH_EVENT_CID_HID_INPUT     0x00
+/* TC=0x21 */
+#define SSH_CID_REG_ENABLE_EVENT    0x01
+#define SSH_CID_REG_DISABLE_EVENT   0x02
 
 #define SSH_EVENT_FLAG_SEQUENCED    BIT(0)
 
 #define SSH_SYN_BYTE_1  0xAA
 #define SSH_SYN_BYTE_2  0x55
-#define SSH_SYN_BYTES   0x55AA
+#define SSH_SYN_BYTES   0x55AA              /* Together as a 16-bit integer*/
 
 #define SSH_FRAME_TYPE_NAK          0x04    /* Sent on error in previously received message. */
 #define SSH_FRAME_TYPE_ACK          0x40    /* Sent to acknowledge receival of DATA frame. */
 #define SSH_FRAME_TYPE_DATA_SEQ     0x80    /* Sent to transfer data. Sequenced. */
 #define SSH_FRAME_TYPE_DATA_NSQ     0x00    /* Same as DATA_SEQ, but does not need to be ACKed. */
 
-#define SSH_COMMAND_TYPE            0x80
+#define SSH_PAYLOAD_TYPE_COMMAND    0x80
 
-#define SSH_DATA_OFFSET         sizeof(SurfaceSerialMessage)+sizeof(SurfaceSerialCommand)
-#define SSH_PAYLOAD_OFFSET      sizeof(SurfaceSerialMessage)
+/*
+ * -- SYN FRAME CRC(F) PAYLOAD CRC(P) --
+ *                      CMD+DATA
+ */
+#define SSH_PAYLOAD_OFFSET          sizeof(SurfaceSerialMessage)
 
 #ifndef PACKED
 #define PACKED __attribute__((packed))
 #endif
 
 struct PACKED SurfaceSerialFrame {
-    UInt8 type;
+    UInt8  type;
     UInt16 length;
-    UInt8 seq_id;
+    UInt8  seq_id;
+};
+
+struct PACKED SurfaceSerialPayload {
+    UInt8 type;
+    UInt8 data[];
 };
 
 struct PACKED SurfaceSerialCommand {
-    UInt8 type;             /* always 0x80 */
-    UInt8 target_category;
-    UInt8 target_id_out;    /* to SAM(request) */
-    UInt8 target_id_in;     /* from SAM(response) */
-    UInt8 instance_id;
-    UInt16 request_id; /* request<->response, events->reserved id set by command `enable event source`*/
-    UInt8 command_id;
+    UInt8  type;            /* command type payload = 0x80 */
+    UInt8  target_category;
+    UInt8  target_id_out;   /* to SAM (request) */
+    UInt8  target_id_in;    /* from SAM (response) */
+    UInt8  instance_id;
+    UInt16 request_id;      /* request<->response, events->reserved id set by command `enable event source`*/
+    UInt8  command_id;
+    UInt8  data[];
 };
 
 struct PACKED SurfaceSerialMessage {
     UInt16 syn;
     SurfaceSerialFrame frame;
     UInt16 frame_crc;
+    UInt8  payload[];
 };
 
-struct PACKED SurfaceEventPayload {
-    UInt8 target_category;
-    UInt8 flags;
-    UInt16 request_id;  /* the request id used for the event*/
-    UInt8 instance_id;
+struct PACKED SurfaceSerialEventData {
+    UInt8  target_category;
+    UInt8  flags;
+    UInt16 request_id;      /* the request id used for the event*/
+    UInt8  instance_id;
 };
 
 #define CRC_INITIAL     0xFFFF

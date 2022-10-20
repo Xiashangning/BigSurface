@@ -19,7 +19,6 @@ OSDefineMetaClassAndStructors(SurfaceBatteryDriver, IOService)
 void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatteryEventType type) {
     switch (type) {
         case SurfaceBatteryInformationChanged:
-            LOG("Got BIX update event");
             update_bix->interruptOccurred(nullptr, this, 0);
             break;
         case SurfaceBatteryStatusChanged:
@@ -30,7 +29,7 @@ void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatte
             clock_get_uptime(&cur_time);
             SUB_ABSOLUTETIME(&cur_time, &last_update);
             absolutetime_to_nanoseconds(cur_time, &nsecs);
-            if (nsecs > 1000000000) {   // PSR often comes with BST changes, so avoid update it twice in a short period(1s).
+            if (nsecs > 1000000000) {   // PSR often comes with BST changes, so avoid update it twice in a short period (1s).
                 quick_cnt = BST_UPDATE_QUICK_CNT;
                 clock_get_uptime(&last_update);
                 update_bst->interruptOccurred(nullptr, this, 0);
@@ -43,7 +42,7 @@ void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatte
 }
 
 void SurfaceBatteryDriver::updateBatteryInformation(IOInterruptEventSource *sender, int count) {
-    if (!awake)
+    if (!awake or bat_missing)
         return;
     
     bix_fail = false;
@@ -51,17 +50,19 @@ void SurfaceBatteryDriver::updateBatteryInformation(IOInterruptEventSource *send
     if (nub->getBatteryConnection(1, &connected) != kIOReturnSuccess) {
         LOG("Failed to get battery connection status from SSH!");
         bix_fail = true;
+        // It is impossible to occur unless the battery is not present
+        bat_missing = true;
         return;
     }
     if (!connected)
-        BatteryManager::getShared()->updateBatteryInfoExtended(0, nullptr); // reset battery
-    else if (BatteryManager::getShared()->needUpdateBIX(0)) {
+        BatteryManager::getShared()->updateBatteryInfoExtended(1, nullptr); // reset battery
+    else if (BatteryManager::getShared()->needUpdateBIX(1)) {
         OSArray *bix;
         if (nub->getBatteryInformation(1, &bix) != kIOReturnSuccess) {
-            LOG("Failed to get BIX from SSH!");
+            LOG("Failed to get battery information extended from SSH!");
             bix_fail = true;
         } else {
-            BatteryManager::getShared()->updateBatteryInfoExtended(0, bix);
+            BatteryManager::getShared()->updateBatteryInfoExtended(1, bix);
             bix->flushCollection();
             OSSafeReleaseNULL(bix);
         }
@@ -69,7 +70,7 @@ void SurfaceBatteryDriver::updateBatteryInformation(IOInterruptEventSource *send
 }
 
 void SurfaceBatteryDriver::updateBatteryStatus(IOInterruptEventSource *sender, int count) {
-    if (!awake)
+    if (!awake or bat_missing)
         return;
     
     UInt32 psr;
@@ -86,7 +87,7 @@ void SurfaceBatteryDriver::updateBatteryStatus(IOInterruptEventSource *sender, i
         LOG("Failed to get power source status from SSH!");
         goto fail;
     } else
-        power_connected = BatteryManager::getShared()->updateAdapterStatus(0, psr);
+        power_connected = BatteryManager::getShared()->updateAdapterStatus(1, psr);
     BatteryManager::getShared()->externalPowerNotify(power_connected);
     
     if (nub->getBatteryConnection(1, &connected) != kIOReturnSuccess) {
@@ -100,9 +101,9 @@ void SurfaceBatteryDriver::updateBatteryStatus(IOInterruptEventSource *sender, i
             LOG("Failed to get BST from SSH!");
             goto fail;
         } else
-            BatteryManager::getShared()->updateBatteryStatus(0, bst);
+            BatteryManager::getShared()->updateBatteryStatus(1, bst);
         if (temp)
-            BatteryManager::getShared()->updateBatteryTemperature(0, temp);
+            BatteryManager::getShared()->updateBatteryTemperature(1, temp);
         BatteryManager::getShared()->informStatusChanged();
     }
 
@@ -134,23 +135,66 @@ fail:
 }
 
 void SurfaceBatteryDriver::pollBatteryStatus(IOTimerEventSource *sender) {
-    updateBatteryStatus(nullptr, 0);
-}
-
-void SurfaceBatteryDriver::wakeupDelayedUpdate(IOTimerEventSource *sender) {
-    update_bix->enable();
-    update_bst->enable();
-    bix_fail = true;
-    quick_cnt = BST_UPDATE_QUICK_CNT;
-    clock_get_uptime(&last_update);
-    updateBatteryStatus(nullptr, 0);
-    
-    OSNumber *mode = OSDynamicCast(OSNumber, getProperty("PerformanceMode"));
-    if (mode) {
-        UInt32 m = mode->unsigned32BitValue();
-        if (nub->setPerformanceMode(m) != kIOReturnSuccess)
-            LOG("Set performance mode failed!");
-    }
+    if (bat_missing) {
+        // Fake a 100% charging battery based on BIX from SP7.
+        
+        // -------- BIX --------
+        UInt8 buffer[BIX_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xa8, 0x00,
+                                    0x00, 0xc0, 0xa8, 0x00, 0x00, 0x01, 0x00, 0x00,
+                                    0x00, 0x92, 0x1d, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+                                    0x00, 0xe8, 0x03, 0x00, 0x00, 0xff, 0xff, 0xff,
+                                    0xff, 0xff, 0xff, 0xff, 0xff, 0xe8, 0x03, 0x00,
+                                    0x00, 0xe8, 0x03, 0x00, 0x00, 0x0a, 0x00, 0x00,
+                                    0x00, 0x0a, 0x00, 0x00, 0x00, 0x4d, 0x31, 0x31,
+                                    0x30, 0x39, 0x35, 0x39, 0x37, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x30, 0x30, 0x32, 0x37, 0x30, 0x36,
+                                    0x36, 0x30, 0x32, 0x30, 0x00, 0x4c, 0x49, 0x4f,
+                                    0x4e, 0x00, 0x44, 0x59, 0x4e, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        UInt32 *temp = reinterpret_cast<UInt32 *>(buffer+1);
+        const char *str = reinterpret_cast<const char *>(buffer);
+        
+        OSNumber *revision = OSNumber::withNumber(*buffer, 8);
+        OSNumber *power_unit = OSNumber::withNumber(temp[0], 32);
+        OSNumber *design_cap = OSNumber::withNumber(temp[1], 32);
+        OSNumber *last_full_cap = OSNumber::withNumber(temp[2], 32);
+        OSNumber *bat_tech = OSNumber::withNumber(temp[3], 32);
+        OSNumber *design_volt = OSNumber::withNumber(temp[4], 32);
+        OSNumber *design_cap_warn = OSNumber::withNumber(temp[5], 32);
+        OSNumber *design_cap_low = OSNumber::withNumber(temp[6], 32);
+        OSNumber *cycle_cnt = OSNumber::withNumber(temp[7], 32);
+        OSNumber *mesure_acc = OSNumber::withNumber(temp[8], 32);
+        OSNumber *max_sample_t = OSNumber::withNumber(temp[9], 32);
+        OSNumber *min_sample_t = OSNumber::withNumber(temp[10], 32);
+        OSNumber *max_avg_interval = OSNumber::withNumber(temp[11], 32);
+        OSNumber *min_avg_interval = OSNumber::withNumber(temp[12], 32);
+        OSNumber *bat_cap_gra_1 = OSNumber::withNumber(temp[13], 32);
+        OSNumber *bat_cap_gra_2 = OSNumber::withNumber(temp[14], 32);
+        OSString *model_number = OSString::withCString(str+0x3D);
+        OSString *serial_number = OSString::withCString(str+0x52);
+        OSString *bat_type = OSString::withCString(str+0x5D);
+        OSString *oem_info = OSString::withCString(str+0x62);
+        const OSObject *arr[] = {revision, power_unit, design_cap, last_full_cap, bat_tech,
+                            design_volt, design_cap_warn, design_cap_low, cycle_cnt,
+                            mesure_acc, max_sample_t, min_sample_t, max_avg_interval,
+                            min_avg_interval, bat_cap_gra_1, bat_cap_gra_2, model_number,
+                            serial_number, bat_type, oem_info};
+        
+        OSArray *bix = OSArray::withObjects(arr, 20);
+        BatteryManager::getShared()->updateBatteryInfoExtended(1, bix);
+        bix->flushCollection();
+        OSSafeReleaseNULL(bix);
+        
+        // -------- BST --------
+        UInt32 bst[4] = {0x02, 0x00, 0xa8c0, 0x1d92};
+        BatteryManager::getShared()->updateBatteryStatus(1, bst);
+        BatteryManager::getShared()->updateAdapterStatus(1, true);
+        BatteryManager::getShared()->externalPowerNotify(true);
+    } else
+        updateBatteryStatus(nullptr, 0);
 }
 
 IOService *SurfaceBatteryDriver::probe(IOService *provider, SInt32 *score) {
@@ -194,7 +238,7 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
     OSSafeReleaseNULL(applesmc);
     
     const UInt8 adaptCount = BatteryManager::getShared()->adapterCount;
-    const UInt8 batCount = min(BatteryManager::getShared()->batteriesCount, MaxIndexCount);
+    const UInt8 batCount = min(BatteryManager::getShared()->batteryCount, MaxIndexCount);
 
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
@@ -208,12 +252,6 @@ bool SurfaceBatteryDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(timer);
-    wakeup = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &SurfaceBatteryDriver::wakeupDelayedUpdate));
-    if (!wakeup) {
-        LOG("Could not create wakeup timer!");
-        goto exit;
-    }
-    work_loop->addEventSource(wakeup);
     
     update_bix = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryInformation));
     update_bst = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceBatteryDriver::updateBatteryStatus));
@@ -294,11 +332,16 @@ bool SurfaceBatteryDriver::vsmcNotificationHandler(void *sensors, void *refCon, 
 		if (ret == kIOReturnSuccess) {
 			IOLog("SurfaceBatteryDriver::Plugin submitted\n");
 			return true;
-		} else {
+		} else
             IOLog("SurfaceBatteryDriver::Plugin submission failure %X\n", ret);
-		}
 	}
 	return false;
+}
+
+void SurfaceBatteryDriver::stop(IOService *provider) {
+    PMstop();
+    releaseResources();
+    super::stop(provider);
 }
 
 void SurfaceBatteryDriver::releaseResources() {
@@ -308,12 +351,6 @@ void SurfaceBatteryDriver::releaseResources() {
         timer->disable();
         work_loop->removeEventSource(timer);
         OSSafeReleaseNULL(timer);
-    }
-    if (wakeup) {
-        wakeup->cancelTimeout();
-        wakeup->disable();
-        work_loop->removeEventSource(wakeup);
-        OSSafeReleaseNULL(wakeup);
     }
     if (update_bix) {
         update_bix->disable();
@@ -326,12 +363,6 @@ void SurfaceBatteryDriver::releaseResources() {
         OSSafeReleaseNULL(update_bst);
     }
     OSSafeReleaseNULL(work_loop);
-}
-
-void SurfaceBatteryDriver::stop(IOService *provider) {
-    PMstop();
-    releaseResources();
-    super::stop(provider);
 }
 
 IOReturn SurfaceBatteryDriver::setProperties(OSObject *props) {
@@ -363,6 +394,7 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
     if (whichState == 0) {
         if (awake) {
             awake = false;
+            bat_missing = false;
             timer->cancelTimeout();
             timer->disable();
             update_bix->disable();
@@ -373,12 +405,19 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
         if (!awake) {
             awake = true;
             timer->enable();
-            if (initial) {
-                initial = false;
-                // when booting, wait for 30 seconds
-                wakeup->setTimeoutMS(30 * 1000);
-            } else
-                wakeup->setTimeoutMS(1);
+            update_bix->enable();
+            update_bst->enable();
+            bix_fail = true;
+            quick_cnt = BST_UPDATE_QUICK_CNT;
+            clock_get_uptime(&last_update);
+            updateBatteryStatus(nullptr, 0);
+            
+            OSNumber *mode = OSDynamicCast(OSNumber, getProperty("PerformanceMode"));
+            if (mode) {
+                UInt32 m = mode->unsigned32BitValue();
+                if (nub->setPerformanceMode(m) != kIOReturnSuccess)
+                    LOG("Set performance mode failed!");
+            }
             LOG("Woke up");
         }
     }

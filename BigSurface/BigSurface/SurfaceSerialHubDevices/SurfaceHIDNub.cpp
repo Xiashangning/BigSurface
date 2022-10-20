@@ -6,6 +6,8 @@
 //  Copyright © 2022 Xia Shangning. All rights reserved.
 //
 
+#include <IOKit/hid/IOHIDDevice.h>
+#include <IOKit/hid/IOHIDElement.h>
 #include "SurfaceHIDNub.hpp"
 
 #define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceHIDNub", ##__VA_ARGS__)
@@ -36,10 +38,10 @@ bool SurfaceHIDNub::start(IOService *provider) {
     SurfaceHIDDescriptor desc;
     if (getHIDDescriptor(SurfaceLegacyKeyboardDevice, &desc) != kIOReturnSuccess) {
         legacy = false;
-        tc = SSH_TC_HID;
         if (getHIDDescriptor(SurfaceKeyboardDevice, &desc) != kIOReturnSuccess)
             return false;
     }
+    LOG("HID version %d", !legacy+1);
     setProperty(SURFACE_LEGACY_HID_STRING, legacy);
 
     PMinit();
@@ -62,21 +64,11 @@ IOReturn SurfaceHIDNub::setPowerState(unsigned long whichState, IOService *whatD
     if (whichState == 0) {
         if (awake) {
             awake = false;
-            if (target && registered) {
-                ssh->unregisterEvent(this, tc, 0x00);
-                registered = false;
-            }
             LOG("Going to sleep");
         }
     } else {
         if (!awake) {
             awake = true;
-            if (target && !registered) {
-                IOSleep(50); // let UART and SSH be prepared
-                if (ssh->registerEvent(this, tc, 0x00) != kIOReturnSuccess)
-                    LOG("HID event registration failed!");
-                registered = true;
-            }
             LOG("Woke up");
         }
     }
@@ -91,26 +83,36 @@ IOReturn SurfaceHIDNub::registerHIDEvent(OSObject* owner, EventHandler _handler)
         return kIOReturnNoResources;
     }
     
-    IOReturn ret = ssh->registerEvent(this, tc, 0x00);
+    IOReturn ret;
+    if (legacy)
+        ret = ssh->registerEvent(this, SurfaceSerialEventHostManagedV1, SSH_TC_KBD, SurfaceLegacyKeyboardDevice);
+    else {
+        ret = ssh->registerEvent(this, SurfaceSerialEventHostManagedV2, SSH_TC_HID, SurfaceKeyboardDevice);
+        if (ret == kIOReturnSuccess)
+            ret = ssh->registerEvent(this, SurfaceSerialEventHostManagedV2, SSH_TC_HID, SurfaceTouchpadDevice);
+    }
     if (ret != kIOReturnSuccess)
         return ret;
     
     target = owner;
     handler = _handler;
-    registered = true;
     return kIOReturnSuccess;
 }
 
 void SurfaceHIDNub::unregisterHIDEvent(OSObject* owner) {
-    if (target) {
-        if (target == owner) {
-            ssh->unregisterEvent(this, tc, 0x00);
-            target = nullptr;
-            handler = nullptr;
-            registered = false;
-        } else
-            LOG("HID event not registered for this handler!");
-    }
+    if (!target)
+        return;
+    if (target == owner) {
+        if (legacy)
+            ssh->unregisterEvent(this, SurfaceSerialEventHostManagedV1, SSH_TC_KBD, SurfaceLegacyKeyboardDevice);
+        else {
+            ssh->unregisterEvent(this, SurfaceSerialEventHostManagedV2, SSH_TC_HID, SurfaceKeyboardDevice);
+            ssh->unregisterEvent(this, SurfaceSerialEventHostManagedV2, SSH_TC_HID, SurfaceTouchpadDevice);
+        }
+        target = nullptr;
+        handler = nullptr;
+    } else
+        LOG("HID event not registered for this handler!");
 }
 
 void SurfaceHIDNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) {
@@ -244,9 +246,33 @@ IOReturn SurfaceHIDNub::getHIDRawReport(SurfaceHIDDeviceType device, UInt8 repor
 void SurfaceHIDNub::setHIDRawReport(SurfaceHIDDeviceType device, UInt8 report_id, bool feature, UInt8 *buffer, UInt16 len) {
     if (legacy) {
         if (feature)
-            LOG("Warning, set feature report is not supported for legacy devices!");
+            LOG("Warning, set feature report is not supported for legacy keyboard device!");
         else {
-            // set caps led
+            LOG("caps lock report");
+//            IOService *client = getClient();
+//            if (!client)
+//                return;
+//            IOHIDDevice *kbd = OSDynamicCast(IOHIDDevice, client->getClient());
+//            if (!kbd)
+//                return;
+//            OSArray* elements = OSDynamicCast(OSArray, kbd->getProperty(kIOHIDElementKey));
+//            if (!elements)
+//                return;
+//
+//            IOHIDElement* e = nullptr;
+//            for (int index=0; index < elements->getCount(); index++) {
+//                e = OSDynamicCast(IOHIDElement, elements->getObject(index));
+//                if (!e)
+//                    continue;
+//                if (e->getUsage() == 0)
+//                    continue;
+//
+//                if (e->conformsTo(kHIDPage_LEDs, kHIDUsage_LED_CapsLock)) {
+//                    UInt8 value = e->getValue();
+//                    LOG("caps lock value %d", value);
+//                    ssh->sendCommand(SSH_TC_KBD, SSH_TID_SECONDARY, 0, SSH_CID_KBD_SET_CAPS_LED, &value, 1, true);
+//                }
+//            }
         }
     } else {
         UInt8 cid = feature ? SSH_CID_HID_SET_FEAT_REPORT : SSH_CID_HID_OUT_REPORT;

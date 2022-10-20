@@ -148,7 +148,7 @@ SMC_RESULT BFCL::readAccess() {
 }
 
 SMC_RESULT BNum::readAccess() {
-	data[0] = BatteryManager::getShared()->batteriesCount;
+	data[0] = BatteryManager::getShared()->batteryCount;
 	return SmcSuccess;
 }
 
@@ -179,7 +179,7 @@ SMC_RESULT BRSC::readAccess() {
 	// TODO: what's with multiple batteries?
 	data[0] = 0;
 	IOSimpleLockLock(BatteryManager::getShared()->stateLock);
-	if (!BatteryManager::getShared()->batteriesCount ||
+	if (!BatteryManager::getShared()->batteryCount ||
 		!BatteryManager::getShared()->state.btInfo[0].connected)
 		data[1] = 0;
 	else if (BatteryManager::getShared()->state.btInfo[0].state.chargeLevel)
@@ -213,7 +213,7 @@ SMC_RESULT CHBV::readAccess() {
 SMC_RESULT CHLC::readAccess() {
 	// TODO: does it have any other values?
 	IOSimpleLockLock(BatteryManager::getShared()->stateLock);
-	if (BatteryManager::getShared()->batteriesCount > 0 &&
+	if (BatteryManager::getShared()->batteryCount > 0 &&
 		BatteryManager::getShared()->state.btInfo[0].connected &&
 		BatteryManager::getShared()->state.btInfo[0].state.lastFullChargeCapacity > 0 &&
 		BatteryManager::getShared()->state.btInfo[0].state.lastFullChargeCapacity != BatteryInfo::ValueUnknown &&

@@ -15,6 +15,9 @@
 OSDefineMetaClassAndStructors(SurfaceHIDDriver, IOService)
 
 void SurfaceHIDDriver::eventReceived(SurfaceHIDNub *sender, SurfaceHIDDeviceType device, UInt8 *buffer, UInt16 len) {
+    if (!ready)
+        return;
+    
     switch (device) {
         case SurfaceLegacyKeyboardDevice:
         case SurfaceKeyboardDevice:
@@ -23,9 +26,11 @@ void SurfaceHIDDriver::eventReceived(SurfaceHIDNub *sender, SurfaceHIDDeviceType
             kbd_interrupt->interruptOccurred(nullptr, this, 0);
             break;
         case SurfaceTouchpadDevice:
-            memcpy(tpd_report, buffer, len);
-            tpd_report_len = len;
-            tpd_interrupt->interruptOccurred(nullptr, this, 0);
+            if (tpd_interrupt) {
+                memcpy(tpd_report, buffer, len);
+                tpd_report_len = len;
+                tpd_interrupt->interruptOccurred(nullptr, this, 0);
+            }
             break;
         default:
             LOG("WTF? Unknown event type");
@@ -82,24 +87,6 @@ bool SurfaceHIDDriver::start(IOService *provider) {
         goto exit;
     }
     
-    kbd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceHIDDriver::keyboardInputReceived));
-    if (!kbd_interrupt) {
-        LOG("Could not create keyboard interrupt event!");
-        goto exit;
-    }
-    work_loop->addEventSource(kbd_interrupt);
-    kbd_interrupt->enable();
-    
-    if (!legacy) {
-        tpd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceHIDDriver::touchpadInputReceived));
-        if (!tpd_interrupt) {
-            LOG("Could not create touchpad interrupt event!");
-            goto exit;
-        }
-        work_loop->addEventSource(tpd_interrupt);
-        tpd_interrupt->enable();
-    }
-    
     if (nub->registerHIDEvent(this, OSMemberFunctionCast(SurfaceHIDNub::EventHandler, this, &SurfaceHIDDriver::eventReceived)) != kIOReturnSuccess) {
         LOG("HID event registration failed!");
         goto exit;
@@ -127,7 +114,14 @@ bool SurfaceHIDDriver::start(IOService *provider) {
         LOG("Could not start keyboard device");
         goto exit;
     }
-    
+    kbd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceHIDDriver::keyboardInputReceived));
+    if (!kbd_interrupt) {
+        LOG("Could not create keyboard interrupt event!");
+        goto exit;
+    }
+    work_loop->addEventSource(kbd_interrupt);
+    kbd_interrupt->enable();
+
     if (!legacy) {
         touchpad = OSTypeAlloc(SurfaceHIDDevice);
         if (!touchpad) {
@@ -145,16 +139,29 @@ bool SurfaceHIDDriver::start(IOService *provider) {
             LOG("Could not start Surface touchpad device");
             goto exit;
         }
+        tpd_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceHIDDriver::touchpadInputReceived));
+        if (!tpd_interrupt) {
+            LOG("Could not create touchpad interrupt event!");
+            goto exit;
+        }
+        work_loop->addEventSource(tpd_interrupt);
+        tpd_interrupt->enable();
     }
-    
-    PMinit();
-    nub->joinPMtree(this);
-    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
+    ready = true;
     
 	return true;
 exit:
     releaseResources();
     return false;
+}
+
+void SurfaceHIDDriver::stop(IOService *provider) {
+    releaseResources();
+    super::stop(provider);
+}
+
+void SurfaceHIDDriver::free() {
+    super::free();
 }
 
 void SurfaceHIDDriver::releaseResources() {
@@ -181,33 +188,6 @@ void SurfaceHIDDriver::releaseResources() {
         touchpad->detach(this);
         OSSafeReleaseNULL(touchpad);
     }
-}
-
-void SurfaceHIDDriver::stop(IOService *provider) {
-    PMstop();
-    releaseResources();
-    super::stop(provider);
-}
-
-void SurfaceHIDDriver::free() {
-    super::free();
-}
-
-IOReturn SurfaceHIDDriver::setPowerState(unsigned long whichState, IOService *device) {
-    if (device != this)
-        return kIOReturnInvalid;
-    if (whichState == 0) {
-        if (awake) {
-            awake = false;
-            LOG("Going to sleep");
-        }
-    } else {
-        if (!awake) {
-            awake = true;
-            LOG("Woke up");
-        }
-    }
-    return kIOPMAckImplied;
 }
 
 IOReturn SurfaceHIDDriver::getHIDDescriptor(SurfaceHIDDeviceType device, SurfaceHIDDescriptor *desc) {

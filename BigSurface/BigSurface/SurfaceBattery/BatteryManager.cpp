@@ -42,10 +42,12 @@ void BatteryInfo::validateData(SInt32 id) {
 }
 
 bool BatteryManager::needUpdateBIX(UInt8 index) {
-    bool ret;
+    if (!index or index > batteryCount)
+        return false;
+    index = index - 1;
     
     IOSimpleLockLock(stateLock);
-    ret = !state.btInfo[index].connected;
+    bool ret = !state.btInfo[index].connected;
     if (!ret) {
         AbsoluteTime cur_time;
         UInt64 nsecs;
@@ -60,20 +62,10 @@ bool BatteryManager::needUpdateBIX(UInt8 index) {
     return ret;
 }
 
-bool BatteryManager::updateBatteryStatus(UInt8 index, UInt32 *bst) {
-    if (index >= batteriesCount)
-        return false;
-    
-    bool is_full;
-    IOLockLock(mainLock);
-    is_full = batteries[index].updateStatus(bst);
-    IOLockUnlock(mainLock);
-    return is_full;
-}
-
 void BatteryManager::updateBatteryInfoExtended(UInt8 index, OSArray *bix) {
-    if (index >= batteriesCount)
+    if (!index or index > batteryCount)
         return;
+    index = index - 1;
     
     IOLockLock(mainLock);
     if (!bix)
@@ -83,15 +75,32 @@ void BatteryManager::updateBatteryInfoExtended(UInt8 index, OSArray *bix) {
     IOLockUnlock(mainLock);
 }
 
+bool BatteryManager::updateBatteryStatus(UInt8 index, UInt32 *bst) {
+    if (!index or index > batteryCount)
+        return false;
+    index = index - 1;
+    
+    bool is_full;
+    IOLockLock(mainLock);
+    is_full = batteries[index].updateStatus(bst);
+    IOLockUnlock(mainLock);
+    return is_full;
+}
+
 void BatteryManager::updateBatteryTemperature(UInt8 index, UInt16 temp) {
+    if (!index or index > batteryCount)
+        return;
+    index = index - 1;
+    
     IOLockLock(mainLock);
     batteries[index].updateTemperature(temp);
     IOLockUnlock(mainLock);
 }
 
 bool BatteryManager::updateAdapterStatus(UInt8 index, UInt32 psr) {
-    if (index >= adapterCount)
+    if (!index or index > adapterCount)
         return false;
+    index = index - 1;
     
     bool power_connected;
     
@@ -118,7 +127,7 @@ void BatteryManager::informStatusChanged() {
 }
 
 bool BatteryManager::batteriesConnected() {
-	for (UInt8 i = 0; i < batteriesCount; i++)
+	for (UInt8 i = 0; i < batteryCount; i++)
 		if (state.btInfo[i].connected)
 			return true;
 	return false;
@@ -131,7 +140,7 @@ bool BatteryManager::adaptersConnected() {
 				return true;
 	}
 	else {
-		for (UInt8 i = 0; i < batteriesCount; i++)
+		for (UInt8 i = 0; i < batteryCount; i++)
 			if (state.btInfo[i].state.calculatedACAdapterConnected)
 				return true;
 	}
@@ -140,7 +149,7 @@ bool BatteryManager::adaptersConnected() {
 
 bool BatteryManager::batteriesAreFull() {
 	// I am not fully convinced we should assume that batteries are full when there are none, but so be it.
-	for (UInt8 i = 0; i < batteriesCount; i++)
+	for (UInt8 i = 0; i < batteryCount; i++)
 		if (state.btInfo[i].connected && (state.btInfo[i].state.state & SurfaceBattery::BSTStateMask) != SurfaceBattery::BSTNotCharging)
 			return false;
 	return true;
@@ -154,7 +163,7 @@ bool BatteryManager::externalPowerConnected() {
 
 	// Then try calculated adapters
 	bool hasBateries = false;
-	for (UInt8 i = 0; i < batteriesCount; i++) {
+	for (UInt8 i = 0; i < batteryCount; i++) {
 		if (state.btInfo[i].connected) {
 			// Ignore calculatedACAdapterConnected when real adapters exist!
 			if (adapterCount == 0 && state.btInfo[i].state.calculatedACAdapterConnected)
@@ -210,7 +219,7 @@ void BatteryManager::createShared(UInt8 bat_cnt, UInt8 adp_cnt) {
         for (UInt8 i=0; i<bat_cnt; i++)
             instance->batteries[i] = SurfaceBattery(nullptr, i, instance->stateLock, &instance->state.btInfo[i]);
     }
-    instance->batteriesCount = bat_cnt;
+    instance->batteryCount = bat_cnt;
     
     dict = IOService::nameMatching("ACPI0003");
     deviceIterator = nullptr;

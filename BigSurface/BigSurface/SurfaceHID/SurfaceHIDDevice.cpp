@@ -8,7 +8,7 @@
 
 #include "SurfaceHIDDevice.hpp"
 
-#define LOG(str, ...)    IOLog("%s::%s " str "\n", getName(), device_name, ##__VA_ARGS__)
+#define LOG(str, ...)    IOLog("%s::%s " str "\n", "SurfaceHIDDevice", device_name, ##__VA_ARGS__)
 
 #define super IOHIDDevice
 OSDefineMetaClassAndStructors(SurfaceHIDDevice, IOHIDDevice);
@@ -43,7 +43,7 @@ bool SurfaceHIDDevice::attach(IOService* provider) {
     }
     
     if (api->getHIDAttributes(device, &attributes) != kIOReturnSuccess) {
-        LOG("Failed to get attributes!");
+        LOG("Failed to get HID attributes!");
         return false;
     }
     if (attributes.length != sizeof(SurfaceHIDAttributes)) {
@@ -102,12 +102,14 @@ IOReturn SurfaceHIDDevice::setReport(IOMemoryDescriptor *report, IOHIDReportType
 
 IOReturn SurfaceHIDDevice::newReportDescriptor(IOMemoryDescriptor **reportDescriptor) const {
     UInt8 *desc = new UInt8[descriptor.report_desc_len];
-
-    if (api->getReportDescriptor(device, desc, descriptor.report_desc_len) != kIOReturnSuccess) {
-        LOG("Failed to get report descriptor!");
-        delete[] desc;
-        return kIOReturnError;
+    for (int trial = 0; trial < 10; trial++) {
+        if (api->getReportDescriptor(device, desc, descriptor.report_desc_len) == kIOReturnSuccess)
+            goto success;
     }
+    LOG("Failed to get report descriptor!");
+    delete[] desc;
+    return kIOReturnError;
+success:
     *reportDescriptor = IOBufferMemoryDescriptor::withBytes(desc, descriptor.report_desc_len, kIODirectionNone);
     delete[] desc;
     return kIOReturnSuccess;

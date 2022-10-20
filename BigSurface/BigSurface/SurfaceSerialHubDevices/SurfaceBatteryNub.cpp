@@ -53,21 +53,11 @@ IOReturn SurfaceBatteryNub::setPowerState(unsigned long whichState, IOService *w
     if (whichState == 0) {
         if (awake) {
             awake = false;
-            if (target && registered) {
-                ssh->unregisterEvent(this, SSH_TC_BAT, 0x00);
-                registered = false;
-            }
             LOG("Going to sleep");
         }
     } else {
         if (!awake) {
             awake = true;
-            if (target && !registered) {
-                IOSleep(50); // let UART and SSH be prepared
-                if (ssh->registerEvent(this, SSH_TC_BAT, 0x00) != kIOReturnSuccess)
-                    LOG("Battery event registration failed!");
-                registered = true;
-            }
             LOG("Woke up");
         }
     }
@@ -82,26 +72,23 @@ IOReturn SurfaceBatteryNub::registerBatteryEvent(OSObject* owner, EventHandler _
         return kIOReturnNoResources;
     }
     
-    IOReturn ret = ssh->registerEvent(this, SSH_TC_BAT, 0x00);
+    IOReturn ret = ssh->registerEvent(this, SurfaceSerialEventHostManagedV1, SSH_TC_BAT, 0x00);
     if (ret != kIOReturnSuccess)
         return ret;
     
     target = owner;
     handler = _handler;
-    registered = true;
     return kIOReturnSuccess;
 }
 
 void SurfaceBatteryNub::unregisterBatteryEvent(OSObject* owner) {
     if (target) {
         if (target == owner) {
-            ssh->unregisterEvent(this, SSH_TC_BAT, 0x00);
+            ssh->unregisterEvent(this, SurfaceSerialEventHostManagedV1, SSH_TC_BAT, 0x00);
             target = nullptr;
             handler = nullptr;
-            registered = false;
-        } else {
+        } else
             LOG("Battery event not registered for this handler!");
-        }
     }
 }
 

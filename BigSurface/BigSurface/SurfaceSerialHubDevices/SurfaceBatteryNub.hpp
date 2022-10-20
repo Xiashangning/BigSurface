@@ -70,8 +70,7 @@ private:
     OSObject*               target {nullptr};
     EventHandler            handler {nullptr};
     
-    bool    awake {false};
-    bool    registered {false};
+    bool    awake {true};
 };
 
 #endif /* SurfaceBatteryNub_hpp */

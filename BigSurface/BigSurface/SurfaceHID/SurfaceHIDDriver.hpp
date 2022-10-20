@@ -31,8 +31,6 @@ public:
     
     void free() override;
     
-    IOReturn setPowerState(unsigned long whichState, IOService * device) override;
-    
     IOReturn getHIDDescriptor(SurfaceHIDDeviceType device, SurfaceHIDDescriptor *desc);
     
     IOReturn getHIDAttributes(SurfaceHIDDeviceType device, SurfaceHIDAttributes *attr);
@@ -44,15 +42,16 @@ public:
     void setRawReport(SurfaceHIDDeviceType device, UInt8 report_id, bool feature, UInt8 *buffer, UInt16 len);
     
 private:
+    SurfaceHIDNub*          nub {nullptr};
     IOWorkLoop*             work_loop {nullptr};
     IOInterruptEventSource* kbd_interrupt {nullptr};
     IOInterruptEventSource* tpd_interrupt {nullptr};
-    SurfaceHIDNub*          nub {nullptr};
     SurfaceHIDDevice*       keyboard {nullptr};
     SurfaceHIDDevice*       touchpad {nullptr};
     
     bool    awake {true};
     bool    legacy {false};
+    bool    ready {false};
     UInt8   kbd_report[32];
     UInt16  kbd_report_len {0};
     UInt8   tpd_report[32];

@@ -27,7 +27,7 @@ class EXPORT BatteryManager : public OSObject {
     friend class SurfaceBatteryDriver;
 	
 public:
-	UInt8 batteriesCount {0};
+	UInt8 batteryCount {0};
 	UInt8 adapterCount {0};
 
 	/**

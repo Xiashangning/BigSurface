@@ -50,7 +50,7 @@ IOService* SurfaceAmbientLightSensorDriver::probe(IOService *provider, SInt32 *s
         SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     VirtualSMCAPI::addKey(KeyMSLD, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(0));
     
-    LOG("Surface Ambient Light Sensor Device found!");
+    LOG("Surface Ambient Light Sensor device found!");
     return this;
 }
 

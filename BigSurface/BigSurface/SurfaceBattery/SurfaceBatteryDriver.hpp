@@ -96,16 +96,15 @@ public:
 private:
     IOWorkLoop*             work_loop {nullptr};
     IOTimerEventSource*     timer {nullptr};
-    IOTimerEventSource*     wakeup {nullptr};
     IOInterruptEventSource* update_bix {nullptr};
     IOInterruptEventSource* update_bst {nullptr};
     SurfaceBatteryNub*      nub {nullptr};
     
     bool    awake {false};
-    bool    initial {true};
     bool    power_connected {true};
     bool    bix_fail {true};
     int     quick_cnt {0};
+    bool    bat_missing {false};
     bool    sync {false};
     AbsoluteTime last_update {0};
 
@@ -116,8 +115,6 @@ private:
     void updateBatteryStatus(IOInterruptEventSource *sender, int count);
     
     void pollBatteryStatus(IOTimerEventSource* sender);
-    
-    void wakeupDelayedUpdate(IOTimerEventSource* sender);
     
     void releaseResources();
 };

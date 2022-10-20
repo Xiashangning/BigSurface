@@ -19,7 +19,14 @@
 #include "../../../Dependencies/VoodooSerial/VoodooSerial/VoodooUART/VoodooUARTController.hpp"
 #include "SerialProtocol.h"
 
-#define SSH_REQID_MIN           34
+enum SurfaceSerialEventRegistryType {
+    SurfaceSerialEventHostManagedV1 = 0,
+    SurfaceSerialEventHostManagedV2,
+    SurfaceSerialEventHubManaged,
+    SurfaceSerialEventTypeCount
+};
+
+#define SSH_REQID_MIN           SSH_TC_COUNT+1
 #define SSH_MSG_CACHE_SIZE      256     // max length for a single message
 #define SSH_MSG_LENGTH_UNKNOWN  (SSH_MSG_CACHE_SIZE+1)
 #define SSH_RING_BUFFER_SIZE    10
@@ -28,53 +35,6 @@
 #define SSH_CMD_TRAIL_CNT       3
 #define SSH_WAIT_TIMEOUT        (SSH_ACK_TIMEOUT * SSH_CMD_TRAIL_CNT)
 
-class CircleIDCounter {
-private:
-    UInt16 min;
-    UInt16 max;
-    UInt16 id;
-public:
-    CircleIDCounter(UInt16 _min, UInt16 _max){
-        min = _min;
-        max = _max;
-        id = min-1;
-    }
-    
-    UInt16 getID() {
-        UInt16 ret = ++id;
-        if (id == max)
-            id = min-1;
-        return ret;
-    }
-};
-
-struct WaitingRequest {
-    queue_entry entry;
-    bool    waiting;
-    UInt16  req_id;
-    UInt8*  data;
-    UInt16  data_len;
-};
-
-struct PendingCommand {
-    queue_entry entry;
-    UInt8*  buffer {nullptr};
-    UInt16  len {0};
-    UInt8   trial_count {0};
-    IOTimerEventSource* timer {nullptr};
-};
-
-struct SerialMessage {
-    UInt8   cache[SSH_MSG_CACHE_SIZE];
-    UInt16  len;
-    UInt16  pos;
-    bool    partial_syn;
-};
-
-struct RingBuffer {
-    UInt8* buffer;
-    UInt16 filled_len;
-};
 
 class EXPORT SurfaceSerialHubClient : public IOService {
     OSDeclareAbstractStructors(SurfaceSerialHubClient);
@@ -99,9 +59,9 @@ public:
 
     IOReturn getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq, UInt8 *buffer, UInt16 buffer_len);
 
-    IOReturn registerEvent(SurfaceSerialHubClient *client, UInt8 tc, UInt8 iid);
+    IOReturn registerEvent(SurfaceSerialHubClient *client, SurfaceSerialEventRegistryType type, UInt8 tc, UInt8 iid);
     
-    void unregisterEvent(SurfaceSerialHubClient *client, UInt8 tc, UInt8 iid);
+    void unregisterEvent(SurfaceSerialHubClient *client, SurfaceSerialEventRegistryType type, UInt8 tc, UInt8 iid);
     
     bool init(OSDictionary* properties) override;
     
@@ -126,8 +86,63 @@ public:
     IOReturn unregisterInterrupt(int source) override;
     
 private:
+    class CircleIDCounter {
+    private:
+        UInt16 min;
+        UInt16 max;
+        UInt16 id;
+    public:
+        CircleIDCounter(UInt16 _min, UInt16 _max){
+            min = _min;
+            max = _max;
+            id = min-1;
+        }
+        
+        UInt16 getID() {
+            UInt16 ret = ++id;
+            if (id == max)
+                id = min-1;
+            return ret;
+        }
+    };
+
+    struct WaitingRequest {
+        queue_entry entry;
+        bool    waiting;
+        UInt16  req_id;
+        UInt8*  data;
+        UInt16  data_len;
+    };
+
+    struct PendingCommand {
+        queue_entry entry;
+        UInt8*  buffer {nullptr};
+        UInt16  len {0};
+        UInt8   trial_count {0};
+        IOTimerEventSource* timer {nullptr};
+    };
+
+    struct MessageCache {
+        UInt8   cache[SSH_MSG_CACHE_SIZE];
+        UInt16  len;
+        UInt16  pos;
+        bool    partial_syn;
+    };
+
+    struct RingBuffer {
+        UInt8* buffer;
+        UInt16 filled_len;
+    };
+    
+    struct EventHandler {
+        queue_entry entry;
+        UInt8 iid;
+        SurfaceSerialHubClient *client;
+    };
+    
     IOWorkLoop*             work_loop {nullptr};
     IOCommandGate*          command_gate {nullptr};
+    IOTimerEventSource*     publish_timer {nullptr};
     IOInterruptEventSource* uart_interrupt {nullptr};
     IOInterruptEventSource* gpio_interrupt {nullptr};
     IOACPIPlatformDevice*   acpi_device {nullptr};
@@ -135,15 +150,15 @@ private:
     VoodooGPIO*             gpio_controller {nullptr};
     SurfaceBatteryNub*      battery_nub {nullptr};
     SurfaceHIDNub*          hid_nub {nullptr};
-    SurfaceSerialHubClient* handler[SSH_REQID_MIN];
     
     bool            awake {true};
     RingBuffer      ring_buffer[SSH_RING_BUFFER_SIZE];
     int             current {0};
     int             last {SSH_RING_BUFFER_SIZE-1};
-    SerialMessage   rx_msg;
+    MessageCache    rx_msg;
     queue_head_t    pending_list;
     queue_head_t    waiting_list;
+    queue_head_t    event_handler_lists[SSH_REQID_MIN];
     
     CircleIDCounter seq_counter {CircleIDCounter(0x00, 0xff)};
     CircleIDCounter req_counter {CircleIDCounter(SSH_REQID_MIN, 0xffff)};
@@ -167,6 +182,8 @@ private:
     
     void processReceivedBuffer(IOInterruptEventSource *sender, int count);
     
+    void delayedPublishingNubs(IOTimerEventSource *sender);
+    
     void gpioWakeUp(IOInterruptEventSource *sender, int count);
     
     void _process(UInt8* buffer, UInt16 length);
@@ -176,6 +193,8 @@ private:
     void commandTimeout(IOTimerEventSource* timer);
     
     IOReturn waitResponse(UInt16 *req_id, UInt8 *buffer, UInt16 *buffer_len);
+    
+    IOReturn sendEventCommand(SurfaceSerialEventRegistryType type, UInt8 tc, UInt8 iid, bool enable);
     
     IOReturn getDeviceResources();
     

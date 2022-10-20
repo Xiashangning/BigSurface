@@ -95,10 +95,8 @@ private:
     OSObject*               target {nullptr};
     EventHandler            handler {nullptr};
     
-    bool    awake {false};
-    bool    registered {false};
+    bool    awake {true};
     bool    legacy {true};
-    UInt8   tc {SSH_TC_KBD};
 
     IOReturn getDescriptorData(SurfaceHIDDeviceType device, SurfaceHIDDescriptorEntryType entry, UInt8 *buffer, UInt16 buffer_len);
     
