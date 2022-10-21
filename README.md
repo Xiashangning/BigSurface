@@ -13,7 +13,7 @@ You will need to first **DELETE** all the original **VoodooI2C** kexts including
 ## Which Surface series are supported ?
 Check your UART device id in Windows, currently device id `34a8` is supported perfectly, `9d27` still needs some ameliorations but usable
 - Surface Pro 7 & Laptop 3 & Book 3     -> 34a8
-- Surface Pro 4, 5, 6 & Book 1, 2 & Laptop 1, 2    -> 9d27
+- Surface Pro 4, 5, 6 & Book 2 & Laptop 1, 2    -> 9d27
 
 See my sub-repo `VoodooSerial` for details
 
