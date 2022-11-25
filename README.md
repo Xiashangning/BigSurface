@@ -41,7 +41,7 @@ See my sub-repo `VoodooSerial` for details
   > 
   > 10 finger touch & stylus
   > 
-  > **Important**: need a SSDT patch! See in the release section 
+  > **Important**: need a SSDT patch (SSDT-SURFACE) and a user-space daemon (IPTSDaemon) to work with.
   
 Possible values for Performance mode are:
 
