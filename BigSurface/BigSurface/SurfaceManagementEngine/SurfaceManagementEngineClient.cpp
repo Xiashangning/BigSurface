@@ -67,10 +67,6 @@ bool SurfaceManagementEngineClient::start(IOService *provider) {
     rx_cache = new UInt8[properties.max_msg_length];
     
     initial = false;
-
-    PMinit();
-    api->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
     return true;
@@ -81,7 +77,6 @@ exit:
 
 void SurfaceManagementEngineClient::stop(IOService *provider) {
     releaseResources();
-    PMstop();
     super::stop(provider);
 }
 
@@ -105,23 +100,6 @@ void SurfaceManagementEngineClient::releaseResources() {
         IOLockFree(queue_lock);
 }
 
-IOReturn SurfaceManagementEngineClient::setPowerState(unsigned long whichState, IOService *whatDevice) {
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-    if (whichState == 0) {
-        if (awake) {
-            awake = false;
-            LOG("Going to sleep");
-        }
-    } else {
-        if (!awake) {
-            awake = true;
-            LOG("Woke up");
-        }
-    }
-    return kIOPMAckImplied;
-}
-
 IOReturn SurfaceManagementEngineClient::registerMessageHandler(OSObject *owner, MessageHandler _handler) {
     if (!owner || !_handler)
         return kIOReturnError;
@@ -135,9 +113,14 @@ IOReturn SurfaceManagementEngineClient::registerMessageHandler(OSObject *owner, 
     return kIOReturnSuccess;
 }
 
+void SurfaceManagementEngineClient::unregisterMessageHandler(OSObject *owner) {
+    if (target && target == owner) {
+        target = nullptr;
+        handler = nullptr;
+    }
+}
+
 IOReturn SurfaceManagementEngineClient::sendMessage(UInt8 *data, UInt16 data_len, bool blocking) {
-    if (!awake)
-        return kIOReturnError;
     if (!active)
         return kIOReturnNoDevice;
     
@@ -163,10 +146,8 @@ void SurfaceManagementEngineClient::hostRequestReconnect() {
 }
 
 void SurfaceManagementEngineClient::messageComplete() {
-    if (!awake || !rx_cache_pos) {  // rx_cache_pos shouldn't be 0
-        rx_cache_pos = 0;
+    if (!rx_cache_pos)
         return;
-    }
     
     MEIClientMessage *client_msg = new MEIClientMessage;
     client_msg->msg = new UInt8[rx_cache_pos];

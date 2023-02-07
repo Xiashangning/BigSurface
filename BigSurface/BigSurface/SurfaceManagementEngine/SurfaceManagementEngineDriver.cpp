@@ -860,15 +860,19 @@ IOReturn SurfaceManagementEngineDriver::sendClientMessageGated(SurfaceManagement
     
     MEIClientTransaction *tx = new MEIClientTransaction;
     tx->client = client;
-    tx->data = buffer;
     tx->data_len = *buffer_len;
+    tx->data = new UInt8[tx->data_len];
+    memcpy(tx->data, buffer, tx->data_len);
     tx->completed = false;
     tx->blocking = *blocking;
     
     IOReturn ret = kIOReturnSuccess;
-    if (tx->blocking) {
-        if (!acquireWriteBuffer() || !submitTransaction(tx)) {   // not finished
-            enqueue(&bus.tx_queue, &tx->entry);
+    if (acquireWriteBuffer() && submitTransaction(tx)) {
+        delete[] tx->data;
+        delete tx;
+    } else {
+        enqueue(&bus.tx_queue, &tx->entry);
+        if (tx->blocking) {
             AbsoluteTime abstime, deadline;
             nanoseconds_to_absolutetime(MEI_CLIENT_SEND_MSG_TIMEOUT * 1000000ULL, &abstime);
             clock_absolutetime_interval_to_deadline(abstime, &deadline);
@@ -878,13 +882,8 @@ IOReturn SurfaceManagementEngineDriver::sendClientMessageGated(SurfaceManagement
                 ret = kIOReturnTimeout;
             }
             remqueue(&tx->entry);
-        }
-        delete tx;
-    } else {
-        if (!acquireWriteBuffer() || !submitTransaction(tx)) {   // not finished
-            tx->data = new UInt8[tx->data_len];
-            memcpy(tx->data, buffer, tx->data_len);
-            enqueue(&bus.tx_queue, &tx->entry);
+            delete[] tx->data;
+            delete tx;
         }
     }
     

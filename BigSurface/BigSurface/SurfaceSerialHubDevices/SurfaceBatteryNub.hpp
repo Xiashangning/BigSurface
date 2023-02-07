@@ -37,8 +37,6 @@ public:
     
     void stop(IOService* provider) override;
     
-    IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
-    
     IOReturn registerBatteryEvent(OSObject* owner, EventHandler _handler);
     
     void unregisterBatteryEvent(OSObject* owner);
@@ -69,8 +67,6 @@ private:
     SurfaceSerialHubDriver* ssh {nullptr};
     OSObject*               target {nullptr};
     EventHandler            handler {nullptr};
-    
-    bool    awake {true};
 };
 
 #endif /* SurfaceBatteryNub_hpp */

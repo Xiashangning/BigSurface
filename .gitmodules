@@ -10,3 +10,6 @@
 [submodule "Dependencies/VoodooInput"]
 	path = Dependencies/VoodooInput
 	url = https://github.com/Xiashangning/VoodooInput.git
+[submodule "Dependencies/BigSurfaceHIDDriver"]
+	path = Dependencies/BigSurfaceHIDDriver
+	url = https://github.com/Xiashangning/BigSurfaceHIDDriver.git

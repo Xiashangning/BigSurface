@@ -555,8 +555,8 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(publish_timer);
-    // publishing nubs after 30s
-    publish_timer->setTimeoutMS(30 * 1000);
+    // publishing nubs after 20s
+    publish_timer->setTimeoutMS(20 * 1000);
     
     uart_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedBuffer));
     if (!uart_interrupt) {

@@ -21,11 +21,10 @@ struct MEIClientMessage {
 
 class EXPORT SurfaceManagementEngineClient : public IOService {
     OSDeclareDefaultStructors(SurfaceManagementEngineClient);
-    
     friend class SurfaceManagementEngineDriver;
     
 public:
-    // handle received message, when msg = nullptr, it means d0i3 enter/exit depends on msg_len=1/0
+    // handle received message
     typedef void (*MessageHandler)(OSObject *owner, SurfaceManagementEngineClient *sender, UInt8 *msg, UInt16 msg_len);
     
     bool attach(IOService* provider) override;
@@ -36,9 +35,9 @@ public:
     
     void stop(IOService* provider) override;
     
-    IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
-    
     IOReturn registerMessageHandler(OSObject *owner, MessageHandler _handler);
+    
+    void unregisterMessageHandler(OSObject *owner);
     
     IOReturn sendMessage(UInt8 *data, UInt16 data_len, bool blocking);
     
@@ -56,7 +55,6 @@ private:
     UInt16          rx_cache_pos {0};
     
     UInt8   addr;
-    bool    awake {true};
     bool    active {false};
     bool    initial {true};    
     

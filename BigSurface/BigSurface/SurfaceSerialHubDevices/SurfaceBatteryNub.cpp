@@ -32,10 +32,6 @@ void SurfaceBatteryNub::detach(IOService* provider) {
 bool SurfaceBatteryNub::start(IOService *provider) {
     if (!super::start(provider))
         return false;
-
-    PMinit();
-    ssh->joinPMtree(this);
-    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
     
     registerService();
     return true;
@@ -43,25 +39,7 @@ bool SurfaceBatteryNub::start(IOService *provider) {
 
 void SurfaceBatteryNub::stop(IOService *provider) {
     unregisterBatteryEvent(target);
-    PMstop();
     super::stop(provider);
-}
-
-IOReturn SurfaceBatteryNub::setPowerState(unsigned long whichState, IOService *whatDevice) {
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-    if (whichState == 0) {
-        if (awake) {
-            awake = false;
-            LOG("Going to sleep");
-        }
-    } else {
-        if (!awake) {
-            awake = true;
-            LOG("Woke up");
-        }
-    }
-    return kIOPMAckImplied;
 }
 
 IOReturn SurfaceBatteryNub::registerBatteryEvent(OSObject* owner, EventHandler _handler) {
@@ -93,9 +71,6 @@ void SurfaceBatteryNub::unregisterBatteryEvent(OSObject* owner) {
 }
 
 void SurfaceBatteryNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *data_buffer, UInt16 length) {
-    if (!awake)
-        return;
-    
     // iid corresponds to battery/adaptor index, starts with 1
     SurfaceBatteryEventType type;
     switch (cid) {
@@ -109,7 +84,7 @@ void SurfaceBatteryNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid,
             type = SurfaceAdaptorStatusChanged;
             break;
         default:
-//            LOG("Unknown battery event! tid: %d, iid: %d, cid: %x, data_len: %d", tid, iid, cid, length);
+            LOG("Unknown battery event! tid: %d, iid: %d, cid: %x, data_len: %d", tid, iid, cid, length);
             return;
     }
     if (handler)

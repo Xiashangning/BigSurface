@@ -72,8 +72,6 @@ public:
     
     void stop(IOService* provider) override;
     
-    IOReturn setPowerState(unsigned long whichState, IOService *whatDevice) override;
-    
     IOReturn registerHIDEvent(OSObject* owner, EventHandler _handler);
     
     void unregisterHIDEvent(OSObject* owner);
@@ -94,8 +92,7 @@ private:
     SurfaceSerialHubDriver* ssh {nullptr};
     OSObject*               target {nullptr};
     EventHandler            handler {nullptr};
-    
-    bool    awake {true};
+
     bool    legacy {true};
 
     IOReturn getDescriptorData(SurfaceHIDDeviceType device, SurfaceHIDDescriptorEntryType entry, UInt8 *buffer, UInt16 buffer_len);
