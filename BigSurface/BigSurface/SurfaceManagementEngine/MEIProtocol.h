@@ -9,17 +9,7 @@
 #ifndef MEIProtocol_h
 #define MEIProtocol_h
 
-#ifndef EXPORT
-#define EXPORT __attribute__((visibility("default")))
-#endif
-
-#ifndef BIT
-#define BIT(nr) (1UL << (nr))
-#endif
-
-#ifndef GENMASK
-#define GENMASK(h, l) (((~0UL) << (l)) & (~0UL >> (64 - 1 - (h))))
-#endif
+#include "../helpers.hpp"
 
 /*
  * IPTS MEI constants and communication protocol ported from linux

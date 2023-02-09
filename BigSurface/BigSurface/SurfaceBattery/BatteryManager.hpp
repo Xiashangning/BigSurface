@@ -14,10 +14,6 @@
 #include "SurfaceBattery.hpp"
 #include "SurfaceACAdapter.hpp"
 #include "BatteryManagerState.hpp"
-#include <IOKit/IOService.h>
-#include <IOKit/IOReportTypes.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include <IOKit/pwr_mgt/IOPMPowerSource.h>
 #include <IOKit/pwr_mgt/RootDomain.h>
 #include <Headers/kern_util.hpp>
 #include <stdatomic.h>

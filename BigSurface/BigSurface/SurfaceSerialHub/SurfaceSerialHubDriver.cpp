@@ -7,7 +7,7 @@
 //
 
 #include "SurfaceSerialHubDriver.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/ACPIParser/VoodooACPIResourcesParser.hpp"
 #include "../SurfaceSerialHubDevices/SurfaceBatteryNub.hpp"
 #include "../SurfaceSerialHubDevices/SurfaceHIDNub.hpp"
 

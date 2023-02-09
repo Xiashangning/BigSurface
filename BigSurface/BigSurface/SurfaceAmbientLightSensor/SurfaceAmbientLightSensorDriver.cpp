@@ -6,8 +6,9 @@
 //  Copyright © 2021 Xia Shangning. All rights reserved.
 //
 
+#include <Headers/kern_util.hpp>
+
 #include "SurfaceAmbientLightSensorDriver.hpp"
-#include <Headers/kern_version.hpp>
 
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceAmbientLightSensorDriver, IOService);

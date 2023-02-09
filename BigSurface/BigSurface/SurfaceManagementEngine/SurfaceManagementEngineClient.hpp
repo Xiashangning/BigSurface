@@ -9,8 +9,6 @@
 #ifndef SurfaceManagementEngineClient_hpp
 #define SurfaceManagementEngineClient_hpp
 
-#include <IOKit/IOLocks.h>
-
 #include "SurfaceManagementEngineDriver.hpp"
 
 struct MEIClientMessage {

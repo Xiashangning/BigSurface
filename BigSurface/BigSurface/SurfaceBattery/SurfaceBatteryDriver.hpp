@@ -8,14 +8,6 @@
 #ifndef SurfaceBatteryDriver_hpp
 #define SurfaceBatteryDriver_hpp
 
-#include <IOKit/IOService.h>
-#include <IOKit/IOReportTypes.h>
-#include <IOKit/IOWorkLoop.h>
-#include <IOKit/IOInterruptEventSource.h>
-#include <IOKit/pwr_mgt/IOPMPowerSource.h>
-#include <IOKit/pwr_mgt/RootDomain.h>
-#include <IOKit/IOTimerEventSource.h>
-
 #include "BatteryManager.hpp"
 #include "../SurfaceSerialHubDevices/SurfaceBatteryNub.hpp"
 

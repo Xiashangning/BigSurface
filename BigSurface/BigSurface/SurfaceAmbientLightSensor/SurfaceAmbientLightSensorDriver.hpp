@@ -9,18 +9,13 @@
 #ifndef SurfaceAmbientLightSensorDriver_hpp
 #define SurfaceAmbientLightSensorDriver_hpp
 
-#include <IOKit/IOService.h>
-#include <IOKit/IOLib.h>
-#include <IOKit/IOWorkLoop.h>
 #include <IOKit/IOTimerEventSource.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/ACPIParser/VoodooACPIResourcesParser.hpp"
 #include "./../../Dependencies/VoodooSerial/VoodooSerial/VoodooI2C/VoodooI2CDevice/VoodooI2CDeviceNub.hpp"
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
-#include <Headers/kern_util.hpp>
 
 #include "AmbientLightValue.hpp"
 #include "APDS9960Constants.h"

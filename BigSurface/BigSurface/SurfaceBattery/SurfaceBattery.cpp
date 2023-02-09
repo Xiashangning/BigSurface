@@ -7,8 +7,6 @@
 
 #include "SurfaceBattery.hpp"
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
-#include <Headers/kern_util.hpp>
-#include <Headers/kern_compat.hpp>
 
 UInt32 SurfaceBattery::getNumberFromArray(OSArray *array, UInt32 index) {
 	auto number = OSDynamicCast(OSNumber, array->getObject(index));

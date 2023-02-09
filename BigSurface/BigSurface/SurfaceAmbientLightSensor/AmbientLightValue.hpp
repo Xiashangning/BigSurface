@@ -10,7 +10,6 @@
 
 #include <libkern/libkern.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 class ALSForceBits : public VirtualSMCValue {
 public:

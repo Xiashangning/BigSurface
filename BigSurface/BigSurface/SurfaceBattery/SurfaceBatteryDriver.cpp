@@ -6,6 +6,7 @@
 //
 
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
+#include <Headers/kern_util.hpp>
 
 #include "SurfaceBatteryDriver.hpp"
 #include "KeyImplementations.hpp"

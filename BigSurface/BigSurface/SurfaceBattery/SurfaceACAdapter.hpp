@@ -8,9 +8,7 @@
 #ifndef SurfaceACAdapter_hpp
 #define SurfaceACAdapter_hpp
 
-#include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include <IOKit/IOReportTypes.h>
 #include "BatteryManagerState.hpp"
 
 class SurfaceACAdapter {

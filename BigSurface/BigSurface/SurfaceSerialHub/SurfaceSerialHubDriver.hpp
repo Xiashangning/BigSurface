@@ -9,10 +9,6 @@
 #ifndef SurfaceSerialHubDriver_hpp
 #define SurfaceSerialHubDriver_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOLocks.h>
-#include <IOKit/IOWorkLoop.h>
-#include <IOKit/IOCommandGate.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"

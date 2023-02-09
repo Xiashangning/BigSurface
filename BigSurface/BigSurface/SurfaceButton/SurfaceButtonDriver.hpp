@@ -9,13 +9,11 @@
 #ifndef SurfaceButtonDriver_hpp
 #define SurfaceButtonDriver_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #include "../../../Dependencies/VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
+#include "../../../Dependencies/VoodooSerial/VoodooSerial/ACPIParser/VoodooACPIResourcesParser.hpp"
+#include "../helpers.hpp"
 #include "SurfaceButtonDevice.hpp"
 
 #define BTN_CNT 3

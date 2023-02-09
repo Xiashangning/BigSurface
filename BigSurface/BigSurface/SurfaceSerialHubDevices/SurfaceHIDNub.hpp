@@ -9,10 +9,6 @@
 #ifndef SurfaceHIDNub_hpp
 #define SurfaceHIDNub_hpp
 
-#include <IOKit/IOService.h>
-#include <IOKit/IOWorkLoop.h>
-#include <IOKit/IOInterruptEventSource.h>
-
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 
 enum SurfaceHIDDescriptorEntryType : UInt8 {

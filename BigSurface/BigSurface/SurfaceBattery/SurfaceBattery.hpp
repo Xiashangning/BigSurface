@@ -8,11 +8,7 @@
 #ifndef SurfaceBattery_hpp
 #define SurfaceBattery_hpp
 
-#include <IOKit/IOService.h>
-#include <IOKit/IOReportTypes.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include <IOKit/pwr_mgt/IOPMPowerSource.h>
-#include <IOKit/pwr_mgt/RootDomain.h>
 #include "BatteryManagerState.hpp"
 
 class SurfaceBattery {

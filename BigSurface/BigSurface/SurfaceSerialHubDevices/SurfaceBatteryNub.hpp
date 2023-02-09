@@ -9,9 +9,6 @@
 #ifndef SurfaceBatteryNub_hpp
 #define SurfaceBatteryNub_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOService.h>
-
 #include "../SurfaceSerialHub/SurfaceSerialHubDriver.hpp"
 
 #define BIX_LENGTH          119

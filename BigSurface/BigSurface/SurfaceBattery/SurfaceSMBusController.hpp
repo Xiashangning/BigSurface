@@ -8,12 +8,10 @@
 #ifndef SurfaceSMBusController_hpp
 #define SurfaceSMBusController_hpp
 
-#include <IOKit/IOService.h>
 #include <IOKit/IOSMBusController.h>
 #include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
 
-#include "../../../Dependencies/VoodooSerial/VoodooSerial/utils/helpers.hpp"
 #include "BatteryManager.hpp"
 
 class EXPORT SurfaceSMBusController : public IOSMBusController {

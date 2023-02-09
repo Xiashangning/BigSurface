@@ -9,7 +9,7 @@
 #ifndef SerialProtocol_h
 #define SerialProtocol_h
 
-#include <IOKit/IOLib.h>
+#include "../helpers.hpp"
 
 /* SSH Protocol Config see https://github.com/linux-surface/surface-aggregator-module/blob/master/doc/requests.txt for reference*/
 #define SSH_TC_SAM              0x01    /* Generic system functionality, real-time clock. */

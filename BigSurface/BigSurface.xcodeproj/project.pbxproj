@@ -12,6 +12,7 @@
 		2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */; };
 		2524C0A626F3233A00CAAF12 /* SurfaceButtonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */; };
 		2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */; };
+		25506BAA29929D7A007F59BF /* helpers.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25506BA929929D7A007F59BF /* helpers.hpp */; };
 		259040E926FC065400D605D0 /* SurfaceButtonDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 259040E726FC065400D605D0 /* SurfaceButtonDevice.cpp */; };
 		259040EA26FC065400D605D0 /* SurfaceButtonDevice.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040E826FC065400D605D0 /* SurfaceButtonDevice.hpp */; };
 		259040EC26FC0BB200D605D0 /* HIDReport.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 259040EB26FC0BB200D605D0 /* HIDReport.hpp */; };
@@ -117,6 +118,7 @@
 		2518A2F52734F6AA00B0D631 /* APDS9960Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APDS9960Constants.h; sourceTree = "<group>"; };
 		2524C0A426F3233A00CAAF12 /* SurfaceButtonDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonDriver.cpp; sourceTree = "<group>"; };
 		2524C0A526F3233A00CAAF12 /* SurfaceButtonDriver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonDriver.hpp; sourceTree = "<group>"; };
+		25506BA929929D7A007F59BF /* helpers.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = helpers.hpp; sourceTree = "<group>"; };
 		25813612272D6A2800EED5C9 /* VoodooSerial.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = VoodooSerial.xcodeproj; path = VoodooSerial/VoodooSerial.xcodeproj; sourceTree = "<group>"; };
 		259040E726FC065400D605D0 /* SurfaceButtonDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SurfaceButtonDevice.cpp; sourceTree = "<group>"; };
 		259040E826FC065400D605D0 /* SurfaceButtonDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SurfaceButtonDevice.hpp; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				25DBA9762836A78900459629 /* SurfaceSerialHubDevices */,
 				2597316F2738B01F00A7F7C1 /* SurfaceBattery */,
 				25E5B4C52991ACE7007F21D4 /* SurfaceManagementEngine */,
+				25506BA929929D7A007F59BF /* helpers.hpp */,
 				25B97E43260BA33B00657C76 /* Info.plist */,
 			);
 			path = BigSurface;
@@ -493,6 +496,7 @@
 				25D907292736E2B2006D799F /* AmbientLightValue.hpp in Headers */,
 				2597318C2738B2BA00A7F7C1 /* SurfaceSMBusController.hpp in Headers */,
 				2518A2F82734F6AA00B0D631 /* APDS9960Constants.h in Headers */,
+				25506BAA29929D7A007F59BF /* helpers.hpp in Headers */,
 				2524C0A726F3233A00CAAF12 /* SurfaceButtonDriver.hpp in Headers */,
 				259731862738B01F00A7F7C1 /* SurfaceACAdapter.hpp in Headers */,
 				2597317D2738B01F00A7F7C1 /* KeyImplementations.hpp in Headers */,
@@ -721,7 +725,7 @@
 				CURRENT_PROJECT_VERSION = 1.1.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = K8RXBXZGN4;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../Dependencies/VoodooInput/Debug/VoodooInput.kext/Contents/Resources",
@@ -743,6 +747,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Debug;
@@ -784,6 +789,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.xavier.BigSurface;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Release;
@@ -827,7 +833,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",

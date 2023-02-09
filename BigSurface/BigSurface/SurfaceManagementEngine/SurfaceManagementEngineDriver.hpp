@@ -9,11 +9,8 @@
 #ifndef SurfaceManagementEngineDriver_hpp
 #define SurfaceManagementEngineDriver_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOWorkLoop.h>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOTimerEventSource.h>
-#include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/IOFilterInterruptEventSource.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
