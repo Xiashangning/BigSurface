@@ -37,7 +37,7 @@ See my sub-repo `VoodooSerial` for details
   > Works now, all keys and gestures are recognised properly.
   > 
   > Known issue: neither keyboard nor touchpad can wake up the system.
-- Touch Screen & Stylus
+- Touch Screen & Stylus Yes, this also works :)
   > The code is ported from linux, including `mei` and surface-linux's `ipts` & `iptsd` drivers.
   > 
   > 10 finger touch & stylus
@@ -64,6 +64,18 @@ Possible values for Performance mode are:
   > 
   > Even Linux failed to drive the cameras on SP7 (IPU4), SP6 and before (IPU3) might be possible but I do not have the device.
 
+## Important
+Surface Pro 7 seems to have issues for macOS to recognize properly the battery in System Preference. PM Profile in FACP is tablet not laptop.
+
+Thus, a SSDT patch is needed.
+
+ACPI table: FACP
+
+Find: 00080900 B2000000 F0F1
+
+Replace: 00020900 B2000000 F0F1
+
+Thanks to @he1833
 
 ## If you like my project, please consider to star this project, thanks!
 ### If you appreciate my effort and would like to pay me a coffee, here is my PayPal address: `ritchiexia@163.com`
