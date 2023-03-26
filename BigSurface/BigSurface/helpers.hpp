@@ -30,4 +30,12 @@ static IOPMPowerState myIOPMPowerStates[kIOPMNumberPowerStates] = {
     {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
+#define LOG(str, ...)    IOLog("%s::" str "\n", getName(), ##__VA_ARGS__)
+
+#ifdef DEBUG
+#define DBG_LOG(str, ...)   LOG("dbg-" str, ##__VA_ARGS__)
+#else
+#define DBG_LOG(str, ...)   ;
+#endif
+
 #endif /* helpers_hpp */

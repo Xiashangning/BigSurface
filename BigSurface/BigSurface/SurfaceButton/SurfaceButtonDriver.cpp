@@ -18,9 +18,8 @@ VoodooGPIO* SurfaceButtonDriver::getGPIOController() {
     OSDictionary* name_match = serviceMatching("VoodooGPIO");
     IOService* matched = waitForMatchingService(name_match, 1000000000);
     gpio_controller = OSDynamicCast(VoodooGPIO, matched);
-    if (gpio_controller != NULL) {
-        IOLog("%s::Got GPIO Controller! %s\n", getName(), gpio_controller->getName());
-    }
+    if (gpio_controller != NULL)
+        DBG_LOG("Got GPIO Controller! %s", gpio_controller->getName());
     OSSafeReleaseNULL(name_match);
     OSSafeReleaseNULL(matched);
 
@@ -32,7 +31,7 @@ IOReturn SurfaceButtonDriver::parseButtonResources(VoodooACPIResourcesParser* pa
     OSData *data = nullptr;
     if (acpi_device->evaluateObject("_CRS", &result) != kIOReturnSuccess ||
         !(data = OSDynamicCast(OSData, result))) {
-        IOLog("%s::Could not find or evaluate _CRS method\n", getName());
+        LOG("Could not find or evaluate _CRS method");
         OSSafeReleaseNULL(result);
         return kIOReturnNotFound;
     }
@@ -55,7 +54,7 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
     parseButtonResources(&parser1, &parser2, &parser3);
 
     if (parser1.found_gpio_interrupts && parser2.found_gpio_interrupts && parser3.found_gpio_interrupts) {
-        IOLog("%s::Found valid GPIO interrupts\n", getName());
+        DBG_LOG("Found valid GPIO interrupts");
 
         // Power Button, Volume Up Button, Volume Down Button
         setProperty("powerBtnGPIOPin", parser1.gpio_interrupts.pin_number, 16);
@@ -78,7 +77,7 @@ IOReturn SurfaceButtonDriver::getDeviceResources() {
         
         return kIOReturnSuccess;
     }else{
-        IOLog("%s::GPIO interrupts missing!\n", getName());
+        LOG("GPIO interrupts missing!");
         return kIOReturnError;
     }
 }
@@ -115,7 +114,7 @@ void SurfaceButtonDriver::response(int btn_idx, bool status) {
             btn_status[btn_idx] = !btn_status[btn_idx];
     } else
         btn_status[btn_idx] = status;
-    IOLog("%s::%s %s!\n", getName(), BTN_DESCRIPTION[btn_idx], btn_status[btn_idx]?"pressed":"released");
+    DBG_LOG("%s %s!", BTN_DESCRIPTION[btn_idx], btn_status[btn_idx]?"pressed":"released");
     button_device->simulateKeyboardEvent(BTN_CMD_PAGE[btn_idx], BTN_CMD[btn_idx], btn_status[btn_idx]);
 }
 
@@ -128,19 +127,19 @@ IOService *SurfaceButtonDriver::probe(IOService *provider, SInt32 *score){
         return nullptr;
     
     if (getDeviceResources() != kIOReturnSuccess) {
-        IOLog("%s::Could not parse GPIO infos\n", getName());
+        LOG("Could not parse GPIO infos");
         return nullptr;
     }
     
     gpio_controller = getGPIOController();
     if (!gpio_controller) {
-        IOLog("%s::Could not find GPIO controller, exiting\n", getName());
+        LOG("Could not find GPIO controller, exiting");
         return nullptr;
     }
     // Give the GPIO controller some time to load
     IOSleep(100);
     
-    IOLog("%s::Surface ACPI button device found!\n", getName());
+    LOG("Surface ACPI button device found!");
     
     return this;
 }
@@ -151,14 +150,14 @@ bool SurfaceButtonDriver::start(IOService *provider) {
 
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
-        IOLog("%s Could not get work loop\n", getName());
+        LOG("Could not get work loop");
         goto exit;
     }
     interrupt_source[POWER_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::powerInterruptOccured), this, POWER_BUTTON_IDX);
     interrupt_source[VOLUME_UP_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeUpInterruptOccured), this, VOLUME_UP_BUTTON_IDX);
     interrupt_source[VOLUME_DOWN_BUTTON_IDX] = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceButtonDriver::volumeDownInterruptOccured), this, VOLUME_DOWN_BUTTON_IDX);
     if (!interrupt_source[POWER_BUTTON_IDX] || !interrupt_source[VOLUME_UP_BUTTON_IDX] || !interrupt_source[VOLUME_DOWN_BUTTON_IDX]) {
-        IOLog("%s::Warning: Could not create interrupt event source\n", getName());
+        LOG("Could not create interrupt event source");
         goto exit;
     }
     work_loop->addEventSource(interrupt_source[POWER_BUTTON_IDX]);
@@ -167,7 +166,7 @@ bool SurfaceButtonDriver::start(IOService *provider) {
     
     button_device = OSTypeAlloc(SurfaceButtonDevice);
     if (!button_device || !button_device->init() || !button_device->attach(this) || !button_device->start(this)) {
-        IOLog("%s::Failed to init and start Surface Button HID Device!", getName());
+        LOG("Failed to init and start Surface Button HID Device!");
         goto exit;
     }
     
@@ -195,7 +194,7 @@ IOReturn SurfaceButtonDriver::setPowerState(unsigned long whichState, IOService 
             stopInterrupt(POWER_BUTTON_IDX);
             stopInterrupt(VOLUME_UP_BUTTON_IDX);
             stopInterrupt(VOLUME_DOWN_BUTTON_IDX);
-            IOLog("%s::Going to sleep\n", getName());
+            DBG_LOG("Going to sleep");
             awake = false;
         }
     } else {
@@ -205,7 +204,7 @@ IOReturn SurfaceButtonDriver::setPowerState(unsigned long whichState, IOService 
             startInterrupt(POWER_BUTTON_IDX);
             startInterrupt(VOLUME_UP_BUTTON_IDX);
             startInterrupt(VOLUME_DOWN_BUTTON_IDX);
-            IOLog("%s::Woke up\n", getName());
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;

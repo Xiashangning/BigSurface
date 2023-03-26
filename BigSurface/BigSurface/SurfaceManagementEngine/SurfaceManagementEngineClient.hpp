@@ -33,6 +33,8 @@ public:
     
     void stop(IOService* provider) override;
     
+    IOReturn setPowerState(unsigned long whichState, IOService *device) override;
+    
     IOReturn registerMessageHandler(OSObject *owner, MessageHandler _handler);
     
     void unregisterMessageHandler(OSObject *owner);

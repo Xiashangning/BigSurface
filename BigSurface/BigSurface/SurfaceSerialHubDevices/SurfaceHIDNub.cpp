@@ -10,8 +10,6 @@
 #include <IOKit/hid/IOHIDElement.h>
 #include "SurfaceHIDNub.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceHIDNub", ##__VA_ARGS__)
-
 #define super SurfaceSerialHubClient
 OSDefineMetaClassAndStructors(SurfaceHIDNub, SurfaceSerialHubClient)
 
@@ -44,6 +42,10 @@ bool SurfaceHIDNub::start(IOService *provider) {
     LOG("HID version %d", !legacy+1);
     setProperty(SURFACE_LEGACY_HID_STRING, legacy);
     
+    PMinit();
+    ssh->joinPMtree(this);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
+    
     registerService();
     return true;
 }
@@ -51,6 +53,12 @@ bool SurfaceHIDNub::start(IOService *provider) {
 void SurfaceHIDNub::stop(IOService *provider) {
     unregisterHIDEvent(target);
     super::stop(provider);
+}
+
+IOReturn SurfaceHIDNub::setPowerState(unsigned long whichState, IOService *device) {
+    if (device != this)
+        return kIOReturnInvalid;
+    return kIOPMAckImplied;
 }
 
 IOReturn SurfaceHIDNub::registerHIDEvent(OSObject* owner, EventHandler _handler) {
@@ -123,7 +131,7 @@ void SurfaceHIDNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UIn
     return;
     
 error:
-    LOG("Unknown HID event with tid: %d, iid: %d, cid: %d, data_len: %d", tid, iid, cid, length);
+    DBG_LOG("Unknown HID event with tid: %d, iid: %d, cid: %d, data_len: %d", tid, iid, cid, length);
 }
 
 IOReturn SurfaceHIDNub::getHIDDescriptor(SurfaceHIDDeviceType device, SurfaceHIDDescriptor *desc) {
@@ -222,36 +230,7 @@ IOReturn SurfaceHIDNub::getHIDRawReport(SurfaceHIDDeviceType device, UInt8 repor
 }
 
 void SurfaceHIDNub::setHIDRawReport(SurfaceHIDDeviceType device, UInt8 report_id, bool feature, UInt8 *buffer, UInt16 len) {
-    if (legacy) {
-        if (feature)
-            LOG("Warning, set feature report is not supported for legacy keyboard device!");
-        else {
-            IOService *client = getClient();
-            if (!client)
-                return;
-            IOHIDDevice *kbd = OSDynamicCast(IOHIDDevice, client->getClient());
-            if (!kbd)
-                return;
-            OSArray* elements = OSDynamicCast(OSArray, kbd->getProperty(kIOHIDElementKey));
-            if (!elements)
-                return;
-
-            IOHIDElement* e = nullptr;
-            for (int index=0; index < elements->getCount(); index++) {
-                e = OSDynamicCast(IOHIDElement, elements->getObject(index));
-                if (!e)
-                    continue;
-                if (e->getUsage() == 0)
-                    continue;
-
-                if (e->conformsTo(kHIDPage_LEDs, kHIDUsage_LED_CapsLock)) {
-                    UInt8 value = e->getValue();
-                    LOG("caps lock value %d", value);
-                    ssh->sendCommand(SSH_TC_KBD, SSH_TID_SECONDARY, 0, SSH_CID_KBD_SET_CAPS_LED, &value, 1, true);
-                }
-            }
-        }
-    } else {
+    if (!legacy) {
         UInt8 cid = feature ? SSH_CID_HID_SET_FEAT_REPORT : SSH_CID_HID_OUT_REPORT;
         buffer[0] = report_id;
         ssh->sendCommand(SSH_TC_HID, SSH_TID_SECONDARY, device, cid, buffer, len, true);

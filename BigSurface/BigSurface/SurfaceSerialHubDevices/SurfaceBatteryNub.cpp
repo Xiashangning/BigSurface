@@ -8,8 +8,6 @@
 
 #include "SurfaceBatteryNub.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceBatteryNub", ##__VA_ARGS__)
-
 #define super SurfaceSerialHubClient
 OSDefineMetaClassAndStructors(SurfaceBatteryNub, SurfaceSerialHubClient)
 
@@ -33,6 +31,10 @@ bool SurfaceBatteryNub::start(IOService *provider) {
     if (!super::start(provider))
         return false;
     
+    PMinit();
+    ssh->joinPMtree(this);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
+    
     registerService();
     return true;
 }
@@ -40,6 +42,12 @@ bool SurfaceBatteryNub::start(IOService *provider) {
 void SurfaceBatteryNub::stop(IOService *provider) {
     unregisterBatteryEvent(target);
     super::stop(provider);
+}
+
+IOReturn SurfaceBatteryNub::setPowerState(unsigned long whichState, IOService *device) {
+    if (device != this)
+        return kIOReturnInvalid;
+    return kIOPMAckImplied;
 }
 
 IOReturn SurfaceBatteryNub::registerBatteryEvent(OSObject* owner, EventHandler _handler) {
@@ -84,7 +92,7 @@ void SurfaceBatteryNub::eventReceived(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid,
             type = SurfaceAdaptorStatusChanged;
             break;
         default:
-            LOG("Unknown battery event! tid: %d, iid: %d, cid: %x, data_len: %d", tid, iid, cid, length);
+            DBG_LOG("Unknown battery event! tid: %d, iid: %d, cid: %x, data_len: %d", tid, iid, cid, length);
             return;
     }
     if (handler)

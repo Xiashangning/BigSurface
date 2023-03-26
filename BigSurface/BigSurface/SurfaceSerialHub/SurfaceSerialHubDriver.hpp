@@ -132,7 +132,7 @@ private:
     
     struct EventHandler {
         queue_entry entry;
-        UInt8 iid;
+        UInt8 target_iid;
         SurfaceSerialHubClient *client;
     };
     

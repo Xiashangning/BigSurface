@@ -13,8 +13,6 @@
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceAmbientLightSensorDriver, IOService);
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceAmbientLightSensorDriver", ##__VA_ARGS__)
-
 IOService* SurfaceAmbientLightSensorDriver::probe(IOService *provider, SInt32 *score) {
     if (!super::probe(provider, score))
         return nullptr;
@@ -206,7 +204,7 @@ IOReturn SurfaceAmbientLightSensorDriver::setPowerState(unsigned long whichState
             poller->disable();
             awake = false;
             writeRegister(APDS9960_ENABLE, 0x00);
-            LOG("Going to sleep");
+            DBG_LOG("Going to sleep");
         }
     } else {
         if (!awake) {
@@ -214,7 +212,7 @@ IOReturn SurfaceAmbientLightSensorDriver::setPowerState(unsigned long whichState
             initDevice();
             poller->enable();
             poller->setTimeoutMS(POLLING_INTERVAL);
-            LOG("Woke up");
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;

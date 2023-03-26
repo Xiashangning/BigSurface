@@ -34,6 +34,8 @@ public:
     
     void stop(IOService* provider) override;
     
+    IOReturn setPowerState(unsigned long whichState, IOService *device) override;
+    
     IOReturn registerBatteryEvent(OSObject* owner, EventHandler _handler);
     
     void unregisterBatteryEvent(OSObject* owner);

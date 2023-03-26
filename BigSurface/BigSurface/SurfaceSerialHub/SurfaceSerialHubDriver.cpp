@@ -29,8 +29,6 @@ OSDefineMetaClassAndAbstractStructors(SurfaceSerialHubClient, IOService);
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceSerialHubDriver, IOService);
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceSerialHubDriver", ##__VA_ARGS__)
-
 void err_dump(const char *name, const char *str, UInt8 *buffer, UInt16 len) {
     IOLog("%s::%s\n", name, str);
     if (len == 0)
@@ -68,6 +66,8 @@ int find_sync_bytes(UInt8 *buffer, UInt16 len) {
 }
 
 void SurfaceSerialHubDriver::bufferReceived(VoodooUARTController *sender, UInt8 *buffer, UInt16 length) {
+    if (!awake)
+        return;
     if (SSH_RING_BUFFER_NEXT(last) == current && ring_buffer[current].filled_len) {
         LOG("Overrun!");
         return;
@@ -189,7 +189,7 @@ IOReturn SurfaceSerialHubDriver::processMessage() {
                 }
             }
             if (!found)
-                LOG("Warning, no pending command found for seq_id %d", message->frame.seq_id);
+                DBG_LOG("Warning, no pending command found for seq_id %d", message->frame.seq_id);
             break;
         case SSH_FRAME_TYPE_NAK:
             LOG("Warning, NAK received! Resending all pending messages!");
@@ -229,19 +229,25 @@ IOReturn SurfaceSerialHubDriver::processMessage() {
                     }
                 }
                 if (!found)
-                    LOG("Warning, received data with unknown tc %x, cid %x", command->target_category, command->command_id);
+                    DBG_LOG("Warning, received data with unknown tc %x, cid %x", command->target_category, command->command_id);
             } else {    // an event
-                if (!queue_empty(&event_handler_lists[command->request_id])) {
+                if (!queue_empty(&event_handler_lists[command->request_id]) || !queue_empty(&event_handler_lists[0])) {
                     EventHandler *h;
                     bool handled = false;
-                    qe_foreach_element_safe(h, &event_handler_lists[command->request_id], entry) {
-                        if (h->iid == 0 || h->iid == command->instance_id) {
+                    qe_foreach_element(h, &event_handler_lists[0], entry) {
+                        if (h->target_iid == 0 || h->target_iid == command->instance_id) {
+                            h->client->eventReceived(command->target_category, command->target_id_in, command->instance_id, command->command_id, rx_data, rx_data_len);
+                            handled = true;
+                        }
+                    }
+                    qe_foreach_element(h, &event_handler_lists[command->request_id], entry) {
+                        if (h->target_iid == 0 || h->target_iid == command->instance_id) {
                             h->client->eventReceived(command->target_category, command->target_id_in, command->instance_id, command->command_id, rx_data, rx_data_len);
                             handled = true;
                         }
                     }
                     if (!handled)
-                        LOG("Warning, registered event unhandled with unknown iid %x (tc %x, cid %x)", command->instance_id, command->target_category, command->command_id);
+                        DBG_LOG("Warning, registered event unhandled with unknown iid %x (tc %x, cid %x)", command->instance_id, command->target_category, command->command_id);
                 } else
                     ERR_DUMP_MSG("Event unregistered!");
             }
@@ -354,7 +360,7 @@ void SurfaceSerialHubDriver::commandTimeout(IOTimerEventSource* timer) {
                 LOG("Receive no ACK for command tc %x, tid %x, cid %x, iid %x!", cmd_data->target_category, cmd_data->target_id_out, cmd_data->command_id, cmd_data->instance_id);
             } else {
                 if (cmd->trial_count > 1)
-                    LOG("Timeout, trial count: %d", cmd->trial_count);
+                    DBG_LOG("Timeout, trial count: %d", cmd->trial_count);
                 if (uart_controller->transmitData(cmd->buffer, cmd->len) != kIOReturnSuccess)
                     LOG("Sending SEQ command failed for tc %x, tid %x, cid %x, iid %x!", cmd_data->target_category, cmd_data->target_id_out, cmd_data->command_id, cmd_data->instance_id);
                 cmd->trial_count++;
@@ -371,7 +377,7 @@ void SurfaceSerialHubDriver::commandTimeout(IOTimerEventSource* timer) {
         }
     }
     if (!found)
-        LOG("Warning, timeout occurred but find no timer");
+        DBG_LOG("Warning, timeout occurred but find no timer");
 }
 
 IOReturn SurfaceSerialHubDriver::getResponse(UInt8 tc, UInt8 tid, UInt8 iid, UInt8 cid, UInt8 *payload, UInt16 payload_len, bool seq, UInt8 *buffer, UInt16 buffer_len) {
@@ -404,7 +410,7 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
         return kIOReturnTimeout;
     }
     if (*buffer_len != w->data_len)
-        LOG("Warning, given buffer_len(%d) and received data_len(%d) mismatched!", *buffer_len, w->data_len);
+        DBG_LOG("Warning, given buffer_len(%d) and received data_len(%d) mismatched!", *buffer_len, w->data_len);
     if (w->data_len) {
         if (*buffer_len < w->data_len)
             w->data_len = *buffer_len;
@@ -417,28 +423,37 @@ IOReturn SurfaceSerialHubDriver::waitResponse(UInt16 *req_id, UInt8 *buffer, UIn
 
 IOReturn SurfaceSerialHubDriver::registerEvent(SurfaceSerialHubClient *client, SurfaceSerialEventRegistryType type, UInt8 tc, UInt8 iid) {
     if (type >= SurfaceSerialEventTypeCount)
-        return kIOReturnError;
+        return kIOReturnInvalid;
     
     if (client) {
         EventHandler *h;
-        qe_foreach_element(h, &event_handler_lists[tc], entry) {
-            if (h->client == client && (h->iid == iid || h->iid == 0 || iid == 0)) {
-                LOG("Event already registered!");
-                return kIOReturnAborted;
+        if (tc == 0) {  // debug event handler for all events
+            if (!queue_empty(&event_handler_lists[0])) {
+                LOG("Already has a debug handler!");
+                return kIOReturnNoResources;
             }
+        } else {
+            qe_foreach_element(h, &event_handler_lists[tc], entry) {
+                if (h->client == client && (h->target_iid == iid || h->target_iid == 0 || iid == 0)) {
+                    LOG("Event already registered!");
+                    return kIOReturnAborted;
+                }
+            }
+            
+            IOReturn ret = sendEventCommand(type, tc, iid, true);
+            if (ret != kIOReturnSuccess)
+                return ret;
         }
         
-        IOReturn ret = sendEventCommand(type, tc, iid, true);
-        if (ret != kIOReturnSuccess)
-            return ret;
-        
         h = new EventHandler;
-        h->iid = iid;
+        h->target_iid = iid;
         h->client = client;
         enqueue(&event_handler_lists[tc], &h->entry);
         
         return kIOReturnSuccess;
     } else {    // client = nullptr means only enabling the event
+        if (tc == 0)
+            return kIOReturnInvalid;
         return sendEventCommand(type, tc, iid, true);
     }
 }
@@ -450,14 +465,15 @@ void SurfaceSerialHubDriver::unregisterEvent(SurfaceSerialHubClient *client, Sur
     if (client) {
         EventHandler *h;
         qe_foreach_element_safe(h, &event_handler_lists[tc], entry) {
-            if (h->client == client && h->iid == iid) {
-                sendEventCommand(type, tc, iid, false);
+            if (h->client == client && (h->target_iid == iid || iid == 0)) {
+                if (tc != 0)
+                    sendEventCommand(type, tc, iid, false);
                 remqueue(&h->entry);
                 delete h;
                 break;
             }
         }
-    } else {
+    } else if (tc != 0) {
         sendEventCommand(type, tc, iid, false);
     }
 }
@@ -555,8 +571,8 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
         goto exit;
     }
     work_loop->addEventSource(publish_timer);
-    // publishing nubs after 1s
-    publish_timer->setTimeoutMS(1000);
+    // publishing nubs after 20s
+    publish_timer->setTimeoutMS(20000);
     
     uart_interrupt = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &SurfaceSerialHubDriver::processReceivedBuffer));
     if (!uart_interrupt) {
@@ -585,9 +601,9 @@ bool SurfaceSerialHubDriver::start(IOService *provider) {
     LOG("SAM version %u.%u.%u", (version >> 24) & 0xff, (version >> 8) & 0xffff, version & 0xff);
     
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-        LOG("Unexpected response from D0-entry notification, ret=%x", ret);
+        DBG_LOG("Unexpected response from D0-entry notification, ret=%x", ret);
     if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-        LOG("Unexpected response from display-on notification, ret=%x", ret);
+        DBG_LOG("Unexpected response from display-on notification, ret=%x", ret);
     
     PMinit();
     uart_controller->joinPMtree(this);
@@ -622,7 +638,7 @@ IOReturn SurfaceSerialHubDriver::flushCacheGated() {
     // Clear pending commands, rx_buffer and msg cache
     PendingCommand *cmd;
     if (!queue_empty(&pending_list)) {
-        LOG("There are still pending commands!");
+        DBG_LOG("There are still pending commands!");
         qe_foreach_element_safe(cmd, &pending_list, entry) {
             remqueue(&cmd->entry);
             cmd->timer->cancelTimeout();
@@ -634,7 +650,7 @@ IOReturn SurfaceSerialHubDriver::flushCacheGated() {
         }
     }
     if (ring_buffer[current].filled_len) {
-        LOG("There are still raw data unprocessed!");
+        DBG_LOG("There are still raw data unprocessed!");
         while (ring_buffer[current].filled_len) {
             ring_buffer[current].filled_len = 0;
             current = (current + 1) % SSH_RING_BUFFER_SIZE;
@@ -654,24 +670,24 @@ IOReturn SurfaceSerialHubDriver::setPowerState(unsigned long whichState, IOServi
         if (awake) {
             UInt8 ret;
             if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_OFF, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-                LOG("Unexpected response from display-off notification");
+                DBG_LOG("Unexpected response from display-off notification");
             if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_EXIT, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-                LOG("Unexpected response from d0-exit notification");
+                DBG_LOG("Unexpected response from d0-exit notification");
             uart_interrupt->disable();
             awake = false;
             command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceSerialHubDriver::flushCacheGated));
-            LOG("Going to sleep");
+            DBG_LOG("Going to sleep");
         }
     } else {
         if (!awake) {
-            awake = true;
             uart_interrupt->enable();
+            awake = true;
             UInt8 ret;
             if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_D0_ENTRY, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-                LOG("Unexpected response from D0-entry notification, ret=%x", ret);
+                DBG_LOG("Unexpected response from D0-entry notification, ret=%x", ret);
             if (getResponse(SSH_TC_SAM, SSH_TID_PRIMARY, 0, SSH_CID_SAM_DISPLAY_ON, nullptr, 0, true, &ret, 1) != kIOReturnSuccess || ret != 0)
-                LOG("Unexpected response from display-on notification, ret=%x", ret);
-            LOG("Woke up");
+                DBG_LOG("Unexpected response from display-on notification, ret=%x", ret);
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;
@@ -746,7 +762,7 @@ VoodooGPIO* SurfaceSerialHubDriver::getGPIOController() {
     IOService* matched = waitForMatchingService(name_match, 1000000000);
     gpio_controller = OSDynamicCast(VoodooGPIO, matched);
     if (gpio_controller != NULL)
-        IOLog("%s::Got GPIO Controller! %s\n", getName(), gpio_controller->getName());
+        DBG_LOG("Got GPIO Controller! %s", gpio_controller->getName());
     
     OSSafeReleaseNULL(name_match);
     OSSafeReleaseNULL(matched);
@@ -764,7 +780,7 @@ VoodooUARTController* SurfaceSerialHubDriver::getUARTController() {
         OSSafeReleaseNULL(name_match);
         OSSafeReleaseNULL(matched);
         if (uart) {
-            LOG("Got UART Controller! %s", uart->getName());
+            DBG_LOG("Got UART Controller! %s", uart->getName());
             return uart;
         }
         IOSleep(1000);
@@ -792,7 +808,7 @@ IOReturn SurfaceSerialHubDriver::getDeviceResources() {
     if (!parser.found_uart || !parser.found_gpio_interrupts)
         return kIOReturnNoResources;
     
-    LOG("Found valid UART bus and GPIO interrupt!");
+    DBG_LOG("Found valid UART bus and GPIO interrupt!");
 //    LOG("resource_consumer %d", parser.uart_info.resource_consumer);
 //    LOG("device_initiated %d", parser.uart_info.device_initiated);
 //    LOG("flow_control %d", parser.uart_info.flow_control);
@@ -835,7 +851,7 @@ void SurfaceSerialHubDriver::delayedPublishingNubs(IOTimerEventSource *sender) {
             battery_nub->detach(this);
             OSSafeReleaseNULL(battery_nub);
         } else
-            LOG("Surface Battery nub published!");
+            DBG_LOG("Surface Battery nub published!");
     }
     
     hid_nub = OSTypeAlloc(SurfaceHIDNub);
@@ -848,7 +864,7 @@ void SurfaceSerialHubDriver::delayedPublishingNubs(IOTimerEventSource *sender) {
             hid_nub->detach(this);
             OSSafeReleaseNULL(hid_nub);
         } else
-            LOG("Surface HID nub published!");
+            DBG_LOG("Surface HID nub published!");
     }
 }
 

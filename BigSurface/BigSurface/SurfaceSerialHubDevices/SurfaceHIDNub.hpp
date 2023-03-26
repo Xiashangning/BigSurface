@@ -68,6 +68,8 @@ public:
     
     void stop(IOService* provider) override;
     
+    IOReturn setPowerState(unsigned long whichState, IOService *device) override;
+    
     IOReturn registerHIDEvent(OSObject* owner, EventHandler _handler);
     
     void unregisterHIDEvent(OSObject* owner);

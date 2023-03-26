@@ -8,8 +8,6 @@
 
 #include "SurfaceManagementEngineClient.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceManagementEngineClient", ##__VA_ARGS__)
-
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceManagementEngineClient, IOService)
 
@@ -68,6 +66,10 @@ bool SurfaceManagementEngineClient::start(IOService *provider) {
     
     initial = false;
     
+    PMinit();
+    api->joinPMtree(this);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
+    
     registerService();
     return true;
 exit:
@@ -78,6 +80,12 @@ exit:
 void SurfaceManagementEngineClient::stop(IOService *provider) {
     releaseResources();
     super::stop(provider);
+}
+
+IOReturn SurfaceManagementEngineClient::setPowerState(unsigned long whichState, IOService *device) {
+    if (device != this)
+        return kIOReturnInvalid;
+    return kIOPMAckImplied;
 }
 
 void SurfaceManagementEngineClient::releaseResources() {

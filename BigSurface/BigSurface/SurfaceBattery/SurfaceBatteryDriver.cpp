@@ -12,8 +12,6 @@
 #include "KeyImplementations.hpp"
 #include <IOKit/battery/AppleSmartBatteryCommands.h>
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceBatteryDriver", ##__VA_ARGS__)
-
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceBatteryDriver, IOService)
 
@@ -24,7 +22,7 @@ void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatte
             break;
         case SurfaceBatteryStatusChanged:
         case SurfaceAdaptorStatusChanged:
-            LOG("Got BST/PSR update event");
+            DBG_LOG("Got BST/PSR update event");
             AbsoluteTime cur_time;
             UInt64 nsecs;
             clock_get_uptime(&cur_time);
@@ -37,7 +35,7 @@ void SurfaceBatteryDriver::eventReceived(SurfaceBatteryNub *sender, SurfaceBatte
             }
             break;
         default:
-            LOG("WTF? Unknown event type");
+            DBG_LOG("WTF? Unknown event type");
             break;
     }
 }
@@ -401,7 +399,7 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
             timer->disable();
             update_bix->disable();
             update_bst->disable();
-            LOG("Going to sleep");
+            DBG_LOG("Going to sleep");
         }
     } else {
         if (!awake) {
@@ -420,7 +418,7 @@ IOReturn SurfaceBatteryDriver::setPowerState(unsigned long whichState, IOService
                 if (nub->setPerformanceMode(m) != kIOReturnSuccess)
                     LOG("Set performance mode failed!");
             }
-            LOG("Woke up");
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;

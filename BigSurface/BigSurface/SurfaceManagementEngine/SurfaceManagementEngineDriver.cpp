@@ -9,8 +9,6 @@
 #include "SurfaceManagementEngineDriver.hpp"
 #include "SurfaceManagementEngineClient.hpp"
 
-#define LOG(str, ...)    IOLog("%s::" str "\n", "SurfaceManagementEngineDriver", ##__VA_ARGS__)
-
 #define super IOService
 OSDefineMetaClassAndStructors(SurfaceManagementEngineDriver, IOService);
 
@@ -126,7 +124,7 @@ exit:
 
 void SurfaceManagementEngineDriver::stop(IOService *provider) {
     if (!queue_empty(&bus.tx_queue)) {
-        LOG("Warning, there are still pending transactions!");
+        DBG_LOG("Warning, there are still pending transactions!");
         MEIClientTransaction *tx;
         qe_foreach_element_safe(tx, &bus.tx_queue, entry) {
             completeTransaction(tx);
@@ -153,7 +151,7 @@ IOReturn SurfaceManagementEngineDriver::setPowerState(unsigned long whichState, 
             interrupt_source->disable();
             device.pci_dev->enablePCIPowerManagement(kPCIPMCSPowerStateD3);
             awake = false;
-            LOG("Going to sleep");
+            DBG_LOG("Going to sleep");
         }
     } else {
         if (!awake) {
@@ -163,7 +161,7 @@ IOReturn SurfaceManagementEngineDriver::setPowerState(unsigned long whichState, 
             if (command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &SurfaceManagementEngineDriver::restartDeviceGated)) != kIOReturnSuccess)
                 LOG("Restarting device failed! Retry later");
             init_timeout->enable();
-            LOG("Woke up");
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;
